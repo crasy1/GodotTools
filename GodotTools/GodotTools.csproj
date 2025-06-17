@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.0.1</Version>
+        <Title>some godot4 c# tools</Title>
+        <Authors>Crasy1</Authors>
+        <Description>some godot4 c# tools</Description>
+        <PackageProjectUrl>https://github.com/crasy1/GodotTools</PackageProjectUrl>
+        <PackageLicenseUrl>https://opensource.org/license/mit</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/crasy1/GodotTools</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Godot4</PackageTags>
+        <PackageIcon>icon.png</PackageIcon>
+        <Copyright>Copyright (c) Crasy1 2025</Copyright>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Facepunch.Steamworks" Version="2.4.1" />
+        <PackageReference Include="GodotSharp" Version="4.4.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="icon.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+        <None Include="..\README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+
+</Project>
