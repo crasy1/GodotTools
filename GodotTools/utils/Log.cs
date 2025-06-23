@@ -16,6 +16,12 @@ public static class Log
         GD.PrintRaw("\n");
     }
 
+    public static void Warn(params object[] what)
+    {
+        GD.PrintRaw(new object[] { "[WARN] " }.Concat(what).ToArray());
+        GD.PrintRaw("\n");
+    }
+
     public static void Debug(params object[] what)
     {
         if (OS.IsDebugBuild())
