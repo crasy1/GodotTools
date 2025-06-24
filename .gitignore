@@ -8,3 +8,4 @@ out
 gen
 bin
 obj
+*.uid
