@@ -14,13 +14,13 @@ public static class SteamworksUtil
 
     /// <summary>
     /// 
-    /// 初始化steam api
+    /// 初始化steam api 环境
     /// 会自动将steam api文件添加到环境变量中
     /// 
     /// </summary>
     /// <param name="appId"></param>
     /// <returns>初始化是否成功</returns>
-    public static bool InitClient(int appId)
+    public static bool InitEnvironment()
     {
         var is64Bit = System.Environment.Is64BitOperatingSystem;
         var pathVariable = System.Environment.GetEnvironmentVariable(Path);
@@ -78,20 +78,7 @@ public static class SteamworksUtil
                 }
             }
 
-            if (OS.IsDebugBuild())
-            {
-                SteamClient.Init((uint)appId);
-                return true;
-            }
-
-            // 通过steam启动游戏
-            if (!SteamClient.RestartAppIfNecessary((uint)appId))
-            {
-                SteamClient.Init((uint)appId);
-                return true;
-            }
-
-            return false;
+            return true;
         }
         catch (Exception e)
         {
@@ -99,5 +86,4 @@ public static class SteamworksUtil
             return false;
         }
     }
-
 }
