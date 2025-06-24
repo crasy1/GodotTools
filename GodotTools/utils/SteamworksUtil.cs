@@ -18,7 +18,6 @@ public static class SteamworksUtil
     /// 会自动将steam api文件添加到环境变量中
     /// 
     /// </summary>
-    /// <param name="appId"></param>
     /// <returns>初始化是否成功</returns>
     public static bool InitEnvironment()
     {
