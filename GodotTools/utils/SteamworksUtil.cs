@@ -1,20 +1,16 @@
 using System.Reflection;
 using Godot;
-using GodotTools.utils;
 using Steamworks;
-using Steamworks.Data;
-using Image = Godot.Image;
 
-namespace GodotTools.steamworks;
+namespace GodotTools.utils;
 
 /// <summary>
-/// 封装steam api
+/// steamworks工具类
 /// </summary>
-public static class SteamApiManager
+public static class SteamworksUtil
 {
     private const string Path = "PATH";
     private const string AssemblyLib = "GodotTools.lib";
-    public static bool IsValid => SteamClient.IsValid;
 
     /// <summary>
     /// 
@@ -24,7 +20,7 @@ public static class SteamApiManager
     /// </summary>
     /// <param name="appId"></param>
     /// <returns>初始化是否成功</returns>
-    public static bool Init(int appId)
+    public static bool InitClient(int appId)
     {
         var is64Bit = System.Environment.Is64BitOperatingSystem;
         var pathVariable = System.Environment.GetEnvironmentVariable(Path);
@@ -82,8 +78,20 @@ public static class SteamApiManager
                 }
             }
 
-            SteamClient.Init((uint)appId);
-            return true;
+            if (OS.IsDebugBuild())
+            {
+                SteamClient.Init((uint)appId);
+                return true;
+            }
+
+            // 通过steam启动游戏
+            if (!SteamClient.RestartAppIfNecessary((uint)appId))
+            {
+                SteamClient.Init((uint)appId);
+                return true;
+            }
+
+            return false;
         }
         catch (Exception e)
         {
@@ -92,80 +100,4 @@ public static class SteamApiManager
         }
     }
 
-    public static void Shutdown()
-    {
-        SteamClient.Shutdown();
-    }
-
-
-    public static async Task<Image?> Avatar(SteamId steamId, int size = 0)
-    {
-        Steamworks.Data.Image? avatar = null;
-        if (size < 0)
-        {
-            avatar = await SteamFriends.GetSmallAvatarAsync(steamId);
-        }
-        else if (size > 0)
-        {
-            avatar = await SteamFriends.GetLargeAvatarAsync(steamId);
-        }
-        else
-        {
-            avatar = await SteamFriends.GetMediumAvatarAsync(steamId);
-        }
-
-        if (!avatar.HasValue)
-        {
-            return null;
-        }
-
-        var image = avatar.Value;
-        return Image.CreateFromData((int)image.Width, (int)image.Height, false, Image.Format.Rgba8, image.Data);
-    }
-
-    public static void ServerLists()
-    {
-        // using ( var list = new ServerList.Internet() )
-        // {
-        //     list.AddFilter( "map", "de_dust" );
-        //     await list.RunQueryAsync();
-        //
-        //     foreach ( var server in list.Responsive )
-        //     {
-        //         Console.WriteLine( $"{server.Address} {server.Name}" );
-        //     }
-        // }
-    }
-
-
-    public static void UnlockAchievement(string achievement)
-    {
-        var ach = new Achievement(achievement);
-        ach.Trigger();
-    }
-
-
-    public static void Record(bool record)
-    {
-        SteamUser.VoiceRecord = record;
-    }
-
-    public static void ReadVoice(Stream stream)
-    {
-        if (SteamUser.HasVoiceData)
-        {
-            var bytesrwritten = SteamUser.ReadVoiceData(stream);
-            // Send Stream Data To Server or Something
-        }
-    }
-
-    public static bool WriteToCloud(string filename, byte[] fileContents)
-    {
-        return SteamRemoteStorage.FileWrite(filename, fileContents);
-    }
-
-    public static byte[] ReadFromCloud(string filename)
-    {
-        return SteamRemoteStorage.FileRead(filename);
-    }
 }
