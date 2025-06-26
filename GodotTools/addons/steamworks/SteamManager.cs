@@ -4,7 +4,7 @@ using Godot;
 using GodotTools.extensions;
 using GodotTools.utils;
 using Steamworks;
-
+using  GodotTools.addons.steamworks.component;
 namespace GodotTools.addons.steamworks;
 
 /// <summary>
@@ -37,7 +37,6 @@ public partial class SteamManager : Control
 
     public override void _Ready()
     {
-        SteamworksUtil.InitEnvironment();
         SetProcess(false);
         SetPhysicsProcess(false);
         AddChild(SApp.Instance);
