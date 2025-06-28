@@ -5,6 +5,26 @@ namespace GodotTools.extensions;
 
 public static class NodeExtensions
 {
+    public static void Debug(this Node node, params object[] objects)
+    {
+        Log.Debug(objects);
+    }
+
+    public static void Info(this Node node, params object[] objects)
+    {
+        Log.Info(objects);
+    }
+
+    public static void Warn(this Node node, params object[] objects)
+    {
+        Log.Warn(objects);
+    }
+
+    public static void Error(this Node node, params object[] objects)
+    {
+        Log.Error(objects);
+    }
+
     public static async Task AddToAutoLoad(this Node node, SceneTree tree)
     {
         tree.Root.CallDeferred(Node.MethodName.AddChild, node);
@@ -58,10 +78,12 @@ public static class NodeExtensions
     {
         node.AddToGroup(node.GetType().Name);
     }
+
     public static async Task NextProcessFrame(this Node node)
     {
         await node.ToSignal(node.GetTree(), SceneTree.SignalName.ProcessFrame);
     }
+
     public static async Task NextPhysicsFrame(this Node node)
     {
         await node.ToSignal(node.GetTree(), SceneTree.SignalName.PhysicsFrame);
