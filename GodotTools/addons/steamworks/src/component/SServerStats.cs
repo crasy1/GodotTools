@@ -12,5 +12,9 @@ public partial class SServerStats : SteamComponent
     {
     }
 
+    public override void _Ready()
+    {
+        base._Ready();
+    }
     
 }

@@ -10,6 +10,9 @@ public partial class STimeline : SteamComponent
     private STimeline()
     {
     }
-
     
+    public override void _Ready()
+    {
+        base._Ready();
+    }
 }

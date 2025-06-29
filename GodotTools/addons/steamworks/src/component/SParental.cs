@@ -10,6 +10,13 @@ public partial class SParental : SteamComponent
     private SParental()
     {
     }
-
+    public override void _Ready()
+    {
+        base._Ready();
+        SteamParental.OnSettingsChanged += () =>
+        {
+            Log.Info("steam 家庭设置变更");
+        };
+    }
     
 }

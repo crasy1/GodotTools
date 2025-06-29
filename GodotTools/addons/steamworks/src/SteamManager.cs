@@ -1,3 +1,6 @@
+using System;
+using Steamworks;
+
 namespace Godot;
 
 /// <summary>
@@ -14,9 +17,10 @@ public partial class SteamManager : Control
     private SteamManager()
     {
     }
-    
+
     private const string SteamworksConfigPath = "res://Steamworks.tres";
     private const string AppId = "appId";
+
     public static void SaveAppId(uint appId)
     {
         var config = ResourceLoader.Exists(SteamworksConfigPath)
@@ -44,11 +48,13 @@ public partial class SteamManager : Control
 
     public override void _Ready()
     {
+        SteamworksUtil.InitEnvironment();
         var components = new Node();
         components.Name = "SteamComponents";
         AddChild(components);
-        components.AddChild(SApp.Instance);
+        components.AddChild(SServer.Instance);
         components.AddChild(SClient.Instance);
+        components.AddChild(SApp.Instance);
         components.AddChild(SFriends.Instance);
         components.AddChild(SInput.Instance);
         components.AddChild(SInventory.Instance);
@@ -63,7 +69,6 @@ public partial class SteamManager : Control
         components.AddChild(SRemotePlay.Instance);
         components.AddChild(SRemoteStorage.Instance);
         components.AddChild(SScreenshots.Instance);
-        components.AddChild(SServer.Instance);
         components.AddChild(SServerStats.Instance);
         components.AddChild(STimeline.Instance);
         components.AddChild(SUgc.Instance);

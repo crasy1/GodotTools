@@ -12,5 +12,23 @@ public partial class SApp : SteamComponent
     {
     }
 
-    
+    public override void _Ready()
+    {
+        base._Ready();
+        SteamApps.OnDlcInstalled += (appId) => { Log.Info($"{appId} DLC已安装"); };
+        SteamApps.OnNewLaunchParameters += () => { };
+        AppInfo();
+    }
+
+    public void AppInfo()
+    {
+        Log.Info(@$"
+AppId:  {SteamManager.GetAppId()}
+AvailableLanguages: {SteamApps.AvailableLanguages}
+GameLanguage:  {SteamApps.GameLanguage}
+CommandLine:  {SteamApps.CommandLine}
+Owner:  {SteamApps.AppOwner}
+AppInstallDir:  {SteamApps.AppInstallDir()}
+                 ");
+    }
 }

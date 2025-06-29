@@ -12,5 +12,10 @@ public partial class SNetworking : SteamComponent
     {
     }
 
-    
+    public override void _Ready()
+    {
+        base._Ready();
+        SteamNetworking.OnP2PSessionRequest += (steamId) => { Log.Info($"p2p连接请求 {steamId}"); };
+        SteamNetworking.OnP2PConnectionFailed += (steamId, error) => { Log.Info($"p2p连接失败 {steamId},{error}"); };
+    }
 }

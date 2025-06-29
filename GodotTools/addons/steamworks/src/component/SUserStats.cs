@@ -11,5 +11,9 @@ public partial class SUserStats : SteamComponent
     {
     }
 
+    public override void _Ready()
+    {
+        base._Ready();
+    }
     
 }

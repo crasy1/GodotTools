@@ -11,5 +11,8 @@ public partial class SMatchmakingServers : SteamComponent
     {
     }
 
-    
+    public override void _Ready()
+    {
+        base._Ready();
+    }
 }

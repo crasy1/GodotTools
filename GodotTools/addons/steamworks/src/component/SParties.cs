@@ -12,5 +12,16 @@ public partial class SParties : SteamComponent
     {
     }
 
-    
+    public override void _Ready()
+    {
+        base._Ready();
+        SteamParties.OnActiveBeaconsUpdated += () =>
+        {
+            Log.Info("steam party 活动信标列表可能已更改");
+        };
+        SteamParties.OnBeaconLocationsUpdated += () =>
+        {
+            Log.Info("steam party 信标位置列表可能发生更改");
+        };
+    }
 }

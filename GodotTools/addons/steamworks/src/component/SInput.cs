@@ -12,5 +12,8 @@ public partial class SInput:SteamComponent
     {
     }
 
-    
+    public override void _Ready()
+    {
+        base._Ready();
+    }
 }

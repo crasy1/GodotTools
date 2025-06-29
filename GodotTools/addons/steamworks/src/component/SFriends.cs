@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Steamworks;
 
 namespace Godot;
@@ -12,7 +13,17 @@ public partial class SFriends : SteamComponent
     {
     }
 
-    
+    public override void _Ready()
+    {
+        base._Ready();
+        SteamFriends.OnChatMessage += (friend, s1, s2) => { };
+        SteamFriends.OnClanChatMessage += (friend, s1, s2) => { };
+        SteamFriends.OnFriendRichPresenceUpdate += (friend) => { };
+        SteamFriends.OnGameLobbyJoinRequested += (lobby, steamId) => { };
+        SteamFriends.OnGameOverlayActivated += (result) => { };
+        // TODO
+    }
+
 
     public static async Task<Image> Avatar(SteamId steamId, int size = 0)
     {
