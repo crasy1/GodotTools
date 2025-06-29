@@ -1,7 +1,4 @@
-using Godot;
-using GodotTools.utils;
-
-namespace GodotTools.extensions;
+namespace Godot;
 
 public static class NodeExtensions
 {

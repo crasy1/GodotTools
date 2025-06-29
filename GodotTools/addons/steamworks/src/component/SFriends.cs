@@ -1,9 +1,7 @@
 using System;
-using System.Threading.Tasks;
-using Godot;
 using Steamworks;
 
-namespace GodotTools.addons.steamworks.src.component;
+namespace Godot;
 
 public partial class SFriends : SteamComponent
 {

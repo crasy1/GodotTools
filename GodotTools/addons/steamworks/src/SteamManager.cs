@@ -1,12 +1,4 @@
-using System;
-using System.Threading.Tasks;
-using Godot;
-using GodotTools.extensions;
-using GodotTools.utils;
-using Steamworks;
-using GodotTools.addons.steamworks.src.component;
-
-namespace GodotTools.addons.steamworks.src;
+namespace Godot;
 
 /// <summary>
 /// 封装steam api到godot
@@ -52,11 +44,6 @@ public partial class SteamManager : Control
 
     public override void _Ready()
     {
-        Log.Info("初始化");
-        SteamworksUtil.InitEnvironment();
-        Log.Info("初始化完成");
-        SetProcess(false);
-        SetPhysicsProcess(false);
         var components = new Node();
         components.Name = "SteamComponents";
         AddChild(components);

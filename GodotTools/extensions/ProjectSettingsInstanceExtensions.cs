@@ -1,6 +1,4 @@
-using Godot;
-
-namespace GodotTools.extensions;
+namespace Godot;
 
 public static class ProjectSettingsInstanceExtensions
 {

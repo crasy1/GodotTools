@@ -1,9 +1,6 @@
 using System;
-using Godot;
-using GodotTools.extensions;
-using GodotTools.utils;
 
-namespace GodotTools.addons.steamworks.src.component;
+namespace Godot;
 
 public partial class SteamComponent : Node
 {

@@ -1,7 +1,6 @@
-using Godot;
 using System;
-using GodotTools.addons.steamworks.src;
-using GodotTools.utils;
+
+namespace Godot;
 
 [Tool]
 public partial class SteamworksEditor : Control

@@ -1,8 +1,7 @@
 using System;
-using Godot;
 using Steamworks;
 
-namespace GodotTools.addons.steamworks.src.component;
+namespace Godot;
 
 public partial class SNetworkingSockets : SteamComponent
 {private static readonly Lazy<SNetworkingSockets> LazyInstance = new(() => new());

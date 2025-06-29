@@ -1,8 +1,7 @@
 using System;
-using Godot;
 using Steamworks;
 
-namespace GodotTools.addons.steamworks.src.component;
+namespace Godot;
 
 public partial class SInventory: SteamComponent
 {private static readonly Lazy<SInventory> LazyInstance = new(() => new());

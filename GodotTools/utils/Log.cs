@@ -1,18 +1,13 @@
 ﻿using System.Text;
-using Godot;
 using Serilog;
-using Serilog.Core;
 
-namespace GodotTools.utils;
+namespace Godot;
 
 public static class Log
 {
-    private static Logger Logger = CreateLogger();
-
-    private static Logger CreateLogger()
+    static Log()
     {
-        return new LoggerConfiguration().MinimumLevel.Debug()
-            .WriteTo.Console()
+        Serilog.Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
             .WriteTo.File(ProjectSettings.GlobalizePath("user://logs/game.log"),
                 rollingInterval: RollingInterval.Day,
                 encoding: Encoding.UTF8
@@ -39,21 +34,26 @@ public static class Log
 
     public static void Debug(params object[] what)
     {
-        Logger.Debug(AppendPrintParams(what));
+        Serilog.Log.Debug(AppendPrintParams(what));
+        GD.Print(what);
     }
 
     public static void Info(params object[] what)
     {
-        Logger.Information(AppendPrintParams(what));
+        Serilog.Log.Information(AppendPrintParams(what));
+        GD.Print(what);
     }
 
     public static void Warn(params object[] what)
     {
-        Logger.Warning(AppendPrintParams(what));
+        Serilog.Log.Warning(AppendPrintParams(what));
+        GD.PushWarning(what);
     }
 
     public static void Error(params object[] what)
     {
-        Logger.Error(AppendPrintParams(what));
+        Serilog.Log.Error(AppendPrintParams(what));
+        GD.PrintErr(what);
+        GD.PushError(what);
     }
 }

@@ -1,8 +1,7 @@
 using System;
-using Godot;
 using Steamworks;
 
-namespace GodotTools.addons.steamworks.src.component;
+namespace Godot;
 
 public partial class SMatchmaking : SteamComponent
 {private static readonly Lazy<SMatchmaking> LazyInstance = new(() => new());

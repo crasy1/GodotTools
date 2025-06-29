@@ -1,8 +1,7 @@
 using System;
-using Godot;
 using Steamworks;
 
-namespace GodotTools.addons.steamworks.src.component;
+namespace Godot;
 
 public partial class SParental : SteamComponent
 {private static readonly Lazy<SParental> LazyInstance = new(() => new());

@@ -1,6 +1,4 @@
-using Godot;
-
-namespace GodotTools.extensions;
+namespace Godot;
 
 using System.Collections.Generic;
 

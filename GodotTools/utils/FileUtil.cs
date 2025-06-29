@@ -1,6 +1,4 @@
-using Godot;
-
-namespace GodotTools.utils;
+namespace Godot;
 
 public static class FileUtil
 {

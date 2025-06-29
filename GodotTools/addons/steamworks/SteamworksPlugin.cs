@@ -1,10 +1,6 @@
 #if TOOLS
-using Godot;
 using System;
-using GodotTools.addons.steamworks;
-using GodotTools.addons.steamworks.src;
-using GodotTools.extensions;
-using GodotTools.utils;
+namespace Godot;
 
 [Tool]
 public partial class SteamworksPlugin : EditorPlugin

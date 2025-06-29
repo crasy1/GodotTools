@@ -1,9 +1,7 @@
 using System;
-using Godot;
-using GodotTools.utils;
 using Steamworks;
 
-namespace GodotTools.addons.steamworks.src.component;
+namespace Godot;
 
 public partial class SClient : SteamComponent
 {
