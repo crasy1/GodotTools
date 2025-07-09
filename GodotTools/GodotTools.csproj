@@ -36,9 +36,4 @@
         <EmbeddedResource Include="lib\**" Pack="true" PackagePath="content"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="addons\" />
-    </ItemGroup>
-    
-
 </Project>
