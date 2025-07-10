@@ -7,6 +7,7 @@ namespace Godot;
 /// 封装steam api到godot
 /// <seealso href="https://partner.steamgames.com/doc/features">steamworks文档</seealso>
 /// </summary>
+[SceneTree]
 public partial class SteamManager : Control
 {
     private static readonly Lazy<SteamManager> LazyInstance = new(() =>
@@ -17,10 +18,9 @@ public partial class SteamManager : Control
     private SteamManager()
     {
     }
-
+    
     private const string SteamworksConfigPath = "res://Steamworks.tres";
     private const string AppId = "appId";
-
     public static void SaveAppId(uint appId)
     {
         var config = ResourceLoader.Exists(SteamworksConfigPath)
@@ -44,7 +44,6 @@ public partial class SteamManager : Control
 
         return (uint)config.GetMeta(AppId);
     }
-
 
     public override void _Ready()
     {
