@@ -15,7 +15,6 @@ public partial class SRemoteStorage : SteamComponent
     public override void _Ready()
     {
         base._Ready();
-        GetInfo();
     }
 
     public void GetInfo()

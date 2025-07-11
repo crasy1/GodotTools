@@ -12,15 +12,36 @@ public partial class SClient : SteamComponent
     {
     }
 
+    [Signal]
+    public delegate void SteamClientConnectedEventHandler();
+
+    [Signal]
+    public delegate void SteamClientDisconnectedEventHandler();
+
     public override void _Ready()
     {
         base._Ready();
-        var appId = SteamManager.GetAppId();
+        SteamClientConnected += () =>
+        {
+            SetProcess(true);
+            Log.Info("steam client 连接成功");
+        };
+        SteamClientDisconnected += () =>
+        {
+            SetProcess(false);
+            Log.Info("steam client 断开连接");
+        };
+    }
+
+    public void Connect()
+    {
+        var appId = SteamConfig.AppId;
         try
         {
             if (OS.IsDebugBuild())
             {
                 SteamClient.Init(appId);
+                EmitSignalSteamClientConnected();
             }
             else
             {
@@ -28,15 +49,21 @@ public partial class SClient : SteamComponent
                 if (!SteamClient.RestartAppIfNecessary(appId))
                 {
                     SteamClient.Init(appId);
+                    EmitSignalSteamClientConnected();
                 }
             }
         }
         catch (Exception e)
         {
             Log.Error($"steam client 初始化错误: {e.Message}");
+            EmitSignalSteamClientDisconnected();
         }
+    }
 
-        SetProcess(SteamClient.IsValid);
+    public void Disconnect()
+    {
+        SteamClient.Shutdown();
+        EmitSignalSteamClientDisconnected();
     }
 
     public override void _Process(double delta)
@@ -51,8 +78,7 @@ public partial class SClient : SteamComponent
     {
         if (NotificationWMCloseRequest == what)
         {
-            SteamClient.Shutdown();
-            Log.Info("退出steam client");
+            Disconnect();
         }
     }
 }

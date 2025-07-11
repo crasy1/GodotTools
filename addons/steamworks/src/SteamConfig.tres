@@ -1,0 +1,5 @@
+[gd_resource type="Resource" format=3 uid="uid://6frhlu7es6du"]
+
+[resource]
+metadata/appId = 480
+metadata/debug = true

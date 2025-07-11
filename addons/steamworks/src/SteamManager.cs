@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Steamworks;
 
 namespace Godot;
@@ -10,49 +11,44 @@ namespace Godot;
 [SceneTree]
 public partial class SteamManager : Control
 {
-    private static readonly Lazy<SteamManager> LazyInstance = new(() =>
-        GD.Load<PackedScene>("res://addons/steamworks/src/SteamManager.tscn").Instantiate<SteamManager>());
-
-    public static SteamManager Instance => LazyInstance.Value;
-
-    private SteamManager()
-    {
-    }
-    
-    private const string SteamworksConfigPath = "res://Steamworks.tres";
-    private const string AppId = "appId";
-    public static void SaveAppId(uint appId)
-    {
-        var config = ResourceLoader.Exists(SteamworksConfigPath)
-            ? ResourceLoader.Load(SteamworksConfigPath)
-            : new Resource();
-
-        config.SetMeta(AppId, appId);
-        ResourceSaver.Save(config, SteamworksConfigPath);
-    }
-
-    public static uint GetAppId()
-    {
-        var config = ResourceLoader.Exists(SteamworksConfigPath)
-            ? ResourceLoader.Load(SteamworksConfigPath)
-            : new Resource();
-        if (!config.HasMeta(AppId))
-        {
-            config.SetMeta(AppId, 480);
-            ResourceSaver.Save(config, SteamworksConfigPath);
-        }
-
-        return (uint)config.GetMeta(AppId);
-    }
-
     public override void _Ready()
     {
         SteamworksUtil.InitEnvironment();
+        SetVisible(SteamConfig.Debug);
+        SteamInit();
+        SClient.Instance.Connect();
+        OpenStore.Pressed += () => { SteamFriends.OpenStoreOverlay(SteamConfig.AppId); };
+        OpenUrl.Pressed += () => { SteamFriends.OpenWebOverlay("https://www.baidu.com"); };
+        OpenSettings.Pressed += () => { SteamFriends.OpenOverlay("settings"); };
+        OpenFriends.Pressed += () => { SteamFriends.OpenOverlay("friends"); };
+        OpenPlayers.Pressed += () => { SteamFriends.OpenOverlay("players"); };
+        OpenCommunity.Pressed += () => { SteamFriends.OpenOverlay("community"); };
+        OpenStats.Pressed += () => { SteamFriends.OpenOverlay("stats"); };
+        OpenOfficalGameGroup.Pressed += () => { SteamFriends.OpenOverlay("officalgamegroup"); };
+        OpenAchievements.Pressed += () => { SteamFriends.OpenOverlay("achievements"); };
+        CreateLobby.Pressed += () =>
+        {
+            if (LobbyInfo.GetChildCount() > 0)
+            {
+                Log.Info("大厅已存在");
+                return;
+            }
+
+            var lobby = SteamLobby.Instantiate((int)MaxLobbyUser.Value);
+            LobbyInfo.AddChild(lobby);
+            lobby.Create();
+        };
+    }
+
+    private void SteamInit()
+    {
         var components = new Node();
-        components.Name = "SteamComponents";
+        components.Name = $"{nameof(SteamComponent)}s";
         AddChild(components);
-        components.AddChild(SServer.Instance);
+        SClient.Instance.SteamClientConnected += async () => await OnSteamClientConnected();
+        SClient.Instance.SteamClientDisconnected += OnSteamClientDisconnected;
         components.AddChild(SClient.Instance);
+        components.AddChild(SServer.Instance);
         components.AddChild(SApp.Instance);
         components.AddChild(SFriends.Instance);
         components.AddChild(SInput.Instance);
@@ -74,6 +70,39 @@ public partial class SteamManager : Control
         components.AddChild(SUser.Instance);
         components.AddChild(SUserStats.Instance);
         components.AddChild(SUtil.Instance);
-        components.AddChild(SVideo.Instance);
+    }
+
+    private void OnSteamClientDisconnected()
+    {
+        Connected.Text = "未连接";
+    }
+
+    private async Task OnSteamClientConnected()
+    {
+        SteamFriends.ListenForFriendsMessages = true;
+        Connected.Text = "已连接";
+        UserInfo.Text = $@"
+AppId:                              {SteamClient.AppId}
+SteamId:                            {SteamClient.SteamId}
+Name:                               {SteamClient.Name}
+State:                              {SteamClient.State}
+SteamLevel:                         {SteamUser.SteamLevel}
+SampleRate:                         {SteamUser.SampleRate}
+IsBehindNAT:                        {SteamUser.IsBehindNAT}
+IsPhoneIdentifying:                 {SteamUser.IsPhoneIdentifying}
+IsPhoneVerified:                    {SteamUser.IsPhoneVerified}
+IsPhoneRequiringVerification:       {SteamUser.IsPhoneRequiringVerification}
+IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
+";
+        var image = await SFriends.Avatar(SteamClient.SteamId);
+        Avatar.Texture = image.Texture();
+        foreach (var friend in SteamFriends.GetFriends())
+        {
+            if (friend.IsOnline)
+            {
+                var steamUserInfo = SteamUserInfo.Instantiate(friend);
+                Friends.AddChild(steamUserInfo);
+            }
+        }
     }
 }

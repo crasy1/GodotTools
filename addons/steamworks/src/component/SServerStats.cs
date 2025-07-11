@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Steamworks;
 
 namespace Godot;
@@ -16,5 +17,4 @@ public partial class SServerStats : SteamComponent
     {
         base._Ready();
     }
-    
 }

@@ -28,6 +28,6 @@ dotnet pack --configuration Release
 dotnet nuget delete GodotTools %version% --non-interactive --source "local"
 dotnet nuget push "GodotTools\bin\Release\GodotTools.%version%.nupkg" --source "local"
 
-dotnet nuget push "GodotTools\bin\Release\GodotTools.%version%.nupkg" --source "github"
+@REM dotnet nuget push "GodotTools\bin\Release\GodotTools.%version%.nupkg" --source "github"
 
 endlocal

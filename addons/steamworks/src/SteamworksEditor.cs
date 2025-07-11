@@ -3,20 +3,18 @@ using System;
 namespace Godot;
 
 [Tool]
+[SceneTree]
 public partial class SteamworksEditor : Control
 {
-    private SpinBox AppIdSpinBox => GetNode<SpinBox>("%AppIdSpinBox");
-    private Button SetEnvButton => GetNode<Button>("%SetEnvButton");
-    private Button UserDataButton => GetNode<Button>("%UserDataButton");
-
-
     public override void _Ready()
     {
         SteamworksUtil.InitEnvironment();
         SetEnvButton.Pressed += () => { SteamworksUtil.InitEnvironment(); };
         UserDataButton.Pressed += () => { OS.ShellOpen(OS.GetUserDataDir()); };
-        AppIdSpinBox.ValueChanged += (value) => { SteamManager.SaveAppId((uint)value); };
-        AppIdSpinBox.Value = SteamManager.GetAppId();
+        AppIdSpinBox.ValueChanged += (value) => { SteamConfig.AppId = (uint)value; };
+        AppIdSpinBox.Value = SteamConfig.AppId;
+        DebugUI.Toggled += (value) => { SteamConfig.Debug = value; };
+        DebugUI.ButtonPressed = SteamConfig.Debug;
     }
 
 

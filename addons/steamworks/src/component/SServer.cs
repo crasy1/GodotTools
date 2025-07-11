@@ -27,10 +27,14 @@ public partial class SServer : SteamComponent
 
     public void StartServer(string modDir, string desc)
     {
-        var serverInit = new SteamServerInit(modDir, desc);
+        var serverInit = new SteamServerInit(modDir, desc)
+        {
+            VersionString = ProjectSettings.GetSetting("config/version").AsString()
+        };
         try
         {
-            SteamServer.Init(4000, serverInit);
+            SteamServer.Init(SteamConfig.AppId, serverInit);
+            Log.Info("启动steam服务器");
         }
         catch (Exception e)
         {

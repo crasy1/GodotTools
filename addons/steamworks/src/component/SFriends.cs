@@ -25,7 +25,6 @@ public partial class SFriends : SteamComponent
         SteamFriends.OnGameServerChangeRequested += (s1, s2) => { Log.Info($"steam 游戏服务器改变请求 {s1} {s2}"); };
         SteamFriends.OnOverlayBrowserProtocol += (s) => { Log.Info($"steam 覆盖界面浏览器协议 {s}"); };
         SteamFriends.OnPersonaStateChange += (friend) => { Log.Info($"steam 好友状态改变 {friend}"); };
-        SteamFriends.ListenForFriendsMessages = true;
     }
 
 

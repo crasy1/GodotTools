@@ -23,7 +23,6 @@ public partial class SUtil : SteamComponent
         SteamUtils.OnIpCountryChanged += () => { Log.Info($"ip地址改变，当前ip地址为 {SteamUtils.IpCountry}"); };
         SteamUtils.OnLowBatteryPower += (minutesLeft) => { Log.Info($"电量低，还剩 {minutesLeft} 分钟"); };
         SteamUtils.OnSteamShutdown += () => { Log.Info($"Steam 关闭"); };
-        GetInfo();
     }
 
     public void GetInfo()

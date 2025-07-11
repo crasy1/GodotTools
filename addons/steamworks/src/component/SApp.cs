@@ -17,13 +17,12 @@ public partial class SApp : SteamComponent
         base._Ready();
         SteamApps.OnDlcInstalled += (appId) => { Log.Info($"{appId} DLC已安装"); };
         SteamApps.OnNewLaunchParameters += () => { };
-        AppInfo();
     }
 
     public void AppInfo()
     {
         Log.Info(@$"
-AppId:  {SteamManager.GetAppId()}
+AppId:  {SteamConfig.AppId}
 AvailableLanguages: {SteamApps.AvailableLanguages}
 GameLanguage:  {SteamApps.GameLanguage}
 CommandLine:  {SteamApps.CommandLine}

@@ -30,7 +30,6 @@ public partial class SUser : SteamComponent
         {
             Log.Info($"用户验证授权 {steamId} {steamId2} {authResponse}");
         };
-        GetInfo();
     }
 
     public void GetInfo()
