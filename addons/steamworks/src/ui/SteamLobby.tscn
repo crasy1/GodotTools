@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cvgifx0xtsun0"]
 
-[ext_resource type="Script" uid="uid://dja0i10bek6qy" path="res://addons/steamworks/src/ui/SteamLobby.cs" id="1_meg5c"]
+[ext_resource type="Script" uid="uid://cnqrv73oqsdj8" path="res://addons/steamworks/src/ui/SteamLobby.cs" id="1_meg5c"]
 
 [node name="SteamLobby" type="Control"]
 layout_mode = 3

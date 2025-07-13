@@ -1,12 +1,12 @@
 [gd_scene load_steps=2 format=3 uid="uid://d0hb1ajrndvu5"]
 
-[ext_resource type="Script" uid="uid://6en0xwsjrrff" path="res://addons/steamworks/src/ui/SteamUserInfo.cs" id="1_mdhxx"]
+[ext_resource type="Script" uid="uid://djh7ogj1qv2v7" path="res://addons/steamworks/src/ui/SteamUserInfo.cs" id="1_mdhxx"]
 
 [node name="SteamUserInfo" type="Control"]
-custom_minimum_size = Vector2(200, 100)
+custom_minimum_size = Vector2(300, 100)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 200.0
+offset_right = 300.0
 offset_bottom = 100.0
 script = ExtResource("1_mdhxx")
 
@@ -42,3 +42,22 @@ text = "nickname"
 unique_name_in_owner = true
 layout_mode = 2
 text = "状态"
+
+[node name="Menu" type="VBoxContainer" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="InviteGame" type="Button" parent="FlowContainer/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "邀请到游戏"
+
+[node name="InviteLobby" type="Button" parent="FlowContainer/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "邀请到大厅"
+
+[node name="RemotePlay" type="Button" parent="FlowContainer/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "远程同乐"

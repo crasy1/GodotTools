@@ -9,7 +9,7 @@ namespace Godot;
 /// <seealso href="https://partner.steamgames.com/doc/features">steamworks文档</seealso>
 /// </summary>
 [SceneTree]
-public partial class SteamManager : Control
+public partial class SteamManager : CanvasLayer
 {
     public override void _Ready()
     {
@@ -37,6 +37,11 @@ public partial class SteamManager : Control
             var lobby = SteamLobby.Instantiate((int)MaxLobbyUser.Value);
             LobbyInfo.AddChild(lobby);
             lobby.Create();
+        };
+        SearchLobby.Pressed += async () =>
+        {
+            var lobbies = await SteamLobby.Search();
+            Log.Info(lobbies.Count);
         };
     }
 
@@ -100,6 +105,12 @@ IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
         {
             if (friend.IsOnline)
             {
+                var lobby = friend.GameInfo?.Lobby;
+                if (lobby.HasValue)
+                {
+                    Log.Info($"好友在大厅中,{lobby.Value.Id}");
+                }
+
                 var steamUserInfo = SteamUserInfo.Instantiate(friend);
                 Friends.AddChild(steamUserInfo);
             }

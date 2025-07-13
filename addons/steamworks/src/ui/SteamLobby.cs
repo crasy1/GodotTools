@@ -1,11 +1,15 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
 
 [SceneTree]
 public partial class SteamLobby : Control
 {
+    public static SteamLobby MySteamLobby { set; get; }
     private int MaxUser { set; get; }
     private Lobby Lobby { set; get; }
 
@@ -25,6 +29,7 @@ public partial class SteamLobby : Control
                 Lobby = lobby;
                 Lobby.SetPrivate();
                 Lobby.SetJoinable(false);
+                Lobby.SetData("version", ProjectSettings.GetSetting("config/version").AsString());
                 UpdateLobbyData();
             }
         };
@@ -108,12 +113,23 @@ public partial class SteamLobby : Control
             Lobby.Leave();
             Log.Info("退出大厅");
             QueueFree();
+            MySteamLobby = null;
         };
     }
 
     public void Create()
     {
         SteamMatchmaking.CreateLobbyAsync(MaxUser);
+        MySteamLobby = this;
+    }
+
+    public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10)
+    {
+        var lobbyQuery = SteamMatchmaking.LobbyList.WithMaxResults(maxResult);
+        lobbyQuery = lobbyQuery.WithSlotsAvailable(minSlots);
+        // lobbyQuery = lobbyQuery.WithKeyValue("version", ProjectSettings.GetSetting("config/version").AsString());
+        var lobbies = await lobbyQuery.RequestAsync();
+        return lobbies == null ? [] : lobbies.ToList();
     }
 
     private void UpdateLobbyData()
@@ -131,5 +147,10 @@ public partial class SteamLobby : Control
 
             Friends.AddChild(SteamUserInfo.Instantiate(lobbyMember));
         }
+    }
+
+    public void Invite(SteamId steamId)
+    {
+        Lobby.InviteFriend(steamId);
     }
 }

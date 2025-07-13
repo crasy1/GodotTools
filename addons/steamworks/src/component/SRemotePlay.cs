@@ -15,12 +15,12 @@ public partial class SRemotePlay : SteamComponent
     public override void _Ready()
     {
         base._Ready();
-        SteamRemotePlay.OnSessionConnected += session =>
-        {
-            Log.Info($"steam远程游玩 已连接 {session}");
-        };
-        SteamRemotePlay.OnSessionDisconnected += session => { 
-            Log.Info($"steam远程游玩 断开连接 {session}");
-        };
+        SteamRemotePlay.OnSessionConnected += session => { Log.Info($"steam远程同乐 已连接 {session}"); };
+        SteamRemotePlay.OnSessionDisconnected += session => { Log.Info($"steam远程同乐 断开连接 {session}"); };
+    }
+
+    public static void Invite(SteamId steamId)
+    {
+        SteamRemotePlay.SendInvite(steamId);
     }
 }

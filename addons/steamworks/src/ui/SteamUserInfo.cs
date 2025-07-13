@@ -41,5 +41,16 @@ public partial class SteamUserInfo : Control
             FriendState.Invisible => "隐身"
         };
         Avatar.Texture = (await SFriends.Avatar(Friend.Id))?.Texture();
+        Avatar.GuiInput += (@event =>
+        {
+            if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })
+            {
+                Menu.Show();
+            }
+        });
+        InviteGame.Pressed += () => { Friend.InviteToGame("来"); };
+        InviteLobby.Pressed += () => { SteamLobby.MySteamLobby?.Invite(Friend.Id); };
+        RemotePlay.Pressed += () => { SRemotePlay.Invite(Friend.Id); };
+        Menu.Hide();
     }
 }
