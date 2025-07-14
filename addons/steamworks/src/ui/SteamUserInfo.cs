@@ -49,7 +49,7 @@ public partial class SteamUserInfo : Control
             }
         });
         InviteGame.Pressed += () => { Friend.InviteToGame("来"); };
-        InviteLobby.Pressed += () => { SteamLobby.MySteamLobby?.Invite(Friend.Id); };
+        InviteLobby.Pressed += () => { SMatchmaking.Instance.Invite(Friend.Id); };
         RemotePlay.Pressed += () => { SRemotePlay.Invite(Friend.Id); };
         Menu.Hide();
     }

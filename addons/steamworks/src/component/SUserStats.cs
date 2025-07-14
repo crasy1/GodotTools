@@ -9,6 +9,8 @@ public partial class SUserStats : SteamComponent
     private static readonly Lazy<SUserStats> LazyInstance = new(() => new());
     public static SUserStats Instance => LazyInstance.Value;
 
+    public static event Action<Achievement> AchievementUnlocked;
+
     private SUserStats()
     {
     }
@@ -16,21 +18,20 @@ public partial class SUserStats : SteamComponent
     public override void _Ready()
     {
         base._Ready();
-        SteamUserStats.OnAchievementProgress += (achievement, cu, max) =>
+        SteamUserStats.OnAchievementProgress += (achievement, current, max) =>
         {
-            Log.Info( $"{achievement} 进度： {cu}/{max}");
+            if (current == 0 && max == 0)
+            {
+                Log.Info($"成就 {achievement} 已解锁");
+                AchievementUnlocked?.Invoke(achievement);
+            }
+            else
+            {
+                Log.Info($"成就 {achievement} 进度： {current}/{max}");
+            }
         };
-        SteamUserStats.OnUserStatsStored += (result) =>
-        {
-            Log.Info($"保存用户统计信息 {result}");
-        };
-        SteamUserStats.OnUserStatsReceived += (steamId, result) =>
-        {
-            Log.Info( $"获取用户统计信息 {steamId} {result}");
-        };
-        SteamUserStats.OnUserStatsUnloaded += (steamId) =>
-        {
-            Log.Info( $"用户统计信息已卸载 {steamId}");
-        };
+        SteamUserStats.OnUserStatsStored += (result) => { Log.Info($"保存用户统计信息 {result}"); };
+        SteamUserStats.OnUserStatsReceived += (steamId, result) => { Log.Info($"收到用户统计信息 {steamId} {result}"); };
+        SteamUserStats.OnUserStatsUnloaded += (steamId) => { Log.Info($"用户统计信息已卸载 {steamId}"); };
     }
 }

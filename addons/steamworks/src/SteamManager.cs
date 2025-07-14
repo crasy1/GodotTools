@@ -18,6 +18,23 @@ public partial class SteamManager : CanvasLayer
         SetVisible(SteamConfig.Debug);
         SteamInit();
         SClient.Instance.Connect();
+        Ping.Hide();
+        ScreenShot.Pressed += () =>
+        {
+            SteamScreenshots.TriggerScreenshot();
+            Log.Info("截屏");
+        };
+        ShowFriends.Pressed += () =>
+        {
+            FriendsScrollContainer.Visible = true;
+            AchievementsScrollContainer.Visible = false;
+        };
+        ShowAchievements.Pressed += () =>
+        {
+            FriendsScrollContainer.Visible = false;
+            AchievementsScrollContainer.Visible = true;
+        };
+        AchievementsScrollContainer.Visible = false;
         OpenStore.Pressed += () => { SteamFriends.OpenStoreOverlay(SteamConfig.AppId); };
         OpenUrl.Pressed += () => { SteamFriends.OpenWebOverlay("https://www.baidu.com"); };
         OpenSettings.Pressed += () => { SteamFriends.OpenOverlay("settings"); };
@@ -43,6 +60,15 @@ public partial class SteamManager : CanvasLayer
         {
             var lobbies = await SteamLobby.Search();
             Log.Info(lobbies.Count);
+        };
+        SUserStats.AchievementUnlocked += (v) =>
+        {
+            Achievements.ClearAndFreeChildren();
+            foreach (var achievement in SteamUserStats.Achievements)
+            {
+                var achievementUi = AchievementUi.Instantiate(achievement);
+                Achievements.AddChild(achievementUi);
+            }
         };
     }
 
@@ -116,6 +142,11 @@ IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
                 Friends.AddChild(steamUserInfo);
             }
         }
+
+        foreach (var achievement in SteamUserStats.Achievements)
+        {
+            var achievementUi = AchievementUi.Instantiate(achievement);
+            Achievements.AddChild(achievementUi);
+        }
     }
-    
 }

@@ -43,6 +43,6 @@ public partial class SFriends : SteamComponent
         }
 
         var image = avatar.Value;
-        return Image.CreateFromData((int)image.Width, (int)image.Height, false, Image.Format.Rgba8, image.Data);
+        return SteamUtil.CreateImage(image);
     }
 }

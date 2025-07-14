@@ -1,5 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using Steamworks;
+using Steamworks.Data;
 
 namespace Godot;
 
@@ -16,5 +18,10 @@ public partial class SNetworkingUtils : SteamComponent
     {
         base._Ready();
         SteamNetworkingUtils.OnDebugOutput += (output, s) => { Log.Info($"接收调试网络信息 {output},{s}"); };
+        SClient.Instance.SteamClientConnected += () =>
+        {
+            SteamNetworkingUtils.InitRelayNetworkAccess();
+        };
     }
+    
 }
