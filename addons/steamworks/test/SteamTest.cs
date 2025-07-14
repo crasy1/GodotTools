@@ -15,6 +15,10 @@ public partial class SteamTest : Node2D
             Log.Info($"收到信息时间：{Time.GetUnixTimeFromSystem()}");
             ReceiveText.AppendText(data);
         };
+        ShowFriend.Pressed += () =>
+        {
+            ShowFriends();
+        };
         Send.Pressed += () =>
         {
             if (SteamUserInfo == null)
@@ -30,6 +34,7 @@ public partial class SteamTest : Node2D
 
     public void ShowFriends()
     {
+        Friends.ClearAndFreeChildren();
         foreach (var friend in SteamFriends.GetFriends())
         {
             if (friend.IsOnline)
