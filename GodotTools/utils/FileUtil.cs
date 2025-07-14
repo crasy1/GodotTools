@@ -26,6 +26,7 @@ public static class FileUtil
             {
                 break;
             }
+
             if (!path.Contains(".converted.res") && path.Contains(".tscn"))
             {
                 path = path.Replace(".remap", "");
@@ -45,6 +46,7 @@ public static class FileUtil
                 }
             }
         }
+
         dir.ListDirEnd();
 
         return scenes;
@@ -72,17 +74,33 @@ public static class FileUtil
                             GD.PushWarning($"Could not load resource at {fullPath} with type {typeof(T).Name}");
                             continue;
                         }
+
                         results.Add(res);
                     }
                 }
+
                 fileName = dir.GetNext();
             }
+
             dir.ListDirEnd();
         }
         else
         {
             GD.PushWarning($"Could load resources in path {path}");
         }
+
         return results;
+    }
+
+    public static byte[]? GetFileBytes(string path)
+    {
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+        return file?.GetBuffer((long)file.GetLength());
+    }
+
+    public static void WriteFileBytes(string path, byte[] bytes)
+    {
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+        file?.StoreBuffer(bytes);
     }
 }

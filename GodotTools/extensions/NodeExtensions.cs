@@ -85,4 +85,11 @@ public static class NodeExtensions
     {
         await node.ToSignal(node.GetTree(), SceneTree.SignalName.PhysicsFrame);
     }
+
+    public static async Task WaitFor(this Node node, double seconds, bool processAlways = true,
+        bool processInPhysics = false, bool ignoreTimeScale = false)
+    {
+        await node.ToSignal(node.GetTree().CreateTimer(seconds, processAlways, processInPhysics, ignoreTimeScale),
+            SceneTreeTimer.SignalName.Timeout);
+    }
 }

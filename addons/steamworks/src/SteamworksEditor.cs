@@ -8,8 +8,8 @@ public partial class SteamworksEditor : Control
 {
     public override void _Ready()
     {
-        SteamworksUtil.InitEnvironment();
-        SetEnvButton.Pressed += () => { SteamworksUtil.InitEnvironment(); };
+        SteamUtil.InitEnvironment();
+        SetEnvButton.Pressed += () => { SteamUtil.InitEnvironment(); };
         UserDataButton.Pressed += () => { OS.ShellOpen(OS.GetUserDataDir()); };
         AppIdSpinBox.ValueChanged += (value) => { SteamConfig.AppId = (uint)value; };
         AppIdSpinBox.Value = SteamConfig.AppId;
@@ -17,7 +17,7 @@ public partial class SteamworksEditor : Control
         DebugUI.ButtonPressed = SteamConfig.Debug;
     }
 
-
+    
     public override void _ExitTree()
     {
     }

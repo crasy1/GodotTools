@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Steamworks;
 
@@ -13,7 +14,7 @@ public partial class SteamManager : CanvasLayer
 {
     public override void _Ready()
     {
-        SteamworksUtil.InitEnvironment();
+        SteamUtil.InitEnvironment();
         SetVisible(SteamConfig.Debug);
         SteamInit();
         SClient.Instance.Connect();
@@ -116,4 +117,5 @@ IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
             }
         }
     }
+    
 }
