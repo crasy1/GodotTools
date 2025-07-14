@@ -70,6 +70,7 @@ public partial class SteamManager : CanvasLayer
                 Achievements.AddChild(achievementUi);
             }
         };
+        Test.Pressed += () => { GetTree().ChangeSceneToFile(SteamTest.TscnFilePath); Hide();};
     }
 
     private void SteamInit()

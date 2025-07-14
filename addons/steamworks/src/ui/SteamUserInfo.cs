@@ -6,7 +6,7 @@ using Steamworks;
 [SceneTree]
 public partial class SteamUserInfo : Control
 {
-    private Friend Friend { set; get; }
+    public Friend Friend { set; get; }
 
     public override bool Equals(object obj)
     {

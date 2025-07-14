@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c2amw4dllr24x"]
 
-[ext_resource type="Script" uid="uid://fcf5et8j5ofd" path="res://addons/steamworks/src/SteamManager.cs" id="1_epupd"]
+[ext_resource type="Script" uid="uid://btbomttfwj4iy" path="res://addons/steamworks/src/SteamManager.cs" id="1_epupd"]
 
 [node name="SteamManager" type="CanvasLayer"]
 layer = 100
@@ -129,6 +129,11 @@ text = "创建大厅"
 unique_name_in_owner = true
 layout_mode = 2
 text = "搜索大厅"
+
+[node name="Test" type="Button" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "多人测试"
 
 [node name="FriendsScrollContainer" type="ScrollContainer" parent="."]
 unique_name_in_owner = true
