@@ -16,10 +16,12 @@ public partial class SteamTest : Node2D
             Log.Info($"收到信息时间：{Time.GetUnixTimeFromSystem()}");
             P2PReceiveText.AppendText(data);
         };
-        ShowFriend.Pressed += () =>
+        if (SNetworkingSockets.Instance.FakeIp.HasValue)
         {
-            ShowFriends();
-        };
+            Ip.Text = SNetworkingSockets.Instance.FakeIp.Value.ToString();
+        }
+
+        ShowFriend.Pressed += () => { ShowFriends(); };
         SendP2P.Pressed += () =>
         {
             if (SteamUserInfo == null)
@@ -32,17 +34,11 @@ public partial class SteamTest : Node2D
             // SendText.Text = "";
         };
         // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
-        CreateNormal.Pressed += () =>
-        {
-            SNetworkingSockets.Instance.CreateNormal();
-        };
-        CloseNormal.Pressed += () =>
-        {
-            SNetworkingSockets.Instance.NormalServer?.Close();
-        };
+        CreateNormal.Pressed += () => { SNetworkingSockets.Instance.CreateNormal(); };
+        CloseNormal.Pressed += () => { SNetworkingSockets.Instance.CloseNormal(); };
         SendToClientNormal.Pressed += () =>
         {
-            if (SNetworkingSockets.Instance.NormalServer!=null)
+            if (SNetworkingSockets.Instance.NormalServer != null)
             {
                 foreach (var connection in SNetworkingSockets.Instance.NormalServer.Connected)
                 {
@@ -56,13 +52,9 @@ public partial class SteamTest : Node2D
         {
             var host = NormalIp.Text;
             var port = (ushort)NormalPort.Value;
-            
-            SNetworkingSockets.Instance.ConnectNormal(NetAddress.From(host,port));
+            SNetworkingSockets.Instance.ConnectNormal(NetAddress.From(host, port));
         };
-        DisconnectNormal.Pressed += () =>
-        {
-            SNetworkingSockets.Instance.NormalClient?.Close();
-        };
+        DisconnectNormal.Pressed += () => { SNetworkingSockets.Instance.NormalClient?.Close(); };
         SendToNormalServer.Pressed += () =>
         {
             // SNetworkingSockets.Instance.NormalClient?.SendMessages(NormalClientText.Text);
