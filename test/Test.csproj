@@ -4,7 +4,6 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="godotsharp.sourcegenerators" Version="2.6.0-250707-1718.Release" />
     <PackageReference Include="godottools" Version="0.0.2" />
   </ItemGroup>
 </Project>
