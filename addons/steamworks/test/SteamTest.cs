@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using Steamworks;
+using Steamworks.Data;
 
 [SceneTree]
 public partial class SteamTest : Node2D
@@ -13,22 +14,58 @@ public partial class SteamTest : Node2D
         SNetworking.ReceiveData += (steamId, data) =>
         {
             Log.Info($"收到信息时间：{Time.GetUnixTimeFromSystem()}");
-            ReceiveText.AppendText(data);
+            P2PReceiveText.AppendText(data);
         };
         ShowFriend.Pressed += () =>
         {
             ShowFriends();
         };
-        Send.Pressed += () =>
+        SendP2P.Pressed += () =>
         {
             if (SteamUserInfo == null)
             {
                 return;
             }
 
-            SNetworking.SendP2P(SteamUserInfo.Friend.Id, SendText.Text);
+            SNetworking.SendP2P(SteamUserInfo.Friend.Id, P2PText.Text);
             Log.Info($"发送信息时间：{Time.GetUnixTimeFromSystem()}");
             // SendText.Text = "";
+        };
+        // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
+        CreateNormal.Pressed += () =>
+        {
+            SNetworkingSockets.Instance.CreateNormal();
+        };
+        CloseNormal.Pressed += () =>
+        {
+            SNetworkingSockets.Instance.NormalServer?.Close();
+        };
+        SendToClientNormal.Pressed += () =>
+        {
+            if (SNetworkingSockets.Instance.NormalServer!=null)
+            {
+                foreach (var connection in SNetworkingSockets.Instance.NormalServer.Connected)
+                {
+                    var result = connection.SendMessage(NormalText.Text);
+                    Log.Info($"向 {connection} 发送消息 {result}");
+                }
+            }
+        };
+        // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
+        ConnectNormal.Pressed += () =>
+        {
+            var host = NormalIp.Text;
+            var port = (ushort)NormalPort.Value;
+            
+            SNetworkingSockets.Instance.ConnectNormal(NetAddress.From(host,port));
+        };
+        DisconnectNormal.Pressed += () =>
+        {
+            SNetworkingSockets.Instance.NormalClient?.Close();
+        };
+        SendToNormalServer.Pressed += () =>
+        {
+            // SNetworkingSockets.Instance.NormalClient?.SendMessages(NormalClientText.Text);
         };
     }
 

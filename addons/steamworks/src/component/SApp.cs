@@ -16,7 +16,10 @@ public partial class SApp : SteamComponent
     {
         base._Ready();
         SteamApps.OnDlcInstalled += (appId) => { Log.Info($"{appId} DLC已安装"); };
-        SteamApps.OnNewLaunchParameters += () => { };
+        SteamApps.OnNewLaunchParameters += () =>
+        {
+            GD.Print($"启动命令:  {SteamApps.CommandLine}");
+        };
     }
 
     public void AppInfo()
@@ -25,7 +28,6 @@ public partial class SApp : SteamComponent
 AppId:  {SteamConfig.AppId}
 AvailableLanguages: {SteamApps.AvailableLanguages}
 GameLanguage:  {SteamApps.GameLanguage}
-CommandLine:  {SteamApps.CommandLine}
 Owner:  {SteamApps.AppOwner}
 AppInstallDir:  {SteamApps.AppInstallDir()}
                  ");

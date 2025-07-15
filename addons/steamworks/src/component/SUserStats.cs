@@ -31,7 +31,7 @@ public partial class SUserStats : SteamComponent
             }
         };
         SteamUserStats.OnUserStatsStored += (result) => { Log.Info($"保存用户统计信息 {result}"); };
-        SteamUserStats.OnUserStatsReceived += (steamId, result) => { Log.Info($"收到用户统计信息 {steamId} {result}"); };
-        SteamUserStats.OnUserStatsUnloaded += (steamId) => { Log.Info($"用户统计信息已卸载 {steamId}"); };
+        SteamUserStats.OnUserStatsReceived += (steamId, result) => { Log.Info($"收到用户 {steamId} 统计信息 {result}"); };
+        SteamUserStats.OnUserStatsUnloaded += (steamId) => { Log.Info($"用户 {steamId} 统计信息已卸载"); };
     }
 }

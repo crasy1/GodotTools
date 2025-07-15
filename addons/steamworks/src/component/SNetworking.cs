@@ -24,10 +24,8 @@ public partial class SNetworking : SteamComponent
             Log.Info($"p2p连接请求 {steamId} : {success}");
         };
         SteamNetworking.OnP2PConnectionFailed += (steamId, error) => { Log.Info($"p2p连接失败 {steamId},{error}"); };
-        SClient.Instance.SteamClientConnected+=() =>
-        { 
-            SetProcess(true);
-        };
+        SClient.Instance.SteamClientConnected += () => { SetProcess(true); };
+        SClient.Instance.SteamClientDisconnected += () => { SetProcess(false); };
     }
 
     public override void _Process(double delta)

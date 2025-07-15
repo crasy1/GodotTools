@@ -9,7 +9,6 @@ using Steamworks.Data;
 [SceneTree]
 public partial class SteamLobby : Control
 {
-    public static SteamLobby MySteamLobby { set; get; }
     private int MaxUser { set; get; }
 
     [OnInstantiate]
@@ -20,6 +19,7 @@ public partial class SteamLobby : Control
 
     public override void _Ready()
     {
+        Hide();
         SteamMatchmaking.OnLobbyCreated += (result, lobby) =>
         {
             if (result == Result.OK)
@@ -80,14 +80,12 @@ public partial class SteamLobby : Control
             SMatchmaking.Instance.LeaveLobby();
             Log.Info("退出大厅");
             QueueFree();
-            MySteamLobby = null;
         };
     }
 
     public void Create()
     {
         SteamMatchmaking.CreateLobbyAsync(MaxUser);
-        MySteamLobby = this;
     }
 
     public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10)
@@ -101,6 +99,7 @@ public partial class SteamLobby : Control
 
     private void UpdateLobbyData()
     {
+        Show();
         Friends.ClearAndFreeChildren();
         SteamId.Text = $"{SMatchmaking.Instance.Lobby?.Id}";
         CurrentUserLabel.Text = $"{SMatchmaking.Instance.Lobby?.MemberCount}";
