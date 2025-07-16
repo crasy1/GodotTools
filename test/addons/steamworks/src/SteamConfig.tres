@@ -3,3 +3,4 @@
 [resource]
 metadata/appId = 480
 metadata/debug = true
+metadata/callbackDebug = false

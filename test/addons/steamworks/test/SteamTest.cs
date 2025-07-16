@@ -51,9 +51,10 @@ public partial class SteamTest : Node2D
         // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
         ConnectNormalClient.Pressed += () =>
         {
+            NormalClient?.QueueFree();
+            NormalClient = null;
             var host = NormalIp.Text;
-            var port = (ushort)NormalPort.Value;
-            NormalClient = SNetworkingSockets.ConnectNormal(port);
+            NormalClient = SNetworkingSockets.ConnectNormal((ushort)NormalPort.Value);
             NormalClient.Connect();
         };
         DisconnectNormalClient.Pressed += () =>
@@ -78,6 +79,8 @@ public partial class SteamTest : Node2D
         // RelayIp,RelayPort,RelayClientText,RelayClientReceiveText
         ConnectRelayClient.Pressed += () =>
         {
+            RelayClient?.QueueFree();
+            RelayClient = null;
             var host = RelayIp.Text;
             var port = (ushort)RelayPort.Value;
             // RelayClient = SNetworkingSockets.ConnectRelay(SteamUserInfo.Friend.Id, port);
