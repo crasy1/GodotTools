@@ -19,6 +19,10 @@ public static class SteamConfig
     {
         get => Instance.GetMeta("debug").AsBool();
         set => Save("debug", value);
+    }public static bool CallbackDebug
+    {
+        get => Instance.GetMeta("callbackDebug").AsBool();
+        set => Save("callbackDebug", value);
     }
 
     private static void Save(string key, Variant value)

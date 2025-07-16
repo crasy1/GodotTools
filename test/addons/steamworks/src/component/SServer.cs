@@ -23,6 +23,7 @@ public partial class SServer : SteamComponent
         {
             Log.Info($"服务器身份验证 {steamId1},{steamId2},{result}");
         };
+        SteamManager.AddBeforeGameQuitAction(StopServer);
     }
 
     public void StartServer(string modDir, string desc)
@@ -56,11 +57,5 @@ public partial class SServer : SteamComponent
         }
     }
 
-    public override void _Notification(int what)
-    {
-        if (NotificationWMCloseRequest == what)
-        {
-            StopServer();
-        }
-    }
+ 
 }

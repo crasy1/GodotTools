@@ -31,6 +31,7 @@ public partial class SClient : SteamComponent
             SetProcess(false);
             Log.Info("steam client 断开连接");
         };
+        SteamManager.AddBeforeGameQuitAction(Disconnect);
     }
 
     public void Connect()
@@ -64,6 +65,7 @@ public partial class SClient : SteamComponent
     {
         SteamClient.Shutdown();
         EmitSignalSteamClientDisconnected();
+        Log.Info("退出steam client");
     }
 
     public override void _Process(double delta)
@@ -71,14 +73,6 @@ public partial class SClient : SteamComponent
         if (SteamClient.IsValid)
         {
             SteamClient.RunCallbacks();
-        }
-    }
-
-    public override void _Notification(int what)
-    {
-        if (NotificationWMCloseRequest == what)
-        {
-            Disconnect();
         }
     }
 }

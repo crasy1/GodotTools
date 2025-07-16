@@ -8,6 +8,11 @@ public partial class SteamTest : Node2D
 {
     private SteamUserInfo SteamUserInfo { set; get; }
 
+    private NormalServer NormalServer { set; get; }
+    private NormalClient NormalClient { set; get; }
+    private RelayServer RelayServer { set; get; }
+    private RelayClient RelayClient { set; get; }
+
     public override void _Ready()
     {
         base._Ready();
@@ -16,10 +21,6 @@ public partial class SteamTest : Node2D
             Log.Info($"收到信息时间：{Time.GetUnixTimeFromSystem()}");
             P2PReceiveText.AppendText(data);
         };
-        if (SNetworkingSockets.Instance.FakeIp.HasValue)
-        {
-            Ip.Text = SNetworkingSockets.Instance.FakeIp.Value.ToString();
-        }
 
         ShowFriend.Pressed += () => { ShowFriends(); };
         SendP2P.Pressed += () =>
@@ -33,32 +34,62 @@ public partial class SteamTest : Node2D
             Log.Info($"发送信息时间：{Time.GetUnixTimeFromSystem()}");
             // SendText.Text = "";
         };
-        // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
-        CreateNormal.Pressed += () => { SNetworkingSockets.Instance.CreateNormal(); };
-        CloseNormal.Pressed += () => { SNetworkingSockets.Instance.CloseNormal(); };
-        SendToClientNormal.Pressed += () =>
+        // NormalServerIp,NormalServerPort,NormalServerText,NormalServerReceiveText
+        CreateNormalServer.Pressed += () =>
         {
-            if (SNetworkingSockets.Instance.NormalServer != null)
-            {
-                foreach (var connection in SNetworkingSockets.Instance.NormalServer.Connected)
-                {
-                    var result = connection.SendMessage(NormalText.Text);
-                    Log.Info($"向 {connection} 发送消息 {result}");
-                }
-            }
+            NormalServer = SNetworkingSockets.CreateNormal((ushort)NormalServerPort.Value);
+            NormalServer.Create();
+            NormalServerIp.Text = NormalServer.NetAddress.Address.ToString();
+            NormalServerPort.Value = NormalServer.NetAddress.Port;
         };
+        CloseNormalServer.Pressed += () =>
+        {
+            NormalServer?.QueueFree();
+            NormalServer = null;
+        };
+        SendToClientNormal.Pressed += () => { NormalServer?.Send(NormalServerText.Text); };
         // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
-        ConnectNormal.Pressed += () =>
+        ConnectNormalClient.Pressed += () =>
         {
             var host = NormalIp.Text;
             var port = (ushort)NormalPort.Value;
-            SNetworkingSockets.Instance.ConnectNormal(NetAddress.From(host, port));
+            NormalClient = SNetworkingSockets.ConnectNormal(port);
+            NormalClient.Connect();
         };
-        DisconnectNormal.Pressed += () => { SNetworkingSockets.Instance.NormalClient?.Close(); };
-        SendToNormalServer.Pressed += () =>
+        DisconnectNormalClient.Pressed += () =>
         {
-            // SNetworkingSockets.Instance.NormalClient?.SendMessages(NormalClientText.Text);
+            NormalClient?.QueueFree();
+            NormalClient = null;
         };
+        SendToNormalServer.Pressed += () => { NormalClient?.Send(NormalClientText.Text); };
+
+        // RelayServerIp,RelayServerPort,RelayServerText,RelayServerReceiveText
+        CreateRelayServer.Pressed += () =>
+        {
+            RelayServer = SNetworkingSockets.CreateRelay((int)RelayServerPort.Value);
+            RelayServer.Create();
+        };
+        CloseRelayServer.Pressed += () =>
+        {
+            RelayServer?.QueueFree();
+            RelayServer = null;
+        };
+        SendToClientRelay.Pressed += () => { RelayServer?.Send(RelayServerText.Text); };
+        // RelayIp,RelayPort,RelayClientText,RelayClientReceiveText
+        ConnectRelayClient.Pressed += () =>
+        {
+            var host = RelayIp.Text;
+            var port = (ushort)RelayPort.Value;
+            // RelayClient = SNetworkingSockets.ConnectRelay(SteamUserInfo.Friend.Id, port);
+            RelayClient = SNetworkingSockets.ConnectRelay(SteamClient.SteamId, port);
+            RelayClient.Connect();
+        };
+        DisconnectRelayClient.Pressed += () =>
+        {
+            RelayClient?.QueueFree();
+            RelayClient = null;
+        };
+        SendToRelayServer.Pressed += () => { RelayClient?.Send(RelayClientText.Text); };
     }
 
     public void ShowFriends()

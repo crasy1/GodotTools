@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Steamworks;
 
@@ -12,11 +14,26 @@ namespace Godot;
 [SceneTree]
 public partial class SteamManager : CanvasLayer
 {
+    /**
+         * 退出前的操作
+         */
+    private static readonly Stack<Action> QuitActions = new();
+
     public override void _Ready()
     {
+        GetTree().AutoAcceptQuit = false;
         SteamUtil.InitEnvironment();
         SetVisible(SteamConfig.Debug);
         SteamInit();
+        if (SteamConfig.CallbackDebug)
+        {
+            Dispatch.OnDebugCallback += (type, message, server) =>
+            {
+                Log.Debug($"steamworks 调试回调信息 [Callback {type} {(server ? "server" : "client")}]: {message}");
+            };
+        }
+
+        Dispatch.OnException += (e) => { Log.Error($"steamworks 异常",e); };
         SClient.Instance.Connect();
         Ping.Hide();
         ScreenShot.Pressed += () =>
@@ -70,7 +87,28 @@ public partial class SteamManager : CanvasLayer
                 Achievements.AddChild(achievementUi);
             }
         };
-        Test.Pressed += () => { GetTree().ChangeSceneToFile(SteamTest.TscnFilePath); Hide();};
+        Test.Pressed += () =>
+        {
+            GetTree().ChangeSceneToFile(SteamTest.TscnFilePath);
+            Hide();
+        };
+    }
+
+    public override void _Notification(int what)
+    {
+        if (NotificationWMCloseRequest == what)
+        {
+            Log.Info("用户请求退出游戏");
+            BeforeGameQuit();
+            GetTree().Quit();
+        }
+
+        if (NotificationWMGoBackRequest == what)
+        {
+            Log.Info("android用户请求退出游戏");
+            BeforeGameQuit();
+            GetTree().Quit();
+        }
     }
 
     private void SteamInit()
@@ -108,6 +146,37 @@ public partial class SteamManager : CanvasLayer
     private void OnSteamClientDisconnected()
     {
         Connected.Text = "未连接";
+    }
+
+    public static void AddBeforeGameQuitAction(Action action)
+    {
+        QuitActions.Push(action);
+    }
+
+    private void BeforeGameQuit()
+    {
+        Log.Info($"退出游戏前逻辑共{QuitActions.Count}个");
+        var count = 0;
+        for (int i = 0; i < QuitActions.Count; i++)
+        {
+            if (QuitActions.TryPop(out var action))
+            {
+                count++;
+                Log.Info($"开始执行第{count}个 => {action.Target?.GetType().Name}");
+                try
+                {
+                    action?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"执行第{count}个异常 => {e.Message}");
+                }
+
+                Log.Info($"<= 结束执行第{count}个");
+            }
+        }
+
+        Log.Info("退出游戏前逻辑执行完毕");
     }
 
     private async Task OnSteamClientConnected()

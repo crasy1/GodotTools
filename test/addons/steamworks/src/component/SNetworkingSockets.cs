@@ -12,11 +12,6 @@ public partial class SNetworkingSockets : SteamComponent
 
     public NetAddress? FakeIp { set; get; }
 
-    public SocketManager? NormalServer { set; get; }
-    public SocketManager? RelayServer { set; get; }
-    public ConnectionManager? NormalClient { set; get; }
-    public ConnectionManager? RelayClient { set; get; }
-
     private SNetworkingSockets()
     {
     }
@@ -27,59 +22,59 @@ public partial class SNetworkingSockets : SteamComponent
         base._Ready();
         SteamNetworkingSockets.OnConnectionStatusChanged += (c, ci) =>
         {
-            Log.Info($"连接状态改变 {c},{ci}");
+            Log.Info($"连接状态改变 {ci.Identity},{ci.Address},{ci.State},{ci.EndReason}");
         };
         SteamNetworkingSockets.OnFakeIPResult += (NetAddress na) =>
         {
             Log.Info($"steam fake ip 地址 {na}");
             FakeIp = na;
         };
-        SClient.Instance.SteamClientConnected += () => { SteamNetworkingSockets.RequestFakeIP(); };
+        SClient.Instance.SteamClientConnected += () => { SteamNetworkingUtils.InitRelayNetworkAccess(); };
+        SteamManager.AddBeforeGameQuitAction(CloseAllSocket);
     }
 
-    public void CreateNormal()
+    private void CloseAllSocket()
     {
-        MySocketManager mySocketManager = new();
-        var netAddress = NetAddress.AnyIp(22222);
-        NormalServer = SteamNetworkingSockets.CreateNormalSocket(netAddress, mySocketManager);
-        Log.Info($"创建 normal server {netAddress}");
-        var result = SteamNetworkingSockets.GetFakeIP(1,out var ip);
-        Log.Info($"创建 normal server {result} ip {ip}");
-    }
-
-    public void CloseNormal()
-    {
-        if (NormalServer != null)
+        Log.Info("---------------- 关闭[steam socket]开始 ----------------");
+        foreach (var child in GetChildren())
         {
-            NormalServer.Close();
-            NormalServer = null;
-            Log.Info("关闭 normal server");
+            if (child is SteamSocket socket)
+            {
+                if (IsInstanceValid(child))
+                {
+                    socket.Close();
+                }
+            }
         }
+
+        Log.Info("---------------- 关闭[steam socket]结束 ----------------");
     }
 
-    public void CreateFake()
+    public static NormalServer CreateNormal(ushort port)
     {
-        MySocketManager mySocketManager = new();
-        RelayServer = SteamNetworkingSockets.CreateRelaySocket(33333, mySocketManager);
-        Log.Info($"创建 relay socket ");
+        var normalServer = new NormalServer(10000);
+        Instance.AddChild(normalServer);
+        return normalServer;
     }
 
-    public void ConnectNormal(NetAddress address)
+    public static NormalClient ConnectNormal(ushort port)
     {
-        MyConnectionManager manager = new();
-        NormalClient = SteamNetworkingSockets.ConnectNormal(address, manager);
-        Log.Info($"连接 normal {address}");
+        var normalClient = new NormalClient(port);
+        Instance.AddChild(normalClient);
+        return normalClient;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="serverId">可能是用户steamId</param>
-    /// <param name="port"></param>
-    public void ConnectRelay(SteamId serverId, int port)
+    public static RelayServer CreateRelay(int port)
     {
-        MyConnectionManager manager = new();
-        NormalClient = SteamNetworkingSockets.ConnectRelay(serverId, port, manager);
-        Log.Info($"连接 relay {serverId} {port}");
+        var relayServer = new RelayServer(port);
+        Instance.AddChild(relayServer);
+        return relayServer;
+    }
+
+    public static RelayClient ConnectRelay(SteamId serverId, int port)
+    {
+        var relayClient = new RelayClient(serverId, port);
+        Instance.AddChild(relayClient);
+        return relayClient;
     }
 }
