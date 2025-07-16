@@ -33,7 +33,7 @@ public partial class NormalServer : SteamSocket
     {
         try
         {
-            MySocketManager mySocketManager = new(nameof(NormalServer));
+            MySocketManager mySocketManager = new(this);
             SocketManager = SteamNetworkingSockets.CreateNormalSocket(NetAddress, mySocketManager);
             SetProcess(true);
             Log.Info($"创建 normal server :{NetAddress} 成功");

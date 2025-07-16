@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Steamworks;
 
@@ -8,6 +10,9 @@ public partial class SFriends : SteamComponent
 {
     private static readonly Lazy<SFriends> LazyInstance = new(() => new());
     public static SFriends Instance => LazyInstance.Value;
+
+    public static readonly Dictionary<SteamId, Friend> Friends = new();
+    public static Friend Me { private set; get; }
 
     private SFriends()
     {
@@ -24,7 +29,21 @@ public partial class SFriends : SteamComponent
         SteamFriends.OnGameRichPresenceJoinRequested += (friend, s) => { Log.Info($"steam 游戏状态加入请求 {friend} {s}"); };
         SteamFriends.OnGameServerChangeRequested += (s1, s2) => { Log.Info($"steam 游戏服务器改变请求 {s1} {s2}"); };
         SteamFriends.OnOverlayBrowserProtocol += (s) => { Log.Info($"steam 覆盖界面浏览器协议 {s}"); };
-        SteamFriends.OnPersonaStateChange += (friend) => { Log.Info($"steam 好友状态改变 {friend}"); };
+        SteamFriends.OnPersonaStateChange += (friend) =>
+        {
+            if (friend.IsMe)
+            {
+                Me = friend;
+                Friends.TryAdd(friend.Id, Me);
+            }
+        };
+        SClient.Instance.SteamClientConnected += () =>
+        {
+            foreach (var friend in SteamFriends.GetFriends())
+            {
+                Friends.Add(friend.Id, friend);
+            }
+        };
     }
 
 

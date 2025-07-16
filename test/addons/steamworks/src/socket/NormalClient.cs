@@ -31,10 +31,9 @@ public partial class NormalClient : SteamSocket
     {
         try
         {
-            MyConnectionManager myConnectionManager = new(nameof(NormalClient));
+            MyConnectionManager myConnectionManager = new(this);
             ConnectionManager = SteamNetworkingSockets.ConnectNormal(NetAddress, myConnectionManager);
-            SetProcess(ConnectionManager!.Connected);
-            Log.Info($"创建 normal client :{NetAddress} {(ConnectionManager!.Connected ? "成功" : "失败")}");
+            Log.Info($"创建 normal client :{NetAddress}");
         }
         catch (Exception e)
         {

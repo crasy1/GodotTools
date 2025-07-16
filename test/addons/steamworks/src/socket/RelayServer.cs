@@ -30,7 +30,7 @@ public partial class RelayServer : SteamSocket
     {
         try
         {
-            MySocketManager mySocketManager = new(nameof(RelayServer));
+            MySocketManager mySocketManager = new(this);
             SocketManager = SteamNetworkingSockets.CreateRelaySocket(Port, mySocketManager);
             SetProcess(true);
             Log.Info($"创建 relay server :port: {Port} 成功");

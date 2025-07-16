@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bye4e4xpr5t3u"]
 
-[ext_resource type="Script" uid="uid://dpfa7etnmpql3" path="res://addons/steamworks/test/SteamTest.cs" id="1_t73qi"]
+[ext_resource type="Script" uid="uid://ccqi08rgf2hb8" path="res://addons/steamworks/test/SteamTest.cs" id="1_t73qi"]
 
 [node name="SteamTest" type="Node2D"]
 script = ExtResource("1_t73qi")
@@ -81,9 +81,9 @@ custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 4
-min_value = 20000.0
+min_value = 10000.0
 max_value = 65535.0
-value = 20000.0
+value = 10000.0
 rounded = true
 prefix = "端口"
 
@@ -145,7 +145,7 @@ placeholder_text = "目标ip"
 
 [node name="NormalPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/NormalC/HBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 min_value = 10000.0
@@ -278,7 +278,7 @@ placeholder_text = "目标ip"
 
 [node name="RelayPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/RelayC/HBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 min_value = 20000.0

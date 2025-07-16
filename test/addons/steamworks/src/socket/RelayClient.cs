@@ -31,7 +31,7 @@ public partial class RelayClient : SteamSocket
     {
         try
         {
-            MyConnectionManager myConnectionManager = new(nameof(RelayClient));
+            MyConnectionManager myConnectionManager = new(this);
             ConnectionManager = SteamNetworkingSockets.ConnectRelay(ServerId, Port, myConnectionManager);
             SetProcess(ConnectionManager!.Connected);
             Log.Info($"创建 relay client :{ServerId} {(ConnectionManager!.Connected ? "成功" : "失败")}");
@@ -55,13 +55,12 @@ public partial class RelayClient : SteamSocket
     {
         ConnectionManager?.Close();
         ConnectionManager = null;
-        SetProcess(false);
         Log.Info($"关闭 relay client");
     }
 
     public override void _Notification(int what)
     {
-        if (new[] { NotificationWMCloseRequest, NotificationPredelete }.Contains(what))
+        if (NotificationPredelete == what)
         {
             Close();
         }

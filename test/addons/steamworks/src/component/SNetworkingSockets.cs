@@ -20,10 +20,14 @@ public partial class SNetworkingSockets : SteamComponent
     public override void _Ready()
     {
         base._Ready();
-        SteamNetworkingSockets.OnConnectionStatusChanged += (c, ci) =>
+        if (SteamConfig.Debug)
         {
-            Log.Info($"连接状态改变 {ci.Identity},{ci.Address},{ci.State},{ci.EndReason}");
-        };
+            SteamNetworkingSockets.OnConnectionStatusChanged += (c, ci) =>
+            {
+                Log.Info($"连接状态改变 {ci.Identity},{ci.Address},{ci.State},{ci.EndReason}");
+            };
+        }
+
         SteamNetworkingSockets.OnFakeIPResult += (NetAddress na) =>
         {
             Log.Info($"steam fake ip 地址 {na}");

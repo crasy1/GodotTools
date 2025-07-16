@@ -7,7 +7,6 @@ using Steamworks.Data;
 public partial class SteamTest : Node2D
 {
     private SteamUserInfo SteamUserInfo { set; get; }
-
     private NormalServer NormalServer { set; get; }
     private NormalClient NormalClient { set; get; }
     private RelayServer RelayServer { set; get; }
