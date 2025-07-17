@@ -8,6 +8,7 @@ namespace Godot;
 public partial class NormalClient : SteamSocket
 {
     public ConnectionManager? ConnectionManager { set; get; }
+    public MyConnectionManager? IConnectionManager { set; get; }
     private ushort Port { set; get; }
     private NetAddress NetAddress { set; get; }
 
@@ -15,6 +16,7 @@ public partial class NormalClient : SteamSocket
     {
         Port = port;
         NetAddress = NetAddress.LocalHost(Port);
+        SocketName = $"[NormalClient] {Port}";
     }
 
     public override void _Ready()
@@ -32,22 +34,22 @@ public partial class NormalClient : SteamSocket
     {
         try
         {
-            MyConnectionManager myConnectionManager = new(this);
-            ConnectionManager = SteamNetworkingSockets.ConnectNormal(NetAddress, myConnectionManager);
-            Log.Info($"创建 normal client :{NetAddress}");
+            IConnectionManager = new(this);
+            ConnectionManager = SteamNetworkingSockets.ConnectNormal(NetAddress, IConnectionManager);
+            Log.Info($"{SocketName} => 创建");
         }
         catch (Exception e)
         {
-            Log.Error($"创建 normal client :{NetAddress} 异常, {e.Message}");
+            Log.Error($"{SocketName} => 创建异常, {e.Message}");
         }
     }
 
     public void Send(string content, SendType sendType = SendType.Reliable)
     {
-        if (ConnectionManager is { Connected: true })
+        if (!string.IsNullOrEmpty(content) && ConnectionManager is { Connected: true })
         {
             var result = ConnectionManager.Connection.SendMessage(content, sendType);
-            Log.Info($"normal client 向 {ConnectionManager.Connection.ConnectionName} 发送消息 {result}");
+            Log.Info($"{SocketName} => 向 {ConnectionManager.ConnectionInfo.Identity} 发送消息 {result}");
         }
     }
 
@@ -55,7 +57,8 @@ public partial class NormalClient : SteamSocket
     {
         ConnectionManager?.Close();
         ConnectionManager = null;
+        IConnectionManager = null;
         SetProcess(false);
-        Log.Info($"关闭 normal client");
+        Log.Info($"{SocketName} => 关闭");
     }
 }

@@ -10,6 +10,7 @@ public partial class NormalServer : SteamSocket
 {
     public bool Started { set; get; }
     public SocketManager? SocketManager { set; get; }
+    public MySocketManager? ISocketManager { set; get; }
     private ushort Port { set; get; }
     public NetAddress NetAddress { set; get; }
 
@@ -17,6 +18,7 @@ public partial class NormalServer : SteamSocket
     {
         Port = port;
         NetAddress = NetAddress.AnyIp(Port);
+        SocketName = $"[NormalServer] {NetAddress}";
     }
 
     public override void _Ready()
@@ -33,28 +35,38 @@ public partial class NormalServer : SteamSocket
     {
         try
         {
-            MySocketManager mySocketManager = new(this);
-            SocketManager = SteamNetworkingSockets.CreateNormalSocket(NetAddress, mySocketManager);
+            ISocketManager = new(this);
+            SocketManager = SteamNetworkingSockets.CreateNormalSocket(NetAddress, ISocketManager);
             SetProcess(true);
-            Log.Info($"创建 normal server :{NetAddress} 成功");
+            Log.Info($"{SocketName} => 创建");
             Started = true;
         }
         catch (Exception e)
         {
-            Log.Error($"创建 normal server :{NetAddress} 异常, {e.Message}");
+            Log.Error($"{SocketName} => 创建异常, {e.Message}");
             Started = false;
         }
     }
 
     public void Send(string content, SendType sendType = SendType.Reliable)
     {
-        if (SocketManager != null && Started)
+        if (!string.IsNullOrEmpty(content) && SocketManager != null && Started)
         {
             foreach (var connection in SocketManager.Connected)
             {
                 var result = connection.SendMessage(content, sendType);
-                Log.Info($"normal server :{NetAddress} 向 {connection.ConnectionName} 发送消息 {result}");
+                Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {result}");
             }
+        }
+    }
+
+    public void Send(SteamId steamId, string content, SendType sendType = SendType.Reliable)
+    {
+        if (!string.IsNullOrEmpty(content) && SocketManager != null && Started && ISocketManager != null)
+        {
+            var connection = ISocketManager.Connections.FirstOrDefault(kv => steamId == kv.Value.Id).Key;
+            var result = connection.SendMessage(content, sendType);
+            Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {result}");
         }
     }
 
@@ -63,7 +75,8 @@ public partial class NormalServer : SteamSocket
         SocketManager?.Close();
         SetProcess(false);
         SocketManager = null;
-        Log.Info($"关闭 normal server :{NetAddress}");
+        ISocketManager = null;
+        Log.Info($"{SocketName} => 关闭");
         Started = false;
     }
 }

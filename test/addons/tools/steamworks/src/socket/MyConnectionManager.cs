@@ -37,7 +37,7 @@ public class MyConnectionManager : IConnectionManager
                 if (SFriends.Friends.TryGetValue(info.Identity.SteamId, out var friend))
                 {
                     Friend = friend;
-                    Log.Info($"{Name} 已连接 {Friend.Id},{Friend.Name}");
+                    Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 连接成功");
                     SteamSocket.EmitSignal(SteamSocket.SignalName.Connected, info.Identity.SteamId.Value);
                 }
             }
@@ -49,7 +49,8 @@ public class MyConnectionManager : IConnectionManager
         if (GodotObject.IsInstanceValid(SteamSocket))
         {
             SteamSocket.SetProcess(false);
-            Log.Info($"{Name} 与 {Friend.Id},{Friend.Name} 断开连接");
+            var friend = SFriends.Friends[info.Identity.SteamId];
+            Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 断开连接");
             SteamSocket.EmitSignal(SteamSocket.SignalName.Disconnected, info.Identity.SteamId.Value);
         }
     }
@@ -59,7 +60,7 @@ public class MyConnectionManager : IConnectionManager
         if (GodotObject.IsInstanceValid(SteamSocket))
         {
             var msg = Marshal.PtrToStringUTF8(data, size);
-            Log.Info($"{Name} 从 {Friend.Id},{Friend.Name} 收到信息 {msg}");
+            Log.Info($"{SteamSocket.SocketName} => 从 {Friend.Id},{Friend.Name} 收到信息 {msg}");
             SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, Friend.Id.Value, msg);
         }
     }

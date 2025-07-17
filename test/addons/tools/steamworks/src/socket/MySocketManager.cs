@@ -11,7 +11,7 @@ public class MySocketManager : ISocketManager
     private SteamSocket SteamSocket { set; get; }
     private string Name { set; get; }
 
-    public readonly Dictionary<Friend, List<Connection>> Connections = new();
+    public readonly Dictionary<Connection, Friend> Connections = new();
 
     public MySocketManager(SteamSocket steamSocket)
     {
@@ -29,15 +29,8 @@ public class MySocketManager : ISocketManager
         if (info.Identity.IsSteamId)
         {
             var friend = SFriends.Friends[info.Identity.SteamId];
-            if (Connections.TryGetValue(friend, out var connections))
-            {
-                connections.Add(connection);
-            }
-            else
-            {
-                Connections.Add(friend, new List<Connection> { connection });
-            }
-
+            Connections.TryAdd(connection, friend);
+            Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 连接成功");
             if (GodotObject.IsInstanceValid(SteamSocket))
             {
                 SteamSocket.EmitSignal(SteamSocket.SignalName.Connected, info.Identity.SteamId.Value);
@@ -50,10 +43,8 @@ public class MySocketManager : ISocketManager
         if (info.Identity.IsSteamId)
         {
             var friend = SFriends.Friends[info.Identity.SteamId];
-            if (Connections.TryGetValue(friend, out var connections))
-            {
-                connections.Remove(connection);
-            }
+            Connections.Remove(connection);
+            Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 断开连接");
 
             if (GodotObject.IsInstanceValid(SteamSocket))
             {
@@ -72,7 +63,7 @@ public class MySocketManager : ISocketManager
             {
                 var friend = SFriends.Friends[identity.SteamId];
                 var msg = Marshal.PtrToStringUTF8(data, size);
-                Log.Info($"{Name} 从 {friend.Id},{friend.Name} 收到信息 {msg}");
+                Log.Info($"{SteamSocket.SocketName} => 从 {friend.Id},{friend.Name} 收到信息 {msg}");
                 SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, identity.SteamId.Value, msg);
             }
         }

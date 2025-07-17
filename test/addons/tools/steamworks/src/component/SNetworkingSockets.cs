@@ -10,8 +10,6 @@ public partial class SNetworkingSockets : SteamComponent
     private static readonly Lazy<SNetworkingSockets> LazyInstance = new(() => new());
     public static SNetworkingSockets Instance => LazyInstance.Value;
 
-    public NetAddress? FakeIp { set; get; }
-
     private SNetworkingSockets()
     {
     }
@@ -20,18 +18,17 @@ public partial class SNetworkingSockets : SteamComponent
     public override void _Ready()
     {
         base._Ready();
-        if (SteamConfig.Debug)
-        {
-            SteamNetworkingSockets.OnConnectionStatusChanged += (c, ci) =>
-            {
-                Log.Info($"连接状态改变 {ci.Identity},{ci.Address},{ci.State},{ci.EndReason}");
-            };
-        }
+        // if (SteamConfig.Debug)
+        // {
+        //     SteamNetworkingSockets.OnConnectionStatusChanged += (c, ci) =>
+        //     {
+        //         Log.Info($"连接状态改变 {ci.Identity},{ci.Address},{ci.State},{ci.EndReason}");
+        //     };
+        // }
 
         SteamNetworkingSockets.OnFakeIPResult += (NetAddress na) =>
         {
             Log.Info($"steam fake ip 地址 {na}");
-            FakeIp = na;
         };
         SClient.Instance.SteamClientConnected += () => { SteamNetworkingUtils.InitRelayNetworkAccess(); };
         SteamManager.AddBeforeGameQuitAction(CloseAllSocket);

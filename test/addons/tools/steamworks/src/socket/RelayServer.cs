@@ -9,11 +9,13 @@ public partial class RelayServer : SteamSocket
 {
     public bool Started { set; get; }
     public SocketManager? SocketManager { set; get; }
+    public MySocketManager? ISocketManager { set; get; }
     private int Port { set; get; }
 
     public RelayServer(int port)
     {
         Port = port;
+        SocketName = $"[RelayServer] {Port}";
     }
 
     public override void _Ready()
@@ -30,28 +32,38 @@ public partial class RelayServer : SteamSocket
     {
         try
         {
-            MySocketManager mySocketManager = new(this);
-            SocketManager = SteamNetworkingSockets.CreateRelaySocket(Port, mySocketManager);
+            ISocketManager = new(this);
+            SocketManager = SteamNetworkingSockets.CreateRelaySocket(Port, ISocketManager);
             SetProcess(true);
-            Log.Info($"创建 relay server :port: {Port} 成功");
+            Log.Info($"{SocketName} => 创建");
             Started = true;
         }
         catch (Exception e)
         {
-            Log.Error($"创建 relay server :port: {Port} 异常, {e.Message}");
+            Log.Error($"{SocketName} => 创建异常, {e.Message}");
             Started = false;
         }
     }
 
     public void Send(string content, SendType sendType = SendType.Reliable)
     {
-        if (SocketManager != null && Started)
+        if (!string.IsNullOrEmpty(content) && SocketManager != null && Started)
         {
             foreach (var connection in SocketManager.Connected)
             {
                 var result = connection.SendMessage(content, sendType);
-                Log.Info($"relay server :port {Port} 向 {connection.ConnectionName} 发送消息 {result}");
+                Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {result}");
             }
+        }
+    }
+
+    public void Send(SteamId steamId, string content, SendType sendType = SendType.Reliable)
+    {
+        if (!string.IsNullOrEmpty(content) && SocketManager != null && Started && ISocketManager != null)
+        {
+            var connection = ISocketManager.Connections.FirstOrDefault(kv => steamId == kv.Value.Id).Key;
+            var result = connection.SendMessage(content, sendType);
+            Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {result}");
         }
     }
 
@@ -60,7 +72,8 @@ public partial class RelayServer : SteamSocket
         SocketManager?.Close();
         SetProcess(false);
         SocketManager = null;
-        Log.Info($"关闭 relay server :port {Port}");
+        ISocketManager = null;
+        Log.Info($"{SocketName} => 关闭");
         Started = false;
     }
 }

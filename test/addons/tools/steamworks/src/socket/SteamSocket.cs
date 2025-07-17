@@ -22,5 +22,10 @@ public abstract partial class SteamSocket : SteamComponent
     [Signal]
     public delegate void ReceiveMessageEventHandler(ulong steamId, string message);
 
+    /// <summary>
+    /// steam socket名字
+    /// </summary>
+    public string SocketName { set; get; }
+
     public abstract void Close();
 }
