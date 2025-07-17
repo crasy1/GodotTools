@@ -7,7 +7,7 @@ namespace Godot;
 
 public partial class NormalClient : SteamSocket
 {
-    private ConnectionManager? ConnectionManager { set; get; }
+    public ConnectionManager? ConnectionManager { set; get; }
     private ushort Port { set; get; }
     private NetAddress NetAddress { set; get; }
 
@@ -20,6 +20,7 @@ public partial class NormalClient : SteamSocket
     public override void _Ready()
     {
         base._Ready();
+        Disconnected += (id) => QueueFree();
     }
 
     public override void _Process(double delta)
@@ -56,13 +57,5 @@ public partial class NormalClient : SteamSocket
         ConnectionManager = null;
         SetProcess(false);
         Log.Info($"关闭 normal client");
-    }
-
-    public override void _Notification(int what)
-    {
-        if (new[] { NotificationWMCloseRequest, NotificationPredelete }.Contains(what))
-        {
-            Close();
-        }
     }
 }

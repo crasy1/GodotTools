@@ -9,7 +9,7 @@ namespace Godot;
 public partial class NormalServer : SteamSocket
 {
     public bool Started { set; get; }
-    private SocketManager? SocketManager { set; get; }
+    public SocketManager? SocketManager { set; get; }
     private ushort Port { set; get; }
     public NetAddress NetAddress { set; get; }
 
@@ -65,13 +65,5 @@ public partial class NormalServer : SteamSocket
         SocketManager = null;
         Log.Info($"关闭 normal server :{NetAddress}");
         Started = false;
-    }
-
-    public override void _Notification(int what)
-    {
-        if (new[] { NotificationPredelete }.Contains(what))
-        {
-            Close();
-        }
     }
 }

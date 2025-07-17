@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bye4e4xpr5t3u"]
 
-[ext_resource type="Script" uid="uid://ccqi08rgf2hb8" path="res://addons/steamworks/test/SteamTest.cs" id="1_t73qi"]
+[ext_resource type="Script" uid="uid://dpfa7etnmpql3" path="res://addons/steamworks/test/SteamTest.cs" id="1_t73qi"]
 
 [node name="SteamTest" type="Node2D"]
 script = ExtResource("1_t73qi")
@@ -121,6 +121,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="NormalServerConnections" type="FlowContainer" parent="CanvasLayer/HBoxContainer/NormalS"]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="NormalC" type="VBoxContainer" parent="CanvasLayer/HBoxContainer"]
 layout_mode = 2
 
@@ -188,6 +192,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="NormalClientConnections" type="FlowContainer" parent="CanvasLayer/HBoxContainer/NormalC"]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="RelayS" type="VBoxContainer" parent="CanvasLayer/HBoxContainer"]
 layout_mode = 2
 
@@ -254,6 +262,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="RelayServerConnections" type="FlowContainer" parent="CanvasLayer/HBoxContainer/RelayS"]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="RelayC" type="VBoxContainer" parent="CanvasLayer/HBoxContainer"]
 layout_mode = 2
 
@@ -315,8 +327,12 @@ text = "发送"
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 
-[node name="NormalRelayReceiveText" type="RichTextLabel" parent="CanvasLayer/HBoxContainer/RelayC/ScrollContainer"]
+[node name="RelayClientReceiveText" type="RichTextLabel" parent="CanvasLayer/HBoxContainer/RelayC/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="RelayClientConnections" type="FlowContainer" parent="CanvasLayer/HBoxContainer/RelayC"]
+unique_name_in_owner = true
+layout_mode = 2

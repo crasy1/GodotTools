@@ -8,7 +8,7 @@ namespace Godot;
 public partial class RelayServer : SteamSocket
 {
     public bool Started { set; get; }
-    private SocketManager? SocketManager { set; get; }
+    public SocketManager? SocketManager { set; get; }
     private int Port { set; get; }
 
     public RelayServer(int port)
@@ -62,13 +62,5 @@ public partial class RelayServer : SteamSocket
         SocketManager = null;
         Log.Info($"关闭 relay server :port {Port}");
         Started = false;
-    }
-
-    public override void _Notification(int what)
-    {
-        if (new[] { NotificationPredelete }.Contains(what))
-        {
-            Close();
-        }
     }
 }

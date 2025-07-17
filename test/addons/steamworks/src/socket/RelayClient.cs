@@ -7,7 +7,7 @@ namespace Godot;
 
 public partial class RelayClient : SteamSocket
 {
-    private ConnectionManager? ConnectionManager { set; get; }
+    public ConnectionManager? ConnectionManager { set; get; }
     private int Port { set; get; }
     private SteamId ServerId { set; get; }
 
@@ -20,6 +20,7 @@ public partial class RelayClient : SteamSocket
     public override void _Ready()
     {
         base._Ready();
+        Disconnected += (id) => QueueFree();
     }
 
     public override void _Process(double delta)
@@ -56,13 +57,5 @@ public partial class RelayClient : SteamSocket
         ConnectionManager?.Close();
         ConnectionManager = null;
         Log.Info($"关闭 relay client");
-    }
-
-    public override void _Notification(int what)
-    {
-        if (NotificationPredelete == what)
-        {
-            Close();
-        }
     }
 }

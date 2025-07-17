@@ -37,6 +37,11 @@ public class MySocketManager : ISocketManager
             {
                 Connections.Add(friend, new List<Connection> { connection });
             }
+
+            if (GodotObject.IsInstanceValid(SteamSocket))
+            {
+                SteamSocket.EmitSignal(SteamSocket.SignalName.Connected, info.Identity.SteamId.Value);
+            }
         }
     }
 
@@ -48,6 +53,11 @@ public class MySocketManager : ISocketManager
             if (Connections.TryGetValue(friend, out var connections))
             {
                 connections.Remove(connection);
+            }
+
+            if (GodotObject.IsInstanceValid(SteamSocket))
+            {
+                SteamSocket.EmitSignal(SteamSocket.SignalName.Disconnected, info.Identity.SteamId.Value);
             }
         }
     }

@@ -36,29 +36,66 @@ public partial class SteamTest : Node2D
         // NormalServerIp,NormalServerPort,NormalServerText,NormalServerReceiveText
         CreateNormalServer.Pressed += () =>
         {
+            NormalServer?.Close();
             NormalServer = SNetworkingSockets.CreateNormal((ushort)NormalServerPort.Value);
             NormalServer.Create();
             NormalServerIp.Text = NormalServer.NetAddress.Address.ToString();
             NormalServerPort.Value = NormalServer.NetAddress.Port;
+            NormalServer.ReceiveMessage += (id, msg) => { NormalServerReceiveText.AddText($"{id}:{msg} \r\n"); };
+            NormalServer.Connected += (id) =>
+            {
+                NormalServerReceiveText.AddText($"已连接：{id} \r\n");
+                NormalServerConnections.AddChild(SteamUserInfo.Instantiate(SFriends.Friends[id]));
+            };
+            NormalServer.Disconnected += (id) =>
+            {
+                NormalServerReceiveText.AddText($"已断开连接：{id} \r\n");
+                foreach (var steamUserInfo in NormalServerConnections.GetChildren<SteamUserInfo>())
+                {
+                    if (steamUserInfo.Friend.Id == id)
+                    {
+                        steamUserInfo.QueueFree();
+                        NormalServerConnections.RemoveChild(steamUserInfo);
+                    }
+                }
+            };
         };
         CloseNormalServer.Pressed += () =>
         {
-            NormalServer?.QueueFree();
+            NormalServer?.Close();
             NormalServer = null;
         };
         SendToClientNormal.Pressed += () => { NormalServer?.Send(NormalServerText.Text); };
         // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
         ConnectNormalClient.Pressed += () =>
         {
-            NormalClient?.QueueFree();
-            NormalClient = null;
+            NormalClient?.Close();
             var host = NormalIp.Text;
             NormalClient = SNetworkingSockets.ConnectNormal((ushort)NormalPort.Value);
+            NormalClient.ReceiveMessage += (id, msg) => { NormalClientReceiveText.AddText($"{id}:{msg} \r\n"); };
+            NormalClient.Connected += (id) =>
+            {
+                NormalClientReceiveText.AddText($"已连接：{id} \r\n");
+                NormalClientConnections.AddChild(SteamUserInfo.Instantiate(SFriends.Friends[id]));
+            };
+            NormalClient.Disconnected += (id) =>
+            {
+                NormalClient = null;
+                NormalClientReceiveText.AddText($"已断开连接：{id} \r\n");
+                foreach (var steamUserInfo in NormalClientConnections.GetChildren<SteamUserInfo>())
+                {
+                    if (steamUserInfo.Friend.Id == id)
+                    {
+                        steamUserInfo.QueueFree();
+                        NormalClientConnections.RemoveChild(steamUserInfo);
+                    }
+                }
+            };
             NormalClient.Connect();
         };
         DisconnectNormalClient.Pressed += () =>
         {
-            NormalClient?.QueueFree();
+            NormalClient?.Close();
             NormalClient = null;
         };
         SendToNormalServer.Pressed += () => { NormalClient?.Send(NormalClientText.Text); };
@@ -66,29 +103,66 @@ public partial class SteamTest : Node2D
         // RelayServerIp,RelayServerPort,RelayServerText,RelayServerReceiveText
         CreateRelayServer.Pressed += () =>
         {
+            RelayServer?.Close();
             RelayServer = SNetworkingSockets.CreateRelay((int)RelayServerPort.Value);
+            RelayServer.ReceiveMessage += (id, msg) => { RelayServerReceiveText.AddText($"{id}:{msg} \r\n"); };
+            RelayServer.Connected += (id) =>
+            {
+                RelayServerReceiveText.AddText($"已连接：{id} \r\n");
+                RelayServerConnections.AddChild(SteamUserInfo.Instantiate(SFriends.Friends[id]));
+            };
+            RelayServer.Disconnected += (id) =>
+            {
+                RelayServerReceiveText.AddText($"已断开连接：{id} \r\n");
+                foreach (var steamUserInfo in RelayServerConnections.GetChildren<SteamUserInfo>())
+                {
+                    if (steamUserInfo.Friend.Id == id)
+                    {
+                        steamUserInfo.QueueFree();
+                        RelayServerConnections.RemoveChild(steamUserInfo);
+                    }
+                }
+            };
             RelayServer.Create();
         };
         CloseRelayServer.Pressed += () =>
         {
-            RelayServer?.QueueFree();
+            RelayServer?.Close();
             RelayServer = null;
         };
         SendToClientRelay.Pressed += () => { RelayServer?.Send(RelayServerText.Text); };
         // RelayIp,RelayPort,RelayClientText,RelayClientReceiveText
         ConnectRelayClient.Pressed += () =>
         {
-            RelayClient?.QueueFree();
-            RelayClient = null;
+            RelayClient?.Close();
             var host = RelayIp.Text;
             var port = (ushort)RelayPort.Value;
             // RelayClient = SNetworkingSockets.ConnectRelay(SteamUserInfo.Friend.Id, port);
             RelayClient = SNetworkingSockets.ConnectRelay(SteamClient.SteamId, port);
+            RelayClient.ReceiveMessage += (id, msg) => { RelayClientReceiveText.AddText($"{id}:{msg} \r\n"); };
+            RelayClient.Connected += (id) =>
+            {
+                RelayClientReceiveText.AddText($"已连接：{id} \r\n");
+                RelayClientConnections.AddChild(SteamUserInfo.Instantiate(SFriends.Friends[id]));
+            };
+            RelayClient.Disconnected += (id) =>
+            {
+                RelayClient = null;
+                RelayClientReceiveText.AddText($"已断开连接：{id} \r\n");
+                foreach (var steamUserInfo in RelayClientConnections.GetChildren<SteamUserInfo>())
+                {
+                    if (steamUserInfo.Friend.Id == id)
+                    {
+                        steamUserInfo.QueueFree();
+                        RelayClientConnections.RemoveChild(steamUserInfo);
+                    }
+                }
+            };
             RelayClient.Connect();
         };
         DisconnectRelayClient.Pressed += () =>
         {
-            RelayClient?.QueueFree();
+            RelayClient?.Close();
             RelayClient = null;
         };
         SendToRelayServer.Pressed += () => { RelayClient?.Send(RelayClientText.Text); };
