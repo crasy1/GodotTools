@@ -6,4 +6,7 @@
   <ItemGroup>
     <PackageReference Include="godottools" Version="0.0.2" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="addons\tools\plugin.cfg" />
+  </ItemGroup>
 </Project>

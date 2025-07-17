@@ -7,7 +7,7 @@ public static class SteamConfig
     private static Lazy<Resource> _instance = new(() => ResourceLoader.Load(SteamworksConfigPath));
     public static Resource Instance => _instance.Value;
 
-    private const string SteamworksConfigPath = "res://addons/steamworks/src/SteamConfig.tres";
+    private const string SteamworksConfigPath = "res://addons/tools/steamworks/src/SteamConfig.tres";
 
     public static uint AppId
     {

@@ -1,24 +1,21 @@
 #if TOOLS
 using System;
+
 namespace Godot;
 
 [Tool]
 public partial class SteamworksPlugin : EditorPlugin
 {
     private static readonly CompressedTexture2D SteamIcon =
-        GD.Load<CompressedTexture2D>("res://addons/steamworks/assets/steam_icon.png");
+        GD.Load<CompressedTexture2D>("res://addons/tools/steamworks/assets/steam_icon.png");
 
-    private static readonly PackedScene SteamworksEditorScene =
-        GD.Load<PackedScene>("res://addons/steamworks/src/SteamworksEditor.tscn");
-
-    private const string SteamManagerPath = "res://addons/steamworks/src/SteamManager.tscn";
-    private const string PluginName = "Steamworks";
+    private const string PluginName = "steamworks";
     private SteamworksEditor SteamworksEditor { set; get; }
 
     public override void _EnterTree()
     {
-        SteamworksEditor = SteamworksEditorScene.Instantiate<SteamworksEditor>();
-        AddAutoloadSingleton(nameof(SteamManager), SteamManagerPath);
+        SteamworksEditor = GD.Load<PackedScene>(SteamworksEditor.TscnFilePath).Instantiate<SteamworksEditor>();
+        AddAutoloadSingleton(nameof(SteamManager), SteamManager.TscnFilePath);
         EditorInterface.Singleton.GetEditorMainScreen().AddChild(SteamworksEditor);
         _MakeVisible(false);
     }

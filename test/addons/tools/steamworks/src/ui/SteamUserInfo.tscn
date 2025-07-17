@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d0hb1ajrndvu5"]
 
-[ext_resource type="Script" uid="uid://djh7ogj1qv2v7" path="res://addons/steamworks/src/ui/SteamUserInfo.cs" id="1_mdhxx"]
+[ext_resource type="Script" uid="uid://djh7ogj1qv2v7" path="res://addons/tools/steamworks/src/ui/SteamUserInfo.cs" id="1_mdhxx"]
 
 [node name="SteamUserInfo" type="Control"]
 custom_minimum_size = Vector2(300, 100)

@@ -3,7 +3,6 @@ namespace Godot;
 public static class SteamUtil
 {
     private const string PathEnv = "PATH";
-    private const string LibDir = "res://addons/steamworks/assets/lib";
 
     /// <summary>
     /// 
@@ -12,7 +11,7 @@ public static class SteamUtil
     /// 
     /// </summary>
     /// <returns>初始化是否成功</returns>
-    public static bool InitEnvironment()
+    public static bool InitEnvironment(string libDir="res://addons/tools/steamworks/assets/lib")
     {
         var is64Bit = System.Environment.Is64BitOperatingSystem;
         var pathVariable = System.Environment.GetEnvironmentVariable(PathEnv);
@@ -25,11 +24,11 @@ public static class SteamUtil
         {
             case PlatformName.Windows:
                 libName = is64Bit ? "steam_api64.dll" : "steam_api.dll";
-                resourceName = Path.Combine(LibDir, (is64Bit ? "win64" : "win32"), libName);
+                resourceName = Path.Combine(libDir, (is64Bit ? "win64" : "win32"), libName);
                 break;
             case PlatformName.MacOS:
                 libName = "libsteam_api.dylib";
-                resourceName = Path.Combine(LibDir, "osx", libName);
+                resourceName = Path.Combine(libDir, "osx", libName);
                 break;
             case PlatformName.Linux:
             case PlatformName.FreeBSD:
@@ -37,7 +36,7 @@ public static class SteamUtil
             case PlatformName.OpenBSD:
             case PlatformName.BSD:
                 libName = "libsteam_api.so";
-                resourceName = Path.Combine(LibDir, (is64Bit ? "linux64" : "linux32"), libName);
+                resourceName = Path.Combine(libDir, (is64Bit ? "linux64" : "linux32"), libName);
                 break;
             case PlatformName.Android:
             case PlatformName.IOS:

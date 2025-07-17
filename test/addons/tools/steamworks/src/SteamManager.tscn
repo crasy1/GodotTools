@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c2amw4dllr24x"]
 
-[ext_resource type="Script" uid="uid://jf51hkbbrpyv" path="res://addons/steamworks/src/SteamManager.cs" id="1_epupd"]
+[ext_resource type="Script" uid="uid://jf51hkbbrpyv" path="res://addons/tools/steamworks/src/SteamManager.cs" id="1_epupd"]
 
 [node name="SteamManager" type="CanvasLayer"]
 layer = 100
