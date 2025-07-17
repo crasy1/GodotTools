@@ -17,14 +17,17 @@ public partial class NormalClient : SteamSocket
 
     public NormalClient(string host, ushort port)
     {
-        if (string.IsNullOrWhiteSpace(host))
-        {
-            host = "0.0.0.0";
-        }
-
         Host = host;
         Port = port;
-        NetAddress = NetAddress.From(Host, Port);
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            NetAddress = NetAddress.LocalHost(Port);
+        }
+        else
+        {
+            NetAddress = NetAddress.From(Host, Port);
+        }
+
         SocketName = $"[NormalClient] {NetAddress}";
     }
 
