@@ -15,9 +15,9 @@ public partial class SteamTest : Node2D
     public override void _Ready()
     {
         base._Ready();
-        SNetworking.ReceiveData += (steamId, data) =>
+        SNetworking.Instance.ReceiveMessage += (steamId, data) =>
         {
-            Log.Info($"收到信息时间：{Time.GetUnixTimeFromSystem()}");
+            Log.Info($"从 {steamId} 收到P2P消息 {data}");
             P2PReceiveText.AppendText(data);
         };
 
@@ -30,8 +30,6 @@ public partial class SteamTest : Node2D
             }
 
             SNetworking.SendP2P(SteamUserInfo.Friend.Id, P2PText.Text);
-            Log.Info($"发送信息时间：{Time.GetUnixTimeFromSystem()}");
-            // SendText.Text = "";
         };
         // NormalServerIp,NormalServerPort,NormalServerText,NormalServerReceiveText
         CreateNormalServer.Pressed += () =>
@@ -39,7 +37,6 @@ public partial class SteamTest : Node2D
             NormalServer?.Close();
             NormalServer = SNetworkingSockets.CreateNormal((ushort)NormalServerPort.Value);
             NormalServer.Create();
-            NormalServerIp.Text = NormalServer.NetAddress.Address.ToString();
             NormalServerPort.Value = NormalServer.NetAddress.Port;
             NormalServer.ReceiveMessage += (id, msg) => { NormalServerReceiveText.AddText($"{id}:{msg} \r\n"); };
             NormalServer.Connected += (id) =>
@@ -83,7 +80,7 @@ public partial class SteamTest : Node2D
         {
             NormalClient?.Close();
             var host = NormalIp.Text;
-            NormalClient = SNetworkingSockets.ConnectNormal((ushort)NormalPort.Value);
+            NormalClient = SNetworkingSockets.ConnectNormal(host, (ushort)NormalPort.Value);
             NormalClient.ReceiveMessage += (id, msg) => { NormalClientReceiveText.AddText($"{id}:{msg} \r\n"); };
             NormalClient.Connected += (id) =>
             {
@@ -159,11 +156,9 @@ public partial class SteamTest : Node2D
         ConnectRelayClient.Pressed += () =>
         {
             RelayClient?.Close();
-            var host = RelayIp.Text;
             var port = (ushort)RelayPort.Value;
-            // RelayClient = SNetworkingSockets.ConnectRelay(SteamUserInfo.Friend.Id, port);
-            RelayClient = SNetworkingSockets.ConnectRelay(SteamClient.SteamId, port);
-            RelayClient.ReceiveMessage += (id, msg) => { RelayClientReceiveText.AddText($"{id}:{msg} \r\n"); };
+            RelayClient = SNetworkingSockets.ConnectRelay(SteamUserInfo.Friend.Id, port);
+            RelayClient.ReceiveMessage += (id, msg) => { };
             RelayClient.Connected += (id) =>
             {
                 RelayClientReceiveText.AddText($"已连接：{id} \r\n");
@@ -195,6 +190,7 @@ public partial class SteamTest : Node2D
     public void ShowFriends()
     {
         Friends.ClearAndFreeChildren();
+        Friends.AddChild(SteamUserInfo.Instantiate(SFriends.Me));
         foreach (var friend in SteamFriends.GetFriends())
         {
             if (friend.IsOnline)

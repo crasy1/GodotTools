@@ -49,9 +49,11 @@ public class MyConnectionManager : IConnectionManager
         if (GodotObject.IsInstanceValid(SteamSocket))
         {
             SteamSocket.SetProcess(false);
-            var friend = SFriends.Friends[info.Identity.SteamId];
-            Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 断开连接");
-            SteamSocket.EmitSignal(SteamSocket.SignalName.Disconnected, info.Identity.SteamId.Value);
+            if (SFriends.Friends.TryGetValue(info.Identity.SteamId, out var friend))
+            {
+                Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 断开连接");
+                SteamSocket.EmitSignal(SteamSocket.SignalName.Disconnected, info.Identity.SteamId.Value);
+            }
         }
     }
 

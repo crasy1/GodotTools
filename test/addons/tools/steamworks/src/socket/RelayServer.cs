@@ -4,7 +4,9 @@ using Steamworks;
 using Steamworks.Data;
 
 namespace Godot;
-
+/// <summary>
+/// 通过friend steamId 连接，走steam中继网络，延迟较高
+/// </summary>
 public partial class RelayServer : SteamSocket
 {
     public bool Started { set; get; }

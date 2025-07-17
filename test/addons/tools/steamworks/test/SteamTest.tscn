@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bye4e4xpr5t3u"]
 
-[ext_resource type="Script" uid="uid://dpfa7etnmpql3" path="res://addons/tools/steamworks/test/SteamTest.cs" id="1_t73qi"]
+[ext_resource type="Script" uid="uid://bflvy26n4prxh" path="res://addons/tools/steamworks/test/SteamTest.cs" id="1_t73qi"]
 
 [node name="SteamTest" type="Node2D"]
 script = ExtResource("1_t73qi")
@@ -62,30 +62,17 @@ layout_mode = 2
 layout_mode = 2
 text = "SteamNetworkingSockets Normal Server"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/NormalS"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/NormalS/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 2
-text = "服务器IP:"
-
-[node name="NormalServerIp" type="Label" parent="CanvasLayer/HBoxContainer/NormalS/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 2
-
-[node name="NormalServerPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/NormalS/HBoxContainer"]
+[node name="NormalServerPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/NormalS"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
 size_flags_vertical = 4
 min_value = 10000.0
 max_value = 65535.0
 value = 10000.0
 rounded = true
-prefix = "端口"
+prefix = "端口：          "
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/NormalS"]
 layout_mode = 2
@@ -135,28 +122,23 @@ text = "SteamNetworkingSockets Normal Client"
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/NormalC"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/NormalC/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 6
-text = "IP:"
-
 [node name="NormalIp" type="TextEdit" parent="CanvasLayer/HBoxContainer/NormalC/HBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 40)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-size_flags_horizontal = 6
+size_flags_horizontal = 3
 placeholder_text = "目标ip"
 
 [node name="NormalPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/NormalC/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
-size_flags_horizontal = 6
+size_flags_horizontal = 3
 min_value = 10000.0
 max_value = 65535.0
 value = 10000.0
 rounded = true
-prefix = "port:"
+prefix = "端口:   "
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/NormalC"]
 layout_mode = 2
@@ -203,30 +185,17 @@ layout_mode = 2
 layout_mode = 2
 text = "SteamNetworkingSockets Relay Server"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/RelayS"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/RelayS/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 2
-text = "服务器IP:"
-
-[node name="RelayServerIp" type="Label" parent="CanvasLayer/HBoxContainer/RelayS/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 2
-
-[node name="RelayServerPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/RelayS/HBoxContainer"]
+[node name="RelayServerPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/RelayS"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
 size_flags_vertical = 4
 min_value = 20000.0
 max_value = 65535.0
 value = 20000.0
 rounded = true
-prefix = "端口"
+prefix = "端口：          "
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/RelayS"]
 layout_mode = 2
@@ -273,31 +242,16 @@ layout_mode = 2
 layout_mode = 2
 text = "SteamNetworkingSockets Normal Client"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/RelayC"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/RelayC/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 6
-text = "IP:"
-
-[node name="RelayIp" type="TextEdit" parent="CanvasLayer/HBoxContainer/RelayC/HBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 40)
-layout_mode = 2
-size_flags_horizontal = 6
-placeholder_text = "目标ip"
-
-[node name="RelayPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/RelayC/HBoxContainer"]
+[node name="RelayPort" type="SpinBox" parent="CanvasLayer/HBoxContainer/RelayC"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
-size_flags_horizontal = 6
+size_flags_horizontal = 3
 min_value = 20000.0
 max_value = 65535.0
 value = 20000.0
 rounded = true
-prefix = "port:"
+prefix = "端口:          "
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="CanvasLayer/HBoxContainer/RelayC"]
 layout_mode = 2

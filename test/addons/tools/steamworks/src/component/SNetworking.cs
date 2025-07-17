@@ -9,7 +9,8 @@ public partial class SNetworking : SteamComponent
     private static readonly Lazy<SNetworking> LazyInstance = new(() => new());
     public static SNetworking Instance => LazyInstance.Value;
 
-    public static event Action<SteamId, string> ReceiveData;
+    [Signal]
+    public delegate void ReceiveMessageEventHandler(ulong steamId, string content);
 
     private SNetworking()
     {
@@ -38,7 +39,7 @@ public partial class SNetworking : SteamComponent
                 var steamId = readP2PPacket.Value.SteamId;
                 var data = Encoding.UTF8.GetString(readP2PPacket.Value.Data);
                 Log.Info($"p2p从 {steamId} 收到数据 ,{data}");
-                ReceiveData?.Invoke(steamId, data);
+                EmitSignalReceiveMessage(steamId, data);
             }
         }
     }

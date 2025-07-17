@@ -26,10 +26,7 @@ public partial class SNetworkingSockets : SteamComponent
         //     };
         // }
 
-        SteamNetworkingSockets.OnFakeIPResult += (NetAddress na) =>
-        {
-            Log.Info($"steam fake ip 地址 {na}");
-        };
+        SteamNetworkingSockets.OnFakeIPResult += (NetAddress na) => { Log.Info($"steam fake ip 地址 {na}"); };
         SClient.Instance.SteamClientConnected += () => { SteamNetworkingUtils.InitRelayNetworkAccess(); };
         SteamManager.AddBeforeGameQuitAction(CloseAllSocket);
     }
@@ -58,9 +55,9 @@ public partial class SNetworkingSockets : SteamComponent
         return normalServer;
     }
 
-    public static NormalClient ConnectNormal(ushort port)
+    public static NormalClient ConnectNormal(string host, ushort port)
     {
-        var normalClient = new NormalClient(port);
+        var normalClient = new NormalClient(host, port);
         Instance.AddChild(normalClient);
         return normalClient;
     }

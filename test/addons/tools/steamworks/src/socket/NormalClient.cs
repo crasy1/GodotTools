@@ -1,22 +1,31 @@
 using System;
-using System.Linq;
 using Steamworks;
 using Steamworks.Data;
 
 namespace Godot;
 
+/// <summary>
+/// 和普通socket一样通过host ip连接
+/// </summary>
 public partial class NormalClient : SteamSocket
 {
     public ConnectionManager? ConnectionManager { set; get; }
     public MyConnectionManager? IConnectionManager { set; get; }
+    private string Host { set; get; }
     private ushort Port { set; get; }
     private NetAddress NetAddress { set; get; }
 
-    public NormalClient(ushort port)
+    public NormalClient(string host, ushort port)
     {
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            host = "0.0.0.0";
+        }
+
+        Host = host;
         Port = port;
-        NetAddress = NetAddress.LocalHost(Port);
-        SocketName = $"[NormalClient] {Port}";
+        NetAddress = NetAddress.From(Host, Port);
+        SocketName = $"[NormalClient] {NetAddress}";
     }
 
     public override void _Ready()

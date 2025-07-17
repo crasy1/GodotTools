@@ -5,7 +5,9 @@ using Steamworks;
 using Steamworks.Data;
 
 namespace Godot;
-
+/// <summary>
+/// 和普通socket一样通过host ip连接
+/// </summary>
 public partial class NormalServer : SteamSocket
 {
     public bool Started { set; get; }
