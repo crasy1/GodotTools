@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Godot;
@@ -8,6 +9,12 @@ using Range = Godot.Range;
 [SceneTree]
 public partial class ConfigUi : CanvasLayer
 {
+    private static Lazy<ConfigUi> LazyInstance = new(() => new());
+    public static ConfigUi Instance => LazyInstance.Value;
+    private ConfigUi()
+    {
+    }
+
     [Export] public Key UiOptionsKey = Key.Escape;
 
     public const string UiOptionsAction = "ui_options_action";

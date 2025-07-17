@@ -4,6 +4,13 @@ using Godot;
 [SceneTree]
 public partial class SceneManager : CanvasLayer
 {
+    private static Lazy<SceneManager> LazyInstance = new(() => new());
+    public static SceneManager Instance => LazyInstance.Value;
+
+    private SceneManager()
+    {
+    }
+
     [Signal]
     public delegate void SceneChangedEventHandler();
 
@@ -49,13 +56,13 @@ public partial class SceneManager : CanvasLayer
         SceneTree.Paused = false;
     }
 
-   /// <summary>
-   /// 简单转场效果
-   /// </summary>
-   /// <param name="action"></param>
-   /// <param name="tips"></param>
-   /// <param name="duration"></param>
-   /// <param name="showTip"></param>
+    /// <summary>
+    /// 简单转场效果
+    /// </summary>
+    /// <param name="action"></param>
+    /// <param name="tips"></param>
+    /// <param name="duration"></param>
+    /// <param name="showTip"></param>
     public async void SimpleColorChange(Action action, string tips = null, double duration = 0.4, bool showTip = true)
     {
         StopBgm();
