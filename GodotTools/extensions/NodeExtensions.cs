@@ -60,6 +60,34 @@ public static class NodeExtensions
         }
     }
 
+    /// <summary>
+    /// 移除释放子节点
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="child"></param>
+    public static void RemoveAndQueueFreeChild(this Node node, Node child)
+    {
+        if (GodotObject.IsInstanceValid(child))
+        {
+            node.RemoveChild(child);
+            child.QueueFree();
+        }
+    }
+
+    /// <summary>
+    /// 移除释放该节点
+    /// </summary>
+    /// <param name="node"></param>
+    public static void RemoveAndQueueFree(this Node node)
+    {
+        var parent = node.GetParent();
+        if (GodotObject.IsInstanceValid(parent))
+        {
+            parent.RemoveChild(node);
+            node.QueueFree();
+        }
+    }
+
     public static Node? FirstChild(this Node n)
     {
         return n.GetChildCount() == 0 ? null : n.GetChild(0);

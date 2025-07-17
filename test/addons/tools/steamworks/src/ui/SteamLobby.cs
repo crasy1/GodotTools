@@ -92,7 +92,7 @@ public partial class SteamLobby : Control
     {
         var lobbyQuery = SteamMatchmaking.LobbyList.WithMaxResults(maxResult);
         lobbyQuery = lobbyQuery.WithSlotsAvailable(minSlots);
-        // lobbyQuery = lobbyQuery.WithKeyValue("version", ProjectSettings.GetSetting("config/version").AsString());
+        // lobbyQuery = lobbyQuery.WithKeyValue("version",Project.Version);
         var lobbies = await lobbyQuery.RequestAsync();
         return lobbies == null ? [] : lobbies.ToList();
     }

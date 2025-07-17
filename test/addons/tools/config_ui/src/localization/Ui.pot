@@ -1,0 +1,100 @@
+# LANGUAGE translation for Ui for the following files:
+# res://ui/Ui.tscn
+#
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Ui\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+
+#: ui/Ui.tscn
+msgid "Font Size"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Resolution"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Window Mode"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Language"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Vertical Sync"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Max FPS"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Game Speed"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Master Volume"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "BGM Volume"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "SFX Volume"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Full Screen"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Windowed"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Enable"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Disable"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Unlimited"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Game Settings"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Input Settings"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Reset to Default Settings"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Reset to Default Options"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Back To Main Menu"
+msgstr ""
+
+#: ui/Ui.tscn
+msgid "Back"
+msgstr ""
+
+msgid "Confirm"
+msgstr ""

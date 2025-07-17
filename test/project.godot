@@ -17,6 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+ConfigUi="*res://addons/tools/config_ui/src/ConfigUi.tscn"
+SceneManager="*res://addons/tools/manager/src/SceneManager.tscn"
 SteamManager="*res://addons/tools/steamworks/src/SteamManager.tscn"
 
 [display]
@@ -35,4 +37,4 @@ naming/script_name_casing=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/tools/plugin.cfg", "res://addons/tools/steamworks/plugin.cfg")
+enabled=PackedStringArray("res://addons/tools/config_ui/plugin.cfg", "res://addons/tools/manager/plugin.cfg", "res://addons/tools/plugin.cfg", "res://addons/tools/steamworks/plugin.cfg")

@@ -1,0 +1,294 @@
+[gd_resource type="Theme" load_steps=31 format=3 uid="uid://53dw3ok1uj1w"]
+
+[ext_resource type="Texture2D" uid="uid://bx0uuwkcvyp50" path="res://addons/tools/config_ui/src/assets/button/Button_Disable_3Slides.png" id="1_6j1fe"]
+[ext_resource type="Texture2D" uid="uid://bbs7kojibhh6w" path="res://addons/tools/config_ui/src/assets/button/Button_Hover_3Slides.png" id="2_ods53"]
+[ext_resource type="Texture2D" uid="uid://de0sns3b5815e" path="res://addons/tools/config_ui/src/assets/GUI_4x.png" id="3_owebv"]
+[ext_resource type="FontFile" uid="uid://cglq1s61wy6ep" path="res://addons/tools/config_ui/src/assets/SmileySans-Oblique.ttf" id="4_glwtt"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v3n8m"]
+texture = ExtResource("1_6j1fe")
+texture_margin_left = 30.4816
+texture_margin_top = 17.672
+texture_margin_right = 32.175
+texture_margin_bottom = 22.5383
+region_rect = Rect2(7, 4, 178, 52)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2op3b"]
+texture = ExtResource("2_ods53")
+texture_margin_left = 30.4816
+texture_margin_top = 17.672
+texture_margin_right = 32.175
+texture_margin_bottom = 22.5383
+region_rect = Rect2(7, 0, 178, 56)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fmly2"]
+texture = ExtResource("2_ods53")
+texture_margin_left = 30.4816
+texture_margin_top = 17.672
+texture_margin_right = 32.175
+texture_margin_bottom = 22.5383
+region_rect = Rect2(7, 0, 178, 56)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_hgcq3"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_phf8c"]
+texture = SubResource("CompressedTexture2D_hgcq3")
+texture_margin_left = 30.4816
+texture_margin_top = 17.672
+texture_margin_right = 32.175
+texture_margin_bottom = 22.5383
+region_rect = Rect2(7, 0, 178, 56)
+modulate_color = Color(0.783523, 0.783523, 0.783523, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ifytg"]
+texture = ExtResource("2_ods53")
+texture_margin_left = 30.4816
+texture_margin_top = 17.672
+texture_margin_right = 32.175
+texture_margin_bottom = 22.5383
+region_rect = Rect2(7, -6, 178, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1055y"]
+atlas = ExtResource("3_owebv")
+region = Rect2(8, 136, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rwf3p"]
+atlas = ExtResource("3_owebv")
+region = Rect2(8, 136, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1kpqf"]
+atlas = ExtResource("3_owebv")
+region = Rect2(128, 224, 36, 36)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_n342v"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kvfaw"]
+atlas = SubResource("CompressedTexture2D_n342v")
+region = Rect2(392, 200, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_a0ivj"]
+texture = SubResource("AtlasTexture_kvfaw")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+modulate_color = Color(0.784314, 0.784314, 0.784314, 1)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yrtj2"]
+atlas = ExtResource("3_owebv")
+region = Rect2(392, 200, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_n06gm"]
+texture = SubResource("AtlasTexture_yrtj2")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_80hlg"]
+atlas = ExtResource("3_owebv")
+region = Rect2(308, 148, 12, 12)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_74obf"]
+texture = SubResource("AtlasTexture_80hlg")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u81oj"]
+atlas = ExtResource("3_owebv")
+region = Rect2(480, 256, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_58k78"]
+atlas = ExtResource("3_owebv")
+region = Rect2(392, 200, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tull7"]
+texture = SubResource("AtlasTexture_58k78")
+texture_margin_left = 8.0
+texture_margin_top = 40.0
+texture_margin_right = 8.0
+texture_margin_bottom = 40.0
+region_rect = Rect2(0, 0, 48, 48)
+modulate_color = Color(0.784314, 0.784314, 0.784314, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_01wdo"]
+texture = SubResource("AtlasTexture_58k78")
+texture_margin_left = 8.0
+texture_margin_top = 40.0
+texture_margin_right = 8.0
+texture_margin_bottom = 40.0
+region_rect = Rect2(0, 0, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_oku02"]
+texture = SubResource("AtlasTexture_58k78")
+texture_margin_left = 8.0
+texture_margin_top = 40.0
+texture_margin_right = 8.0
+texture_margin_bottom = 40.0
+region_rect = Rect2(0, 0, 48, 48)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_nbjwt"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2mjii"]
+atlas = SubResource("CompressedTexture2D_nbjwt")
+region = Rect2(308, 148, 12, 12)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1cn1v"]
+texture = SubResource("AtlasTexture_2mjii")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+region_rect = Rect2(0, 0, 12, 12)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wrkmk"]
+texture = SubResource("AtlasTexture_2mjii")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+region_rect = Rect2(0, 0, 12, 12)
+
+[sub_resource type="FontVariation" id="FontVariation_44g30"]
+base_font = ExtResource("4_glwtt")
+
+[resource]
+default_font = SubResource("FontVariation_44g30")
+default_font_size = 40
+Button/styles/disabled = SubResource("StyleBoxTexture_v3n8m")
+Button/styles/focus = SubResource("StyleBoxTexture_2op3b")
+Button/styles/hover = SubResource("StyleBoxTexture_fmly2")
+Button/styles/normal = SubResource("StyleBoxTexture_phf8c")
+Button/styles/pressed = SubResource("StyleBoxTexture_ifytg")
+CheckBox/icons/checked = null
+CheckBox/icons/checked_disabled = null
+CheckBox/icons/radio_checked = null
+CheckBox/icons/radio_checked_disabled = null
+CheckBox/icons/radio_unchecked = null
+CheckBox/icons/radio_unchecked_disabled = null
+CheckBox/icons/unchecked = null
+CheckBox/icons/unchecked_disabled = null
+CheckButton/icons/checked = null
+CheckButton/icons/checked_disabled = null
+CheckButton/icons/checked_disabled_mirrored = null
+CheckButton/icons/checked_mirrored = null
+CheckButton/icons/unchecked = null
+CheckButton/icons/unchecked_disabled = null
+CheckButton/icons/unchecked_disabled_mirrored = null
+CheckButton/icons/unchecked_mirrored = null
+CodeEdit/icons/bookmark = null
+CodeEdit/icons/breakpoint = null
+CodeEdit/icons/can_fold = null
+CodeEdit/icons/can_fold_code_region = null
+CodeEdit/icons/executing_line = null
+CodeEdit/icons/folded = null
+CodeEdit/icons/folded_code_region = null
+CodeEdit/icons/folded_eol_icon = null
+CodeEdit/icons/space = null
+CodeEdit/icons/tab = null
+ColorPicker/icons/add_preset = null
+ColorPicker/icons/bar_arrow = null
+ColorPicker/icons/color_hue = null
+ColorPicker/icons/color_okhsl_hue = null
+ColorPicker/icons/expanded_arrow = null
+ColorPicker/icons/folded_arrow = null
+ColorPicker/icons/overbright_indicator = null
+ColorPicker/icons/picker_cursor = null
+ColorPicker/icons/sample_bg = null
+ColorPicker/icons/screen_picker = null
+ColorPicker/icons/shape_circle = null
+ColorPicker/icons/shape_rect = null
+ColorPicker/icons/shape_rect_wheel = null
+ColorPickerButton/icons/bg = null
+ColorPresetButton/icons/overbright_indicator = null
+ColorPresetButton/icons/preset_bg = null
+FileDialog/icons/back_folder = null
+FileDialog/icons/file = null
+FileDialog/icons/folder = null
+FileDialog/icons/forward_folder = null
+FileDialog/icons/parent_folder = null
+FileDialog/icons/reload = null
+FileDialog/icons/toggle_hidden = null
+GraphEdit/icons/grid_toggle = null
+GraphEdit/icons/layout = null
+GraphEdit/icons/minimap_toggle = null
+GraphEdit/icons/snapping_toggle = null
+GraphEdit/icons/zoom_in = null
+GraphEdit/icons/zoom_out = null
+GraphEdit/icons/zoom_reset = null
+GraphEditMinimap/icons/resizer = null
+GraphNode/icons/port = null
+GraphNode/icons/resizer = null
+HScrollBar/icons/decrement = null
+HScrollBar/icons/decrement_highlight = null
+HScrollBar/icons/decrement_pressed = null
+HScrollBar/icons/increment = null
+HScrollBar/icons/increment_highlight = null
+HScrollBar/icons/increment_pressed = null
+HSlider/icons/grabber = SubResource("AtlasTexture_1055y")
+HSlider/icons/grabber_disabled = SubResource("AtlasTexture_rwf3p")
+HSlider/icons/grabber_highlight = SubResource("AtlasTexture_1kpqf")
+HSlider/icons/tick = null
+HSlider/styles/grabber_area = SubResource("StyleBoxTexture_a0ivj")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBoxTexture_n06gm")
+HSlider/styles/slider = SubResource("StyleBoxTexture_74obf")
+HSplitContainer/icons/grabber = null
+Icons/icons/close = null
+LineEdit/icons/clear = null
+OptionButton/icons/arrow = SubResource("AtlasTexture_u81oj")
+PopupMenu/icons/checked = null
+PopupMenu/icons/checked_disabled = null
+PopupMenu/icons/radio_checked = null
+PopupMenu/icons/radio_checked_disabled = null
+PopupMenu/icons/radio_unchecked = null
+PopupMenu/icons/radio_unchecked_disabled = null
+PopupMenu/icons/submenu = null
+PopupMenu/icons/submenu_mirrored = null
+PopupMenu/icons/unchecked = null
+PopupMenu/icons/unchecked_disabled = null
+SpinBox/icons/updown = null
+SplitContainer/icons/h_grabber = null
+SplitContainer/icons/v_grabber = null
+TabBar/icons/close = null
+TabBar/icons/decrement = null
+TabBar/icons/decrement_highlight = null
+TabBar/icons/drop_mark = null
+TabBar/icons/increment = null
+TabBar/icons/increment_highlight = null
+TabContainer/icons/decrement = null
+TabContainer/icons/decrement_highlight = null
+TabContainer/icons/drop_mark = null
+TabContainer/icons/increment = null
+TabContainer/icons/increment_highlight = null
+TabContainer/icons/menu = null
+TabContainer/icons/menu_highlight = null
+TextEdit/icons/space = null
+TextEdit/icons/tab = null
+Tree/icons/arrow = null
+Tree/icons/arrow_collapsed = null
+Tree/icons/arrow_collapsed_mirrored = null
+Tree/icons/checked = null
+Tree/icons/indeterminate = null
+Tree/icons/select_arrow = null
+Tree/icons/unchecked = null
+Tree/icons/updown = null
+VScrollBar/icons/decrement = null
+VScrollBar/icons/decrement_highlight = null
+VScrollBar/icons/decrement_pressed = null
+VScrollBar/icons/increment = null
+VScrollBar/icons/increment_highlight = null
+VScrollBar/icons/increment_pressed = null
+VScrollBar/styles/grabber = SubResource("StyleBoxTexture_tull7")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxTexture_01wdo")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxTexture_oku02")
+VScrollBar/styles/scroll = SubResource("StyleBoxTexture_1cn1v")
+VScrollBar/styles/scroll_focus = SubResource("StyleBoxTexture_wrkmk")
+VSlider/icons/grabber = null
+VSlider/icons/grabber_disabled = null
+VSlider/icons/grabber_highlight = null
+VSlider/icons/tick = null
+VSplitContainer/icons/grabber = null
+Window/icons/close = null
+Window/icons/close_pressed = null

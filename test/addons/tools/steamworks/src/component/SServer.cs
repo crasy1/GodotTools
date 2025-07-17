@@ -30,7 +30,7 @@ public partial class SServer : SteamComponent
     {
         var serverInit = new SteamServerInit(modDir, desc)
         {
-            VersionString = ProjectSettings.GetSetting("config/version").AsString()
+            VersionString =Project.Version
         };
         try
         {

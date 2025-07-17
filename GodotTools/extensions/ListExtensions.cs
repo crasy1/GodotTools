@@ -44,4 +44,15 @@ public static class ListExtensions
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
+
+    /// <summary>
+    /// 复制
+    /// </summary>
+    /// <param name="list"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IList<T> Duplicate<T>(this IEnumerable<T> list)
+    {
+        return list.ToList();
+    }
 }

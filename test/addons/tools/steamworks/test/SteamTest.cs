@@ -65,7 +65,19 @@ public partial class SteamTest : Node2D
             NormalServer?.Close();
             NormalServer = null;
         };
-        SendToClientNormal.Pressed += () => { NormalServer?.Send(NormalServerText.Text); };
+        SendToClientNormal.Pressed += () =>
+        {
+            if (SteamUserInfo == null)
+            {
+                Log.Info("向所有发送");
+                NormalServer?.Send(NormalServerText.Text);
+            }
+            else
+            {
+                Log.Info("向单个发送");
+                NormalServer?.Send(SteamUserInfo.Friend.Id, NormalServerText.Text);
+            }
+        };
         // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
         ConnectNormalClient.Pressed += () =>
         {
@@ -130,7 +142,19 @@ public partial class SteamTest : Node2D
             RelayServer?.Close();
             RelayServer = null;
         };
-        SendToClientRelay.Pressed += () => { RelayServer?.Send(RelayServerText.Text); };
+        SendToClientRelay.Pressed += () =>
+        {
+            if (SteamUserInfo == null)
+            {
+                Log.Info("向所有发送");
+                RelayServer?.Send(RelayServerText.Text);
+            }
+            else
+            {
+                Log.Info("向单个发送");
+                RelayServer?.Send(SteamUserInfo.Friend.Id, RelayServerText.Text);
+            }
+        };
         // RelayIp,RelayPort,RelayClientText,RelayClientReceiveText
         ConnectRelayClient.Pressed += () =>
         {

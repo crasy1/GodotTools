@@ -7,6 +7,24 @@
     <PackageReference Include="godottools" Version="0.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="addons\tools\common_ui\assets\button\Button_Disable_3Slides.png" />
+    <Content Include="addons\tools\common_ui\assets\button\Button_Disable_3Slides.png.import" />
+    <Content Include="addons\tools\common_ui\assets\button\Button_Hover_3Slides.png" />
+    <Content Include="addons\tools\common_ui\assets\button\Button_Hover_3Slides.png.import" />
+    <Content Include="addons\tools\common_ui\assets\button\License.txt" />
+    <Content Include="addons\tools\common_ui\assets\GUI_4x.png" />
+    <Content Include="addons\tools\common_ui\assets\GUI_4x.png.import" />
+    <Content Include="addons\tools\common_ui\assets\SmileySans-Oblique.ttf" />
+    <Content Include="addons\tools\common_ui\assets\SmileySans-Oblique.ttf.import" />
+    <Content Include="addons\tools\common_ui\assets\theme\label_theme.tres" />
+    <Content Include="addons\tools\common_ui\assets\theme\theme.tres" />
+    <Content Include="addons\tools\common_ui\localization\en.po" />
+    <Content Include="addons\tools\common_ui\localization\Ui.pot" />
+    <Content Include="addons\tools\common_ui\localization\zh.po" />
+    <Content Include="addons\tools\common_ui\Ui.tscn" />
+    <Content Include="addons\tools\config_ui\plugin.cfg" />
+    <Content Include="addons\tools\manager\plugin.cfg" />
+    <Content Include="addons\tools\manager\src\SceneManager.tscn" />
     <Content Include="addons\tools\plugin.cfg" />
   </ItemGroup>
 </Project>

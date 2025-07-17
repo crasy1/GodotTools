@@ -30,7 +30,7 @@ public partial class SMatchmaking : SteamComponent
                 Lobby = lobby;
                 Lobby?.SetPrivate();
                 Lobby?.SetJoinable(false);
-                Lobby?.SetData("version", ProjectSettings.GetSetting("config/version").AsString());
+                Lobby?.SetData("version", Project.Version);
             }
         };
         SteamMatchmaking.OnLobbyInvite += (friend, lobby) =>
@@ -103,7 +103,7 @@ public partial class SMatchmaking : SteamComponent
     {
         var lobbyQuery = SteamMatchmaking.LobbyList.WithMaxResults(maxResult);
         lobbyQuery = lobbyQuery.WithSlotsAvailable(minSlots);
-        // lobbyQuery = lobbyQuery.WithKeyValue("version", ProjectSettings.GetSetting("config/version").AsString());
+        // lobbyQuery = lobbyQuery.WithKeyValue("version", Project.Version);
         var lobbies = await lobbyQuery.RequestAsync();
         return lobbies == null ? [] : lobbies.ToList();
     }

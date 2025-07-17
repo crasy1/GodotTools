@@ -1,0 +1,105 @@
+# LANGUAGE translation for Ui for the following files:
+# res://ui/Ui.tscn
+#
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ui\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.1\n"
+
+#: ui/Ui.tscn
+msgid "Font Size"
+msgstr "字体大小"
+
+#: ui/Ui.tscn
+msgid "Resolution"
+msgstr "分辨率"
+
+#: ui/Ui.tscn
+msgid "Window Mode"
+msgstr "窗口模式"
+
+#: ui/Ui.tscn
+msgid "Language"
+msgstr "语言"
+
+#: ui/Ui.tscn
+msgid "Vertical Sync"
+msgstr "垂直同步"
+
+#: ui/Ui.tscn
+msgid "Max FPS"
+msgstr "最大帧率"
+
+#: ui/Ui.tscn
+msgid "Game Speed"
+msgstr "游戏倍速"
+
+#: ui/Ui.tscn
+msgid "Master Volume"
+msgstr "主音量"
+
+#: ui/Ui.tscn
+msgid "BGM Volume"
+msgstr "BGM音量"
+
+#: ui/Ui.tscn
+msgid "SFX Volume"
+msgstr "SFX音量"
+
+
+#: ui/Ui.tscn
+msgid "Full Screen"
+msgstr "全屏"
+
+#: ui/Ui.tscn
+msgid "Windowed"
+msgstr "窗口化"
+
+#: ui/Ui.tscn
+msgid "Enable"
+msgstr "开启"
+
+#: ui/Ui.tscn
+msgid "Disable"
+msgstr "关闭"
+
+#: ui/Ui.tscn
+msgid "Unlimited"
+msgstr "不限制"
+
+#: ui/Ui.tscn
+msgid "Game Settings"
+msgstr "游戏设置"
+
+#: ui/Ui.tscn
+msgid "Input Settings"
+msgstr "按键设置"
+
+#: ui/Ui.tscn
+msgid "Reset to Default Settings"
+msgstr "重置为默认设置"
+
+#: ui/Ui.tscn
+msgid "Reset to Default Options"
+msgstr "重置为默认选项"
+
+#: ui/Ui.tscn
+msgid "Back To Main Menu"
+msgstr "返回主菜单"
+
+#: ui/Ui.tscn
+msgid "Back"
+msgstr "返回"
+
+msgid "Confirm"
+msgstr "确认"

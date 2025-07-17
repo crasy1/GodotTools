@@ -1,0 +1,363 @@
+[gd_scene load_steps=7 format=3 uid="uid://u2uaywvesii5"]
+
+[ext_resource type="Script" uid="uid://sqcve8r1wvsf" path="res://addons/tools/config_ui/src/ConfigUi.cs" id="1_qhkco"]
+[ext_resource type="Theme" uid="uid://53dw3ok1uj1w" path="res://addons/tools/config_ui/src/assets/theme/theme.tres" id="2_5hckq"]
+[ext_resource type="Texture2D" uid="uid://de0sns3b5815e" path="res://addons/tools/config_ui/src/assets/GUI_4x.png" id="3_2xr6q"]
+[ext_resource type="Theme" uid="uid://bsocord14am67" path="res://addons/tools/config_ui/src/assets/theme/label_theme.tres" id="4_u3ywq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mbq5o"]
+atlas = ExtResource("3_2xr6q")
+region = Rect2(128, 224, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w2xmc"]
+atlas = ExtResource("3_2xr6q")
+region = Rect2(0, 0, 96, 96)
+
+[node name="Ui" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_qhkco")
+
+[node name="Options" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_5hckq")
+metadata/_edit_group_ = true
+
+[node name="BackgroundColor" type="ColorRect" parent="Options"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.196078, 0.196078, 0.196078, 0.784314)
+
+[node name="Border" type="NinePatchRect" parent="Options"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.95
+offset_right = -68.0
+offset_bottom = -57.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_mbq5o")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Options/Border"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 36
+
+[node name="TextureRect" type="NinePatchRect" parent="Options/Border/MarginContainer"]
+layout_mode = 2
+texture = SubResource("AtlasTexture_w2xmc")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="MarginContainer" type="MarginContainer" parent="Options/Border/MarginContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 26
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 26
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Options/Border/MarginContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+alignment = 1
+
+[node name="GameOptions" type="ScrollContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("4_u3ywq")
+
+[node name="MarginContainer" type="MarginContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+alignment = 1
+
+[node name="FontSize" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/FontSize"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Font Size"
+vertical_alignment = 1
+
+[node name="FontSizeSlider" type="HSlider" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/FontSize"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+min_value = 20.0
+max_value = 60.0
+value = 40.0
+scrollable = false
+
+[node name="Resolution" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/Resolution"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Resolution"
+vertical_alignment = 1
+
+[node name="ResolutionBtn" type="OptionButton" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/Resolution"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 7
+theme_override_constants/h_separation = 50
+alignment = 1
+selected = 0
+allow_reselect = true
+item_count = 1
+popup/item_0/text = "1920*1080"
+popup/item_0/id = 0
+
+[node name="WindowMode" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/WindowMode"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Window Mode"
+vertical_alignment = 1
+
+[node name="WindowModeBtn" type="OptionButton" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/WindowMode"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 7
+theme_override_constants/h_separation = 50
+alignment = 1
+selected = 0
+allow_reselect = true
+item_count = 1
+popup/item_0/text = "Windowed"
+popup/item_0/id = 0
+
+[node name="Localization" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/Localization"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Language"
+vertical_alignment = 1
+
+[node name="LocalizationBtn" type="OptionButton" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/Localization"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 7
+theme_override_constants/h_separation = 50
+alignment = 1
+selected = 0
+allow_reselect = true
+item_count = 1
+popup/item_0/text = "English"
+popup/item_0/id = 0
+
+[node name="WindowVSyncMode" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/WindowVSyncMode"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Vertical Sync"
+vertical_alignment = 1
+
+[node name="WindowVSyncModeBtn" type="OptionButton" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/WindowVSyncMode"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 7
+theme_override_constants/h_separation = 50
+alignment = 1
+selected = 0
+allow_reselect = true
+item_count = 1
+popup/item_0/text = "Enable"
+popup/item_0/id = 0
+
+[node name="MaxFps" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/MaxFps"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Max FPS"
+vertical_alignment = 1
+
+[node name="MaxFpsBtn" type="OptionButton" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/MaxFps"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 7
+theme_override_constants/h_separation = 50
+alignment = 1
+selected = 0
+allow_reselect = true
+item_count = 1
+popup/item_0/text = "60"
+popup/item_0/id = 0
+
+[node name="GameSpeed" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/GameSpeed"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Game Speed"
+vertical_alignment = 1
+
+[node name="GameSpeedBtn" type="OptionButton" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/GameSpeed"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 7
+theme_override_constants/h_separation = 50
+alignment = 1
+selected = 0
+allow_reselect = true
+item_count = 1
+popup/item_0/text = "1 X"
+popup/item_0/id = 0
+
+[node name="AudioMaster" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/AudioMaster"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Master Volume"
+vertical_alignment = 1
+
+[node name="AudioMasterSlider" type="HSlider" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/AudioMaster"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+max_value = 1.0
+step = 0.01
+value = 0.5
+scrollable = false
+
+[node name="AudioBgm" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/AudioBgm"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "BGM Volume"
+vertical_alignment = 1
+
+[node name="AudioBgmSlider" type="HSlider" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/AudioBgm"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+max_value = 1.0
+step = 0.01
+value = 0.5
+scrollable = false
+
+[node name="AudioSfx" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/AudioSfx"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "SFX Volume"
+vertical_alignment = 1
+
+[node name="AudioSfxSlider" type="HSlider" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/GameOptions/MarginContainer/VBoxContainer/AudioSfx"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+max_value = 1.0
+step = 0.01
+value = 0.5
+scrollable = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="BackToMainMenuBtn" type="Button" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 6
+text = "Back To Main Menu"
+
+[node name="ResetToDefaultOptionsBtn" type="Button" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 6
+text = "Reset to Default Options"
+
+[node name="ExitOptionsBtn" type="Button" parent="Options/Border/MarginContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 6
+text = "Back"
+
+[node name="SceneChange" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SimpleColorRect" type="ColorRect" parent="SceneChange"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)

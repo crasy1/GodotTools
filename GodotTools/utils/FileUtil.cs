@@ -2,6 +2,27 @@ namespace Godot;
 
 public static class FileUtil
 {
+    /// <summary>
+    /// 递归获取文件夹,返回文件夹全路径列表
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static List<string> GetDirsRecursive(string path)
+    {
+        var dirAccesses = new List<string>();
+        var dirAccess = DirAccess.Open(path);
+        if (dirAccess is not null)
+        {
+            dirAccesses.Add(path);
+            var dirs = dirAccess.GetDirectories();
+            foreach (var dir in dirs)
+            {
+                dirAccesses.AddRange(GetDirsRecursive(Path.Join(path, dir)));
+            }
+        }
+
+        return dirAccesses;
+    }
     public static List<T> InstanceScenesInPath<T>(string dirPath) where T : Node
     {
         if (dirPath[^1] != '/')
