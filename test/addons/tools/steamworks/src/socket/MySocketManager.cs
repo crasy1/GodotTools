@@ -28,12 +28,14 @@ public class MySocketManager : ISocketManager
     {
         if (info.Identity.IsSteamId)
         {
-            var friend = SFriends.Friends[info.Identity.SteamId];
-            Connections.TryAdd(connection, friend);
-            Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 连接成功");
-            if (GodotObject.IsInstanceValid(SteamSocket))
+            if (SFriends.Friends.TryGetValue(info.Identity.SteamId, out var friend))
             {
-                SteamSocket.EmitSignal(SteamSocket.SignalName.Connected, info.Identity.SteamId.Value);
+                Connections.TryAdd(connection, friend);
+                Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 连接成功");
+                if (GodotObject.IsInstanceValid(SteamSocket))
+                {
+                    SteamSocket.EmitSignal(SteamSocket.SignalName.Connected, info.Identity.SteamId.Value);
+                }
             }
         }
     }
@@ -42,13 +44,15 @@ public class MySocketManager : ISocketManager
     {
         if (info.Identity.IsSteamId)
         {
-            var friend = SFriends.Friends[info.Identity.SteamId];
-            Connections.Remove(connection);
-            Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 断开连接");
-
-            if (GodotObject.IsInstanceValid(SteamSocket))
+            if (SFriends.Friends.TryGetValue(info.Identity.SteamId, out var friend))
             {
-                SteamSocket.EmitSignal(SteamSocket.SignalName.Disconnected, info.Identity.SteamId.Value);
+                Connections.Remove(connection);
+                Log.Info($"{SteamSocket.SocketName} => 与 {friend.Id},{friend.Name} 断开连接");
+
+                if (GodotObject.IsInstanceValid(SteamSocket))
+                {
+                    SteamSocket.EmitSignal(SteamSocket.SignalName.Disconnected, info.Identity.SteamId.Value);
+                }
             }
         }
     }
@@ -61,10 +65,12 @@ public class MySocketManager : ISocketManager
         {
             if (identity.IsSteamId)
             {
-                var friend = SFriends.Friends[identity.SteamId];
-                var msg = Marshal.PtrToStringUTF8(data, size);
-                Log.Info($"{SteamSocket.SocketName} => 从 {friend.Id},{friend.Name} 收到信息 {msg}");
-                SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, identity.SteamId.Value, msg);
+                if (SFriends.Friends.TryGetValue(identity.SteamId, out var friend))
+                {
+                    var msg = Marshal.PtrToStringUTF8(data, size);
+                    Log.Info($"{SteamSocket.SocketName} => 从 {friend.Id},{friend.Name} 收到信息 {msg}");
+                    SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, identity.SteamId.Value, msg);
+                }
             }
         }
     }
