@@ -1,15 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <IsPackable>false</IsPackable>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
 
-        <RootNamespace>GodotTools.SourceGenerators</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.0.2</Version>
+        <Title>some godot4 c# tools</Title>
+        <Authors>Crasy1</Authors>
+        <Description>some godot4 c# tools</Description>
+        <PackageProjectUrl>https://github.com/crasy1/GodotTools</PackageProjectUrl>
+        <PackageLicenseUrl>https://opensource.org/license/mit</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/crasy1/GodotTools</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Godot4</PackageTags>
+        <PackageIcon>icon.png</PackageIcon>
+        <Copyright>Copyright (c) Crasy1 2025</Copyright>
+        <AssemblyName>GodotTools.SourceGenerators</AssemblyName>
+        <RootNamespace>Godot.SourceGenerators</RootNamespace>
         <PackageId>GodotTools.SourceGenerators</PackageId>
     </PropertyGroup>
 
@@ -18,8 +29,15 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.5.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="icon.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 
 

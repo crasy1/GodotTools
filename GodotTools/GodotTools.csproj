@@ -17,6 +17,7 @@
         <PackageIcon>icon.png</PackageIcon>
         <Copyright>Copyright (c) Crasy1 2025</Copyright>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RootNamespace>Godot</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
