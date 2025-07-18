@@ -39,4 +39,8 @@
         <EmbeddedResource Include="..\README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SourceGenerators\SourceGenerators\SourceGenerators.csproj" />
+    </ItemGroup>
+
 </Project>
