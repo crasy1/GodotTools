@@ -1,4 +1,3 @@
-
 namespace Godot;
 
 // This code will not compile until you build the project with the Source Generators
@@ -10,8 +9,8 @@ public partial class SampleEntity
     public string? Name { get; } = "Sample";
 
 
-    public void A()
+    public void Test()
     {
-        // var id = Instance.Id;
+        var id = Instance.Id;
     }
 }

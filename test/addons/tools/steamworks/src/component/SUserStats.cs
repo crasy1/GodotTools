@@ -4,16 +4,11 @@ using Steamworks.Data;
 
 namespace Godot;
 
+[Singleton]
 public partial class SUserStats : SteamComponent
 {
-    private static readonly Lazy<SUserStats> LazyInstance = new(() => new());
-    public static SUserStats Instance => LazyInstance.Value;
-
+   
     public static event Action<Achievement> AchievementUnlocked;
-
-    private SUserStats()
-    {
-    }
 
     public override void _Ready()
     {

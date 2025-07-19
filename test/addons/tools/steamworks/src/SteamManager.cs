@@ -12,6 +12,7 @@ namespace Godot;
 /// <seealso href="https://partner.steamgames.com/doc/features">steamworks文档</seealso>
 /// </summary>
 [SceneTree]
+[Singleton]
 public partial class SteamManager : CanvasLayer
 {
     /**
@@ -33,7 +34,7 @@ public partial class SteamManager : CanvasLayer
             };
         }
 
-        Dispatch.OnException += (e) => { Log.Error($"steamworks 异常",e); };
+        Dispatch.OnException += (e) => { Log.Error($"steamworks 异常", e); };
         SClient.Instance.Connect();
         Ping.Hide();
         ScreenShot.Pressed += () =>

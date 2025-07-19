@@ -3,15 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SUtil : SteamComponent
 {
-    private static readonly Lazy<SUtil> LazyInstance = new(() => new());
-
-    public static SUtil Instance => LazyInstance.Value;
-
-    private SUtil()
-    {
-    }
 
     public override void _Ready()
     {

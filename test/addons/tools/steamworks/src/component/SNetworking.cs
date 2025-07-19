@@ -4,17 +4,11 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SNetworking : SteamComponent
 {
-    private static readonly Lazy<SNetworking> LazyInstance = new(() => new());
-    public static SNetworking Instance => LazyInstance.Value;
-
     [Signal]
     public delegate void ReceiveMessageEventHandler(ulong steamId, string content);
-
-    private SNetworking()
-    {
-    }
 
     public override void _Ready()
     {

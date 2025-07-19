@@ -5,15 +5,9 @@ using Steamworks.Data;
 
 namespace Godot;
 
+[Singleton]
 public partial class SNetworkingUtils : SteamComponent
 {
-    private static readonly Lazy<SNetworkingUtils> LazyInstance = new(() => new());
-    public static SNetworkingUtils Instance => LazyInstance.Value;
-
-    private SNetworkingUtils()
-    {
-    }
-
     public override void _Ready()
     {
         base._Ready();

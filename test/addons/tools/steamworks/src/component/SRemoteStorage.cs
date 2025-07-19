@@ -3,14 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SRemoteStorage : SteamComponent
 {
-    private static readonly Lazy<SRemoteStorage> LazyInstance = new(() => new());
-    public static SRemoteStorage Instance => LazyInstance.Value;
-
-    private SRemoteStorage()
-    {
-    }
 
     public override void _Ready()
     {

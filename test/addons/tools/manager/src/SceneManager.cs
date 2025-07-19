@@ -2,15 +2,10 @@ using System;
 using Godot;
 
 [SceneTree]
+[Singleton]
 public partial class SceneManager : CanvasLayer
 {
-    private static Lazy<SceneManager> LazyInstance = new(() => new());
-    public static SceneManager Instance => LazyInstance.Value;
-
-    private SceneManager()
-    {
-    }
-
+    
     [Signal]
     public delegate void SceneChangedEventHandler();
 

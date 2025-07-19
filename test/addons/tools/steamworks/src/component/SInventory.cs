@@ -3,14 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SInventory: SteamComponent
-{private static readonly Lazy<SInventory> LazyInstance = new(() => new());
-    public static SInventory Instance => LazyInstance.Value;
-
-    private SInventory()
-    {
-    }
-
+{
     public override void _Ready()
     {
         base._Ready();

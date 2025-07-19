@@ -3,15 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SParties : SteamComponent
 {
-    private static readonly Lazy<SParties> LazyInstance = new(() => new());
-    public static SParties Instance => LazyInstance.Value;
-
-    private SParties()
-    {
-    }
-
     public override void _Ready()
     {
         base._Ready();

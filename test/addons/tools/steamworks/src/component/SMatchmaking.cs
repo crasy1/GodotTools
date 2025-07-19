@@ -7,14 +7,9 @@ using Steamworks.Data;
 
 namespace Godot;
 
+[Singleton]
 public partial class SMatchmaking : SteamComponent
 {
-    private static readonly Lazy<SMatchmaking> LazyInstance = new(() => new());
-    public static SMatchmaking Instance => LazyInstance.Value;
-
-    private SMatchmaking()
-    {
-    }
 
     public int MaxUser { set; get; } = 4;
     public Lobby? Lobby { get; private set; }

@@ -5,9 +5,9 @@
         <Nullable>enable</Nullable>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
-
         <ImplicitUsings>enable</ImplicitUsings>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        
         <Version>0.0.2</Version>
         <Title>some godot4 c# tools</Title>
         <Authors>Crasy1</Authors>
@@ -29,16 +29,21 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.5.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[4.8.0]"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="[4.8.0]"/>
+        <PackageReference Include="Scriban" Version="6.2.1" IncludeAssets="build" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="icon.png">
-        <Pack>True</Pack>
-        <PackagePath></PackagePath>
-      </None>
+        <EmbeddedResource Include="icon.png" Pack="true" PackagePath=""/>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers\dotnet\cs" Link="Package\analyzers\dotnet\cs\$(AssemblyName).dll"/>
     </ItemGroup>
-
+    <!-- Scriban Settings -->
+    <ItemGroup>
+        <EmbeddedResource Include="**\*.sbncs" />
+    </ItemGroup>
+    <PropertyGroup>
+        <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+    </PropertyGroup>
 
 </Project>

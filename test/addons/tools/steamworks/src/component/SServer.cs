@@ -3,14 +3,10 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SServer : SteamComponent
 {
-    private static readonly Lazy<SServer> LazyInstance = new(() => new());
-    public static SServer Instance => LazyInstance.Value;
-
-    private SServer()
-    {
-    }
+   
 
     public override void _Ready()
     {

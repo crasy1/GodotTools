@@ -3,14 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SClient : SteamComponent
 {
-    private static readonly Lazy<SClient> LazyInstance = new(() => new());
-    public static SClient Instance => LazyInstance.Value;
-
-    private SClient()
-    {
-    }
 
     [Signal]
     public delegate void SteamClientConnectedEventHandler();

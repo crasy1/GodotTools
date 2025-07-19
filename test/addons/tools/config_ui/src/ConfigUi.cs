@@ -7,13 +7,9 @@ using FileAccess = Godot.FileAccess;
 using Range = Godot.Range;
 
 [SceneTree]
+[Singleton]
 public partial class ConfigUi : CanvasLayer
 {
-    private static Lazy<ConfigUi> LazyInstance = new(() => new());
-    public static ConfigUi Instance => LazyInstance.Value;
-    private ConfigUi()
-    {
-    }
 
     [Export] public Key UiOptionsKey = Key.Escape;
 

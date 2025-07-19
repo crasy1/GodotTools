@@ -3,14 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class STimeline : SteamComponent
-{private static readonly Lazy<STimeline> LazyInstance = new(() => new());
-    public static STimeline Instance => LazyInstance.Value;
-
-    private STimeline()
-    {
-    }
-    
+{
     public override void _Ready()
     {
         base._Ready();

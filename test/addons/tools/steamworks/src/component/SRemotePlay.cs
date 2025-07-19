@@ -3,14 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SRemotePlay : SteamComponent
 {
-    private static readonly Lazy<SRemotePlay> LazyInstance = new(() => new());
-    public static SRemotePlay Instance => LazyInstance.Value;
-
-    private SRemotePlay()
-    {
-    }
 
     public override void _Ready()
     {

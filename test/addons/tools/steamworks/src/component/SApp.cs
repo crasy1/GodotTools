@@ -3,14 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SApp : SteamComponent
 {
-    private static readonly Lazy<SApp> LazyInstance = new(() => new());
-    public static SApp Instance => LazyInstance.Value;
-
-    private SApp()
-    {
-    }
 
     public override void _Ready()
     {

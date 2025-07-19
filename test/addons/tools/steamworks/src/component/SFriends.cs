@@ -6,17 +6,12 @@ using Steamworks;
 
 namespace Godot;
 
+[Singleton]
 public partial class SFriends : SteamComponent
 {
-    private static readonly Lazy<SFriends> LazyInstance = new(() => new());
-    public static SFriends Instance => LazyInstance.Value;
-
+    
     public static readonly Dictionary<SteamId, Friend> Friends = new();
     public static Friend Me { private set; get; }
-
-    private SFriends()
-    {
-    }
 
     public override void _Ready()
     {
