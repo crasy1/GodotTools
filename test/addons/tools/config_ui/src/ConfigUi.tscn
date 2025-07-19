@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://u2uaywvesii5"]
+[gd_scene load_steps=6 format=3 uid="uid://u2uaywvesii5"]
 
-[ext_resource type="Script" uid="uid://sqcve8r1wvsf" path="res://addons/tools/config_ui/src/ConfigUi.cs" id="1_qhkco"]
-[ext_resource type="Theme" uid="uid://53dw3ok1uj1w" path="res://addons/tools/config_ui/src/assets/theme/theme.tres" id="2_5hckq"]
+[ext_resource type="Script" uid="uid://d3iswv14cq8xv" path="res://addons/tools/config_ui/src/ConfigUi.cs" id="1_qhkco"]
 [ext_resource type="Texture2D" uid="uid://de0sns3b5815e" path="res://addons/tools/config_ui/src/assets/GUI_4x.png" id="3_2xr6q"]
 [ext_resource type="Theme" uid="uid://bsocord14am67" path="res://addons/tools/config_ui/src/assets/theme/label_theme.tres" id="4_u3ywq"]
 
@@ -25,7 +24,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_5hckq")
 metadata/_edit_group_ = true
 
 [node name="BackgroundColor" type="ColorRect" parent="Options"]

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Godot;
@@ -10,7 +9,6 @@ using Range = Godot.Range;
 [Singleton]
 public partial class ConfigUi : CanvasLayer
 {
-
     [Export] public Key UiOptionsKey = Key.Escape;
 
     public const string UiOptionsAction = "ui_options_action";
@@ -73,17 +71,13 @@ public partial class ConfigUi : CanvasLayer
     /// </summary>
     private static readonly List<string> PoFileDirs =
     [
-        "res://addons/tools/config_ui/src/localization",
-        "user://localization",
-        "res://src/localization"
+        Paths.LocalizationUi,
+        Paths.LocalizationSrc,
+        Paths.LocalizationUser,
     ];
 
-    public const string GameOptionPath = "user://options.json";
     public static GameOption GameOption { set; get; }
-
-    private static readonly Theme DefaultTheme =
-        GD.Load<Theme>($"{Project.AddonsDir}/tools/config_ui/src/assets/theme/theme.tres");
-
+    
     public override void _Ready()
     {
         SimpleColorRect.Color = SimpleColorRect.Color with { A = 0 };
@@ -104,9 +98,9 @@ public partial class ConfigUi : CanvasLayer
 
     private void LoadOptions()
     {
-        if (FileAccess.FileExists(GameOptionPath))
+        if (FileAccess.FileExists(Paths.GameOption))
         {
-            GameOption = JsonUtil.FileToObj<GameOption>(GameOptionPath);
+            GameOption = JsonUtil.FileToObj<GameOption>(Paths.GameOption);
         }
         else
         {
@@ -118,7 +112,7 @@ public partial class ConfigUi : CanvasLayer
 
     private static void SaveOptions()
     {
-        JsonUtil.ObjToFile(GameOption, GameOptionPath);
+        JsonUtil.ObjToFile(GameOption, Paths.GameOption);
         Log.Info($"保存游戏设置 {JsonUtil.ToJsonString(GameOption)}");
     }
 
@@ -231,7 +225,7 @@ public partial class ConfigUi : CanvasLayer
         FontSizeSlider.ValueChanged += (value) =>
         {
             GameOption.FontSize = value;
-            DefaultTheme.DefaultFontSize = (int)value;
+            Resources.DefaultTheme.DefaultFontSize = (int)value;
             Log.Info($"字体大小改变 => {value}");
         };
     }

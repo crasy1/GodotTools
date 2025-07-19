@@ -7,7 +7,7 @@ namespace Godot;
 public partial class SteamworksPlugin : EditorPlugin
 {
     private static readonly CompressedTexture2D SteamIcon =
-        GD.Load<CompressedTexture2D>("res://addons/tools/steamworks/assets/steam_icon.png");
+        GD.Load<CompressedTexture2D>(Paths.SteamIcon);
 
     private const string PluginName = "steamworks";
     private SteamworksEditor SteamworksEditor { set; get; }
