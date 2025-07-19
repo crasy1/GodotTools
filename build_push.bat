@@ -47,6 +47,6 @@ dotnet nuget push "GodotTools\bin\Release\GodotTools.%version%.nupkg" --source "
 dotnet nuget push "SourceGenerators\SourceGenerators\bin\Release\GodotTools.SourceGenerators.%sg_version%.nupkg" --source "local"
 
 @REM dotnet nuget push "GodotTools\bin\Release\GodotTools.%version%.nupkg" --source "github"
-@REM dotnet nuget push "GodotTools\bin\Release\GodotTools.SourceGenerators.%sg_version%.nupkg" --source "github"
+@REM dotnet nuget push "SourceGenerators\SourceGenerators\bin\Release\GodotTools.SourceGenerators.%sg_version%.nupkg" --source "github"
 
 endlocal
