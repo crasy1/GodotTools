@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
-using Godot;
 using System.Linq;
-using FileAccess = Godot.FileAccess;
-using Range = Godot.Range;
+
+namespace Godot;
 
 [SceneTree]
 [Singleton]
@@ -77,7 +76,8 @@ public partial class ConfigUi : CanvasLayer
     ];
 
     public static GameOption GameOption { set; get; }
-    
+
+	
     public override void _Ready()
     {
         SimpleColorRect.Color = SimpleColorRect.Color with { A = 0 };

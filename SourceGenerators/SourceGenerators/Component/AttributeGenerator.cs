@@ -25,25 +25,24 @@ public abstract class AttributeGenerator<D> : IIncrementalGenerator where D : Da
                 FullyQualifiedMetadataName(),
                 predicate: static (node, _) => node is ClassDeclarationSyntax,
                 transform: static (context, _) => (
-                    Symbol: context.TargetSymbol,
+                    Symbol: (INamedTypeSymbol)context.TargetSymbol,
                     Attributes: context.Attributes,
                     Node: context.TargetNode,
                     SemanticModel: context.SemanticModel
                 )
             )
-            .Where(item => item.Symbol is INamedTypeSymbol); // 过滤
-
+            .Where(item => item.Symbol != null); // 过滤
         // 生成代码
         context.RegisterSourceOutput(provider, (productionContext, tuple) =>
         {
             var (symbol, attributes, node, semanticModel) = tuple;
-            var namedTypeSymbol = symbol as INamedTypeSymbol;
-            var dataModel = DataModel(namedTypeSymbol!, attributes, node, semanticModel);
+            var dataModel = DataModel(symbol, attributes, node, semanticModel);
             var templateRenderText = TemplateUtil.GetTemplate(TemplatePath()).Render(dataModel, member => member.Name);
             var sourceText = SourceText.From(templateRenderText, Encoding.UTF8);
             productionContext.AddSource(GenerateValidFileName(dataModel.GeneratorClassFileName), sourceText);
         });
     }
+
 
     /// <summary>
     ///   生成有效的文件名

@@ -1,7 +1,6 @@
-using Godot;
-using System;
 using Steamworks;
-using Steamworks.Data;
+
+namespace Godot;
 
 [SceneTree]
 public partial class SteamTest : Node2D

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
 
+namespace Godot;
+
 [SceneTree]
 public partial class SteamLobby : Control
 {
