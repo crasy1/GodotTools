@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+    <Import Project="..\..\config.props" />
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
@@ -8,7 +8,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         
-        <Version>0.0.2</Version>
+        <Version>$(Version)</Version>
         <Title>some godot4 c# tools</Title>
         <Authors>Crasy1</Authors>
         <Description>some godot4 c# tools</Description>

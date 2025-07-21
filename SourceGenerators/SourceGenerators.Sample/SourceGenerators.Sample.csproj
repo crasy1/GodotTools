@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\..\config.props" />
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
@@ -10,7 +11,7 @@
 
     <ItemGroup>
 <!--        <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" OutputItemType="Analyzer"/>-->
-        <PackageReference Include="godottools.sourcegenerators" Version="0.0.2"/>
+        <PackageReference Include="godottools.sourcegenerators" Version="$(Version)"/>
     </ItemGroup>
     
 

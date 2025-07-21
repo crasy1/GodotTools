@@ -11,6 +11,6 @@ public partial class SampleEntity
 
     public void Test()
     {
-        var id = Instance.Id;
+        // var id = Instance.Id;
     }
 }
