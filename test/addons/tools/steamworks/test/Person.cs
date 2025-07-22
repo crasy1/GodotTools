@@ -10,6 +10,9 @@ class Person {
     public string Name {get;set;}
     [ProtoMember(3)]
     public Address Address {get;set;}
+    
+    [ProtoMember(4)]
+    public Vector2 Vector2 { set; get; }
 }
 [ProtoContract]
 class Address {

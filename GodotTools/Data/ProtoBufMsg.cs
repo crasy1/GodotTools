@@ -24,7 +24,7 @@ public class ProtoBufMsg : GodotObject
     /// <param name="obj"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static ProtoBufMsg From<T>(T obj) where T : class
+    public static ProtoBufMsg From<T>(T obj)
     {
         using var stream = new MemoryStream();
         Serializer.Serialize(stream, obj);
@@ -102,8 +102,8 @@ public class ProtoBufMsg : GodotObject
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public T Deserialize<T>() where T : class, new()
+    public T Deserialize<T>()
     {
-        return Deserialize() as T ?? throw new Exception($"ProtoMsg {Type} 反序列化为 {nameof(T)} 错误");
+        return (T)Deserialize();
     }
 }

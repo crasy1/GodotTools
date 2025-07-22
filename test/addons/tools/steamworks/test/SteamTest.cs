@@ -1,3 +1,4 @@
+using ProtoBuf.Meta;
 using Steamworks;
 
 namespace Godot;
@@ -37,7 +38,11 @@ public partial class SteamTest : Node2D
             NormalServer = SNetworkingSockets.CreateNormal((ushort)NormalServerPort.Value);
             NormalServer.Create();
             NormalServerPort.Value = NormalServer.NetAddress.Port;
-            NormalServer.ReceiveMessage += (id, msg) => { NormalServerReceiveText.AddText($"{id}:{msg} \r\n"); };
+            NormalServer.ReceiveMessage += (id, msg) =>
+            {
+                var protoBufMsg = msg as ProtoBufMsg;
+                NormalServerReceiveText.AddText($"{id}:{protoBufMsg.Type} {protoBufMsg.Deserialize<Vector2>()} \r\n");
+            };
             NormalServer.Connected += (id) =>
             {
                 NormalServerReceiveText.AddText($"已连接：{id} \r\n");
@@ -80,7 +85,11 @@ public partial class SteamTest : Node2D
             NormalClient?.Close();
             var host = NormalIp.Text;
             NormalClient = SNetworkingSockets.ConnectNormal(host, (ushort)NormalPort.Value);
-            NormalClient.ReceiveMessage += (id, msg) => { NormalClientReceiveText.AddText($"{id}:{msg} \r\n"); };
+            NormalClient.ReceiveMessage += (id, msg) =>
+            {
+                var protoBufMsg = msg as ProtoBufMsg;
+                NormalClientReceiveText.AddText($"{id}:{protoBufMsg.Type} {protoBufMsg.Deserialize()}\r\n");
+            };
             NormalClient.Connected += (id) =>
             {
                 NormalClientReceiveText.AddText($"已连接：{id} \r\n");
@@ -115,9 +124,11 @@ public partial class SteamTest : Node2D
                 {
                     Line1 = "Flat 1",
                     Line2 = "The Meadows"
-                }
+                },
+                Vector2 = new Vector2(10,20)
             };
-            NormalClient?.Send(ProtoBufMsg.From(person));
+            
+            NormalClient?.Send(ProtoBufMsg.From(new Vector2(10,20)));
             // NormalClient?.Send(NormalClientText.Text);
         };
 
@@ -126,7 +137,11 @@ public partial class SteamTest : Node2D
         {
             RelayServer?.Close();
             RelayServer = SNetworkingSockets.CreateRelay((int)RelayServerPort.Value);
-            RelayServer.ReceiveMessage += (id, msg) => { RelayServerReceiveText.AddText($"{id}:{msg} \r\n"); };
+            RelayServer.ReceiveMessage += (id, msg) =>
+            {
+                var protoBufMsg = msg as ProtoBufMsg;
+                RelayServerReceiveText.AddText($"{id}:{msg} \r\n");
+            };
             RelayServer.Connected += (id) =>
             {
                 RelayServerReceiveText.AddText($"已连接：{id} \r\n");
@@ -170,7 +185,11 @@ public partial class SteamTest : Node2D
             RelayClient?.Close();
             var port = (ushort)RelayPort.Value;
             RelayClient = SNetworkingSockets.ConnectRelay(SteamUserInfo.Friend.Id, port);
-            RelayClient.ReceiveMessage += (id, msg) => { };
+            RelayClient.ReceiveMessage += (id, msg) =>
+            {
+                var protoBufMsg = msg as ProtoBufMsg;
+                RelayClientReceiveText.AddText($"{id}:{protoBufMsg.Type} {protoBufMsg.Deserialize()} \r\n");
+            };
             RelayClient.Connected += (id) =>
             {
                 RelayClientReceiveText.AddText($"已连接：{id} \r\n");
