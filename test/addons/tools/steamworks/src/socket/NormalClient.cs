@@ -10,7 +10,7 @@ namespace Godot;
 public partial class NormalClient : SteamSocket
 {
     public ConnectionManager? ConnectionManager { set; get; }
-    public MyConnectionManager? IConnectionManager { set; get; }
+    public ProtoConnection? IConnectionManager { set; get; }
     private string Host { set; get; }
     private ushort Port { set; get; }
     private NetAddress NetAddress { set; get; }
@@ -56,12 +56,12 @@ public partial class NormalClient : SteamSocket
         }
     }
 
-    public void Send(string content, SendType sendType = SendType.Reliable)
+    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
-        if (!string.IsNullOrEmpty(content) && ConnectionManager is { Connected: true })
+        if (ConnectionManager is { Connected: true })
         {
-            var result = ConnectionManager.Connection.SendMessage(content, sendType);
-            Log.Info($"{SocketName} => 向 {ConnectionManager.ConnectionInfo.Identity} 发送消息 {result}");
+            var result = ConnectionManager.Connection.SendMsg(msg, sendType);
+            Log.Info($"{SocketName} => 向 {ConnectionManager.ConnectionInfo.Identity} 发送消息 {msg.Type} {result}");
         }
     }
 

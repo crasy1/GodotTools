@@ -4,8 +4,8 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="godottools" Version="0.0.2" />
-    <PackageReference Include="godottools.sourcegenerators" Version="0.0.2"/>
+    <PackageReference Include="godottools" Version="0.0.3" />
+    <PackageReference Include="godottools.sourcegenerators" Version="0.0.3" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="addons\tools\common_ui\assets\button\Button_Disable_3Slides.png" />

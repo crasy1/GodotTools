@@ -8,9 +8,8 @@ public partial class SampleEntity
     public int Id { get; } = 42;
     public string? Name { get; } = "Sample";
 
-
     public void Test()
     {
-        // var id = Instance.Id;
+        var id = Instance.Id;
     }
 }

@@ -6,14 +6,14 @@ using Steamworks.Data;
 
 namespace Godot;
 
-public class MySocketManager : ISocketManager
+public class ProtoSocket : ISocketManager
 {
     private SteamSocket SteamSocket { set; get; }
     private string Name { set; get; }
 
     public readonly Dictionary<Connection, Friend> Connections = new();
 
-    public MySocketManager(SteamSocket steamSocket)
+    public ProtoSocket(SteamSocket steamSocket)
     {
         SteamSocket = steamSocket;
         Name = SteamSocket.Name;
@@ -67,9 +67,9 @@ public class MySocketManager : ISocketManager
             {
                 if (SFriends.Friends.TryGetValue(identity.SteamId, out var friend))
                 {
-                    var msg = Marshal.PtrToStringUTF8(data, size);
-                    Log.Info($"{SteamSocket.SocketName} => 从 {friend.Id},{friend.Name} 收到信息 {msg}");
-                    // SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, identity.SteamId.Value, msg);
+                    var protoBufMsg = ProtoBufMsg.From(data, size);
+                    Log.Info($"{SteamSocket.SocketName} => 从 {friend.Id},{friend.Name} 收到信息 {protoBufMsg.Type}");
+                    SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, identity.SteamId.Value, protoBufMsg);
                 }
             }
         }

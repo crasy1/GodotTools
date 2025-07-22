@@ -22,6 +22,8 @@
         <AssemblyName>GodotTools.SourceGenerators</AssemblyName>
         <RootNamespace>Godot.SourceGenerators</RootNamespace>
         <PackageId>GodotTools.SourceGenerators</PackageId>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn)</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
@@ -36,11 +38,13 @@
 
     <ItemGroup>
         <EmbeddedResource Include="icon.png" Pack="true" PackagePath=""/>
+        <None Include="bin\Release\**\*.xml" Pack="true" PackagePath="lib\$(TargetFramework)" />
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers\dotnet\cs" Link="Package\analyzers\dotnet\cs\$(AssemblyName).dll"/>
     </ItemGroup>
     <!-- Scriban Settings -->
     <ItemGroup>
         <EmbeddedResource Include="**\*.sbncs" />
+        <None Include="bin\Release\**\*.xml" Pack="true" PackagePath="lib\$(TargetFramework)" />
     </ItemGroup>
     <PropertyGroup>
         <PackageScribanIncludeSource>true</PackageScribanIncludeSource>

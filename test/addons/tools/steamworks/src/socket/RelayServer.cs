@@ -4,6 +4,7 @@ using Steamworks;
 using Steamworks.Data;
 
 namespace Godot;
+
 /// <summary>
 /// 通过friend steamId 连接，走steam中继网络，延迟较高
 /// </summary>
@@ -11,7 +12,7 @@ public partial class RelayServer : SteamSocket
 {
     public bool Started { set; get; }
     public SocketManager? SocketManager { set; get; }
-    public MySocketManager? ISocketManager { set; get; }
+    public ProtoSocket? ISocketManager { set; get; }
     private int Port { set; get; }
 
     public RelayServer(int port)
@@ -47,25 +48,25 @@ public partial class RelayServer : SteamSocket
         }
     }
 
-    public void Send(string content, SendType sendType = SendType.Reliable)
+    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
-        if (!string.IsNullOrEmpty(content) && SocketManager != null && Started)
+        if (SocketManager != null && Started)
         {
             foreach (var connection in SocketManager.Connected)
             {
-                var result = connection.SendMessage(content, sendType);
-                Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {result}");
+                var result = connection.SendMsg(msg, sendType);
+                Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {msg.Type} {result}");
             }
         }
     }
 
-    public void Send(SteamId steamId, string content, SendType sendType = SendType.Reliable)
+    public void Send(SteamId steamId, ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
-        if (!string.IsNullOrEmpty(content) && SocketManager != null && Started && ISocketManager != null)
+        if (SocketManager != null && Started && ISocketManager != null)
         {
             var connection = ISocketManager.Connections.FirstOrDefault(kv => steamId == kv.Value.Id).Key;
-            var result = connection.SendMessage(content, sendType);
-            Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {result}");
+            var result = connection.SendMsg(msg, sendType);
+            Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {msg.Type} {result}");
         }
     }
 

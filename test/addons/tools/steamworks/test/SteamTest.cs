@@ -66,12 +66,12 @@ public partial class SteamTest : Node2D
             if (SteamUserInfo == null)
             {
                 Log.Info("向所有发送");
-                NormalServer?.Send(NormalServerText.Text);
+                NormalServer?.Send(ProtoBufMsg.From(NormalServerText.Text));
             }
             else
             {
                 Log.Info("向单个发送");
-                NormalServer?.Send(SteamUserInfo.Friend.Id, NormalServerText.Text);
+                NormalServer?.Send(SteamUserInfo.Friend.Id, ProtoBufMsg.From(NormalServerText.Text));
             }
         };
         // NormalIp,NormalPort,NormalClientText,NormalClientReceiveText
@@ -106,7 +106,20 @@ public partial class SteamTest : Node2D
             NormalClient?.Close();
             NormalClient = null;
         };
-        SendToNormalServer.Pressed += () => { NormalClient?.Send(NormalClientText.Text); };
+        SendToNormalServer.Pressed += () =>
+        {
+            var person = new Person
+            {
+                Id = 12345, Name = "Fred",
+                Address = new Address
+                {
+                    Line1 = "Flat 1",
+                    Line2 = "The Meadows"
+                }
+            };
+            NormalClient?.Send(ProtoBufMsg.From(person));
+            // NormalClient?.Send(NormalClientText.Text);
+        };
 
         // RelayServerIp,RelayServerPort,RelayServerText,RelayServerReceiveText
         CreateRelayServer.Pressed += () =>
@@ -143,12 +156,12 @@ public partial class SteamTest : Node2D
             if (SteamUserInfo == null)
             {
                 Log.Info("向所有发送");
-                RelayServer?.Send(RelayServerText.Text);
+                RelayServer?.Send(ProtoBufMsg.From(RelayServerText.Text));
             }
             else
             {
                 Log.Info("向单个发送");
-                RelayServer?.Send(SteamUserInfo.Friend.Id, RelayServerText.Text);
+                RelayServer?.Send(SteamUserInfo.Friend.Id, ProtoBufMsg.From(RelayServerText.Text));
             }
         };
         // RelayIp,RelayPort,RelayClientText,RelayClientReceiveText
@@ -183,7 +196,7 @@ public partial class SteamTest : Node2D
             RelayClient?.Close();
             RelayClient = null;
         };
-        SendToRelayServer.Pressed += () => { RelayClient?.Send(RelayClientText.Text); };
+        SendToRelayServer.Pressed += () => { RelayClient?.Send(ProtoBufMsg.From(RelayClientText.Text)); };
     }
 
     public void ShowFriends()

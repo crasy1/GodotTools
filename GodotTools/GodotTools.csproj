@@ -18,6 +18,9 @@
         <Copyright>Copyright (c) Crasy1 2025</Copyright>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <RootNamespace>Godot</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn)</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
@@ -30,12 +33,14 @@
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[4.8.0]" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="protobuf-net" Version="3.2.52" />
         <PackageReference Include="Serilog" Version="4.3.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="bin\Release\**\*.xml" Pack="true" PackagePath="lib\$(TargetFramework)" />
         <EmbeddedResource Include="icon.png" Pack="true" PackagePath=""/>
         <EmbeddedResource Include="..\README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
