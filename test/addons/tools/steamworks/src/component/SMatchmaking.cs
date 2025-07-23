@@ -10,7 +10,6 @@ namespace Godot;
 [Singleton]
 public partial class SMatchmaking : SteamComponent
 {
-
     public int MaxUser { set; get; } = 4;
     public Lobby? Lobby { get; private set; }
 
@@ -23,62 +22,62 @@ public partial class SMatchmaking : SteamComponent
             if (result == Result.OK)
             {
                 Lobby = lobby;
-                Lobby?.SetPrivate();
-                Lobby?.SetJoinable(false);
-                Lobby?.SetData("version", Project.Version);
+                // 确保只能搜到客户端版本一致的大厅
+                var update = Lobby?.SetData(nameof(Project.Version), Project.Version);
+                Log.Info($"更新lobby {nameof(Project.Version)} {Project.Version} {update}");
             }
         };
         SteamMatchmaking.OnLobbyInvite += (friend, lobby) =>
         {
-            Log.Info($"收到房间邀请 {friend} {lobby}");
+            Log.Info($"收到房间邀请 {friend} {lobby.Id}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnLobbyEntered += (lobby) =>
         {
-            Log.Info($"进入房间 {lobby}");
+            Log.Info($"进入房间 {lobby.Id}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnLobbyGameCreated += (lobby, i, s, steamId) =>
         {
-            Log.Info($"房间游戏已创建 {lobby} {i} {s} {steamId}");
+            Log.Info($"房间游戏已创建 {lobby.Id} {i} {s} {steamId}");
         };
         SteamMatchmaking.OnLobbyDataChanged += (lobby) =>
         {
-            Log.Info($"房间数据已改变 {lobby}");
+            Log.Info($"房间数据已改变 {lobby.Id}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnChatMessage += (lobby, friend, message) =>
         {
-            Log.Info($"房间聊天消息 {lobby} {friend} {message}");
+            Log.Info($"房间聊天消息 {lobby.Id} {friend} {message}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnLobbyMemberJoined += (lobby, friend) =>
         {
-            Log.Info($"房间成员加入 {lobby} {friend}");
+            Log.Info($"房间成员加入 {lobby.Id} {friend}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) =>
         {
-            Log.Info($"房间成员离开 {lobby} {friend}");
+            Log.Info($"房间成员离开 {lobby.Id} {friend}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
         {
-            Log.Info($"房间成员被禁言 {lobby} {friend} {friend2}");
+            Log.Info($"房间成员被禁言 {lobby.Id} {friend} {friend2}");
         };
         SteamMatchmaking.OnLobbyMemberDataChanged += (lobby, friend) =>
         {
-            Log.Info($"房间成员数据改变 {lobby} {friend}");
+            Log.Info($"房间成员数据改变 {lobby.Id} {friend}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnLobbyMemberDisconnected += (lobby, friend) =>
         {
-            Log.Info($"房间成员断开连接 {lobby} {friend}");
+            Log.Info($"房间成员断开连接 {lobby.Id} {friend}");
             Lobby = lobby;
         };
         SteamMatchmaking.OnLobbyMemberKicked += (lobby, friend, friend2) =>
         {
-            Log.Info($"房间成员被踢 {lobby} {friend} {friend2}");
+            Log.Info($"房间成员被踢 {lobby.Id} {friend} {friend2}");
             Lobby = lobby;
         };
     }
@@ -98,7 +97,7 @@ public partial class SMatchmaking : SteamComponent
     {
         var lobbyQuery = SteamMatchmaking.LobbyList.WithMaxResults(maxResult);
         lobbyQuery = lobbyQuery.WithSlotsAvailable(minSlots);
-        // lobbyQuery = lobbyQuery.WithKeyValue("version", Project.Version);
+        lobbyQuery = lobbyQuery.WithKeyValue(nameof(Project.Version), Project.Version);
         var lobbies = await lobbyQuery.RequestAsync();
         return lobbies == null ? [] : lobbies.ToList();
     }

@@ -6,7 +6,6 @@ namespace Godot;
 [Singleton]
 public partial class SRemoteStorage : SteamComponent
 {
-
     public override void _Ready()
     {
         base._Ready();
@@ -17,7 +16,10 @@ public partial class SRemoteStorage : SteamComponent
         Log.Info($@"
 ----    {nameof(SteamRemoteStorage)}    ----
 FileCount:                  {SteamRemoteStorage.FileCount}
-Files:                      {SteamRemoteStorage.Files}
+Files:                      {string.Join(",", SteamRemoteStorage.Files)}
+QuotaBytes:                 {SteamRemoteStorage.QuotaBytes}
+QuotaUsedBytes:             {SteamRemoteStorage.QuotaUsedBytes}
+QuotaRemainingBytes:        {SteamRemoteStorage.QuotaRemainingBytes}
 IsCloudEnabled:             {SteamRemoteStorage.IsCloudEnabled}
 IsCloudEnabledForAccount:   {SteamRemoteStorage.IsCloudEnabledForAccount}
 IsCloudEnabledForApp:       {SteamRemoteStorage.IsCloudEnabledForApp}
@@ -26,15 +28,20 @@ IsCloudEnabledForApp:       {SteamRemoteStorage.IsCloudEnabledForApp}
     }
 
 
-    public static void WriteToCloud(string filename, string content)
+    public bool WriteToCloud(string filename, string content)
     {
         var bytes = System.Text.Encoding.UTF8.GetBytes(content);
-        SteamRemoteStorage.FileWrite(filename, bytes);
+        return SteamRemoteStorage.FileWrite(filename, bytes);
     }
 
-    public static string ReadFromCloud(string filename)
+    public string? ReadFromCloud(string filename)
     {
-        var content = SteamRemoteStorage.FileRead(filename);
-        return System.Text.Encoding.UTF8.GetString(content);
+        if (SteamRemoteStorage.FileExists(filename))
+        {
+            var content = SteamRemoteStorage.FileRead(filename);
+            return System.Text.Encoding.UTF8.GetString(content);
+        }
+
+        return null;
     }
 }

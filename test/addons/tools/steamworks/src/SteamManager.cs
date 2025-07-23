@@ -42,6 +42,17 @@ public partial class SteamManager : CanvasLayer
             SteamScreenshots.TriggerScreenshot();
             Log.Info("截屏");
         };
+        WriteCloud.Pressed += () =>
+        {
+            var writeToCloud = SRemoteStorage.Instance.WriteToCloud("test.txt", "test123你好");
+            Log.Info($"上传到云端 {writeToCloud}");
+        };
+        ReadCloud.Pressed += () =>
+        {
+            SRemoteStorage.Instance.GetInfo();
+            var readFromCloud = SRemoteStorage.Instance.ReadFromCloud("test.txt");
+            Log.Info($"从云端读取到 {readFromCloud}");
+        };
         ShowFriends.Pressed += () =>
         {
             FriendsScrollContainer.Visible = true;
@@ -70,9 +81,8 @@ public partial class SteamManager : CanvasLayer
                 return;
             }
 
-            var lobby = SteamLobby.Instantiate((int)MaxLobbyUser.Value);
+            var lobby = SteamLobby.Instantiate();
             LobbyInfo.AddChild(lobby);
-            lobby.Create();
         };
         SearchLobby.Pressed += async () =>
         {

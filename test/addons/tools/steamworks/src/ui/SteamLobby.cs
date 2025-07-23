@@ -11,26 +11,29 @@ namespace Godot;
 [SceneTree]
 public partial class SteamLobby : Control
 {
-    private int MaxUser { set; get; }
-
-    [OnInstantiate]
-    private void Init(int maxUser)
-    {
-        MaxUser = maxUser;
-    }
+    public Lobby? Lobby => SMatchmaking.Instance.Lobby;
+    private LobbyType LobbyType = LobbyType.Public;
 
     public override void _Ready()
     {
-        Hide();
         SteamMatchmaking.OnLobbyCreated += (result, lobby) =>
         {
             if (result == Result.OK)
             {
+                CreateLobby.Disabled = true;
+                MaxLobbyUser.Editable = false;
                 UpdateLobbyData();
+                LobbyTypeOption.EmitSignal(OptionButton.SignalName.ItemSelected, (int)LobbyType);
+                Joinable.EmitSignal(BaseButton.SignalName.Toggled, Joinable.ButtonPressed);
             }
         };
-        SteamMatchmaking.OnLobbyInvite += (friend, lobby) => { Log.Info($"收到房间邀请 {friend} {lobby}"); };
-        SteamMatchmaking.OnLobbyEntered += (lobby) => { UpdateLobbyData(); };
+        SteamMatchmaking.OnLobbyInvite += (friend, lobby) => { Log.Info($"收到房间邀请 {friend} {lobby.Id}"); };
+        SteamMatchmaking.OnLobbyEntered += (lobby) =>
+        {
+            CreateLobby.Disabled = true;
+            MaxLobbyUser.Editable = false;
+            UpdateLobbyData();
+        };
         SteamMatchmaking.OnLobbyGameCreated += (lobby, i, s, steamId) => { };
         SteamMatchmaking.OnLobbyDataChanged += (lobby) => { UpdateLobbyData(); };
         SteamMatchmaking.OnChatMessage += (lobby, friend, message) => { };
@@ -38,35 +41,51 @@ public partial class SteamLobby : Control
         SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) => { UpdateLobbyData(); };
         SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
         {
-            Log.Info($"房间成员被禁言 {lobby} {friend} {friend2}");
+            Log.Info($"房间成员被禁言 {lobby.Id} {friend} {friend2}");
         };
         SteamMatchmaking.OnLobbyMemberDataChanged += (lobby, friend) => { UpdateLobbyData(); };
         SteamMatchmaking.OnLobbyMemberDisconnected += (lobby, friend) => { UpdateLobbyData(); };
         SteamMatchmaking.OnLobbyMemberKicked += (lobby, friend, friend2) => { UpdateLobbyData(); };
-        Joinable.Pressed += () => { SMatchmaking.Instance.Lobby?.SetJoinable(Joinable.ButtonPressed); };
-        LobbyType.ItemSelected += index =>
+        Joinable.Toggled += (value) =>
         {
+            Lobby?.SetJoinable(value);
+            Log.Info($"设置房间可加入 {value}");
+        };
+        LobbyTypeOption.ItemSelected += index =>
+        {
+            LobbyType = (LobbyType)index;
+            if (!Lobby.HasValue)
+            {
+                return;
+            }
+
             switch (index)
             {
                 case 0:
-                    SMatchmaking.Instance.Lobby?.SetPrivate();
+                    Lobby?.SetPrivate();
+                    Log.Info("大厅设置为私人");
                     break;
                 case 1:
-                    SMatchmaking.Instance.Lobby?.SetFriendsOnly();
+                    Lobby?.SetFriendsOnly();
+                    Log.Info("大厅设置为好友");
                     break;
                 case 2:
-                    SMatchmaking.Instance.Lobby?.SetPublic();
+                    Lobby?.SetPublic();
+                    Log.Info("大厅设置为公开");
                     break;
                 case 3:
-                    SMatchmaking.Instance.Lobby?.SetInvisible();
+                    Lobby?.SetInvisible();
+                    Log.Info("大厅设置为隐藏");
                     break;
             }
         };
+
+        CreateLobby.Pressed += () => { Create(); };
         Join.Pressed += async () =>
         {
-            if (SMatchmaking.Instance.Lobby.HasValue)
+            if (Lobby.HasValue)
             {
-                var result = await SMatchmaking.Instance.Lobby.Value.Join();
+                var result = await Lobby.Value.Join();
                 if (result == RoomEnter.Success)
                 {
                     Log.Info("进入大厅");
@@ -83,33 +102,35 @@ public partial class SteamLobby : Control
             Log.Info("退出大厅");
             QueueFree();
         };
+        SteamId.Hide();
+        MaxUserLabel.Hide();
     }
 
     public void Create()
     {
-        SteamMatchmaking.CreateLobbyAsync(MaxUser);
+        SteamMatchmaking.CreateLobbyAsync((int)MaxLobbyUser.Value);
     }
 
     public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10)
     {
-        var lobbyQuery = SteamMatchmaking.LobbyList.WithMaxResults(maxResult);
-        lobbyQuery = lobbyQuery.WithSlotsAvailable(minSlots);
-        // lobbyQuery = lobbyQuery.WithKeyValue("version",Project.Version);
-        var lobbies = await lobbyQuery.RequestAsync();
-        return lobbies == null ? [] : lobbies.ToList();
+        return await SMatchmaking.Search(minSlots, maxResult);
     }
 
     private void UpdateLobbyData()
     {
         Show();
+        MaxUserLabel.Show();
         Friends.ClearAndFreeChildren();
-        SteamId.Text = $"{SMatchmaking.Instance.Lobby?.Id}";
-        CurrentUserLabel.Text = $"{SMatchmaking.Instance.Lobby?.MemberCount}";
-        MaxUserLabel.Text = $"{SMatchmaking.Instance.Lobby?.MaxMembers}";
-        if (SMatchmaking.Instance.Lobby.HasValue)
-            foreach (var lobbyMember in SMatchmaking.Instance.Lobby.Value.Members)
+        SteamId.Text = $"{Lobby?.Id}";
+        CurrentUserLabel.Text = $"{Lobby?.MemberCount}";
+        MaxUserLabel.Text = $"{Lobby?.MaxMembers}";
+        if (Lobby.HasValue)
+            foreach (var lobbyMember in Lobby.Value.Members)
             {
-                if (SMatchmaking.Instance.Lobby.Value.IsOwnedBy(lobbyMember.Id))
+                var isOwner = Lobby.Value.IsOwnedBy(lobbyMember.Id);
+                Joinable.Disabled = !isOwner;
+                LobbyTypeOption.Disabled = !isOwner;
+                if (isOwner)
                 {
                     Log.Info($"房主是: {lobbyMember.Name}");
                 }

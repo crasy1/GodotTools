@@ -67,6 +67,16 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "显示成就列表"
 
+[node name="WriteCloud" type="Button" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "上传到云"
+
+[node name="ReadCloud" type="Button" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "从云读取"
+
 [node name="OpenStore" type="Button" parent="FlowContainer"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -111,14 +121,6 @@ text = "打开游戏官方组"
 unique_name_in_owner = true
 layout_mode = 2
 text = "打开成就"
-
-[node name="MaxLobbyUser" type="SpinBox" parent="FlowContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 0)
-layout_mode = 2
-value = 4.0
-rounded = true
-prefix = "最大人数"
 
 [node name="CreateLobby" type="Button" parent="FlowContainer"]
 unique_name_in_owner = true
