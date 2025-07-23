@@ -19,7 +19,7 @@ public partial class SNetworkingSockets : SteamComponent
         //         Log.Info($"连接状态改变 {ci.Identity},{ci.Address},{ci.State},{ci.EndReason}");
         //     };
         // }
-
+        ProtoBufUtil.Init();
         SteamNetworkingSockets.OnFakeIPResult += (NetAddress na) => { Log.Info($"steam fake ip 地址 {na}"); };
         SClient.Instance.SteamClientConnected += () => { SteamNetworkingUtils.InitRelayNetworkAccess(); };
         SteamManager.AddBeforeGameQuitAction(CloseAllSocket);

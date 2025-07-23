@@ -1,6 +1,3 @@
-using System;
-using System.Drawing;
-using System.Numerics;
 using ProtoBuf;
 
 namespace Godot;
@@ -24,27 +21,10 @@ public class GodotMsg
     [ProtoMember(14)] private Projection Projection { set; get; }
     [ProtoMember(15)] private Transform3D Transform3D { set; get; }
     [ProtoMember(16)] private Color Color { set; get; }
-    [ProtoMember(17)] private StringName StringName { set; get; }
-    [ProtoMember(18)] private NodePath NodePath { set; get; }
-    [ProtoMember(19)] private Rid Rid { set; get; }
-    [ProtoMember(20)] private GodotObject GodotObject { set; get; }
-    [ProtoMember(21)] private Godot.Collections.Dictionary Dictionary { set; get; }
-    [ProtoMember(22)] private Godot.Collections.Array Array { set; get; }
-    [ProtoMember(23)] private Byte[] ByteArray { set; get; }
-    [ProtoMember(24)] private Int32[] Int32Array { set; get; }
-    [ProtoMember(25)] private Int64[] Int64Array { set; get; }
-    [ProtoMember(26)] private Single[] Float32Array { set; get; }
-    [ProtoMember(27)] private Double[] Float64Array { set; get; }
-    [ProtoMember(28)] private String[] StringArray { set; get; }
-    [ProtoMember(29)] private Vector2[] Vector2Array { set; get; }
-    [ProtoMember(30)] private Vector3[] Vector3Array { set; get; }
-    [ProtoMember(31)] private Color[] ColorArray { set; get; }
-    [ProtoMember(32)] private Vector4[] Vector4Array { set; get; }
 
-    public static void Test()
+    public static GodotMsg TestInstance()
     {
-        ProtoBufUtil.Init();
-        var msg = new GodotMsg()
+        return new GodotMsg()
         {
             Vector2 = new Vector2(1, 2),
             Vector2I = new Vector2I(1, 2),
@@ -62,31 +42,6 @@ public class GodotMsg
             Projection = new Projection(Transform3D.Identity),
             Transform3D = new Transform3D(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
             Color = new Color(1, 2, 3, 4),
-            StringName = new StringName("test"),
-            NodePath = new NodePath("test"),
-            Rid = new Rid(new Node()),
-            GodotObject = new GodotObject(),
-            Dictionary = new Godot.Collections.Dictionary()
-                { },
-            Array = new Godot.Collections.Array()
-                { },
-            ByteArray = new Byte[] { 1, 2, 3, 4 },
-            Int32Array = new Int32[] { 1, 2, 3, 4 },
-            Int64Array = new Int64[] { 1, 2, 3, 4 },
-            Float32Array = new Single[] { 1, 2, 3, 4 },
-            Float64Array = new Double[] { 1, 2, 3, 4 },
-            StringArray = new String[] { "test", "test2" },
-            Vector2Array = new Vector2[] { new Vector2(1, 2), new Vector2(3, 4) },
-            Vector3Array = new Vector3[] { new Vector3(1, 2, 3), new Vector3(4, 5, 6) },
-            ColorArray = new Color[] { new Color(1, 2, 3, 4), new Color(5, 6, 7, 8) },
-            Vector4Array = new Vector4[] { new Vector4(1, 2, 3, 4), new Vector4(5, 6, 7, 8) },
         };
-
-        var protoBufMsg = ProtoBufMsg.From(msg);
-        protoBufMsg.Serialize();
-    }
-    public static void Main()
-    {
-        
     }
 }

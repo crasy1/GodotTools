@@ -41,7 +41,8 @@ public partial class SteamTest : Node2D
             NormalServer.ReceiveMessage += (id, msg) =>
             {
                 var protoBufMsg = msg as ProtoBufMsg;
-                NormalServerReceiveText.AddText($"{id}:{protoBufMsg.Type} {protoBufMsg.Deserialize<Vector2>()} \r\n");
+                var deserialize = protoBufMsg.Deserialize();
+                NormalServerReceiveText.AddText($"{id}:{protoBufMsg.Type} {deserialize} \r\n");
             };
             NormalServer.Connected += (id) =>
             {
@@ -88,7 +89,8 @@ public partial class SteamTest : Node2D
             NormalClient.ReceiveMessage += (id, msg) =>
             {
                 var protoBufMsg = msg as ProtoBufMsg;
-                NormalClientReceiveText.AddText($"{id}:{protoBufMsg.Type} {protoBufMsg.Deserialize()}\r\n");
+                var deserialize = protoBufMsg.Deserialize();
+                NormalClientReceiveText.AddText($"{id}:{protoBufMsg.Type} {deserialize}\r\n");
             };
             NormalClient.Connected += (id) =>
             {

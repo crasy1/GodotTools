@@ -4,9 +4,11 @@ namespace Godot;
 
 public static class ProtoBufUtil
 {
+    /// <summary>
+    /// 添加protobuf支持的类型
+    /// </summary>
     public static void Init()
     {
-        // TODO 添加更多类型
         // 在程序启动时配置一次
         RuntimeTypeModel.Default
             .Add(typeof(Vector2), false)
@@ -45,11 +47,6 @@ public static class ProtoBufUtil
             .Add(4, nameof(Vector4I.W))
             ;
         RuntimeTypeModel.Default
-            .Add(typeof(Vector2I), false)
-            .Add(1, nameof(Vector2.X))
-            .Add(2, nameof(Vector2.Y))
-            ;
-        RuntimeTypeModel.Default
             .Add(typeof(Rect2), false)
             .Add(1, nameof(Rect2.Position))
             .Add(2, nameof(Rect2.Size))
@@ -63,9 +60,9 @@ public static class ProtoBufUtil
             ;
         RuntimeTypeModel.Default
             .Add(typeof(Transform2D), false)
-            .Add(1, nameof(Transform2D.X))
-            .Add(2, nameof(Transform2D.Y))
-            .Add(3, nameof(Transform2D.Origin))
+            .Add(4, nameof(Transform2D.X))
+            .Add(5, nameof(Transform2D.Y))
+            .Add(6, nameof(Transform2D.Origin))
             ;
         RuntimeTypeModel.Default
             .Add(typeof(Plane), false)
@@ -90,9 +87,6 @@ public static class ProtoBufUtil
             .Add(1, nameof(Basis.Row0))
             .Add(2, nameof(Basis.Row1))
             .Add(3, nameof(Basis.Row2))
-            .Add(4, nameof(Basis.Column0))
-            .Add(5, nameof(Basis.Column1))
-            .Add(6, nameof(Basis.Column2))
             ;
         RuntimeTypeModel.Default
             .Add(typeof(Projection), false)
@@ -100,6 +94,12 @@ public static class ProtoBufUtil
             .Add(2, nameof(Projection.Y))
             .Add(3, nameof(Projection.Z))
             .Add(4, nameof(Projection.W))
+            ;
+        RuntimeTypeModel.Default
+            .Add(typeof(Transform2D), false)
+            .Add(1, nameof(Transform2D.X))
+            .Add(2, nameof(Transform2D.Y))
+            .Add(3, nameof(Transform2D.Origin))
             ;
         RuntimeTypeModel.Default
             .Add(typeof(Transform3D), false)
@@ -113,6 +113,5 @@ public static class ProtoBufUtil
             .Add(3, nameof(Color.B))
             .Add(4, nameof(Color.A))
             ;
-        
     }
 }
