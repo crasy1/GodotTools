@@ -119,19 +119,7 @@ public partial class SteamTest : Node2D
         };
         SendToNormalServer.Pressed += () =>
         {
-            var person = new Person
-            {
-                Id = 12345, Name = "Fred",
-                Address = new Address
-                {
-                    Line1 = "Flat 1",
-                    Line2 = "The Meadows"
-                },
-                Vector2 = new Vector2(10,20)
-            };
-            
-            NormalClient?.Send(ProtoBufMsg.From(new Vector2(10,20)));
-            // NormalClient?.Send(NormalClientText.Text);
+            NormalClient?.Send(ProtoBufMsg.From(NormalClientText.Text));
         };
 
         // RelayServerIp,RelayServerPort,RelayServerText,RelayServerReceiveText
@@ -142,7 +130,8 @@ public partial class SteamTest : Node2D
             RelayServer.ReceiveMessage += (id, msg) =>
             {
                 var protoBufMsg = msg as ProtoBufMsg;
-                RelayServerReceiveText.AddText($"{id}:{msg} \r\n");
+                var deserialize = protoBufMsg.Deserialize();
+                RelayServerReceiveText.AddText($"{id}:{protoBufMsg.Type} {deserialize} \r\n");
             };
             RelayServer.Connected += (id) =>
             {

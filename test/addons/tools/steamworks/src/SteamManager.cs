@@ -36,6 +36,7 @@ public partial class SteamManager : CanvasLayer
 
         Dispatch.OnException += (e) => { Log.Error($"steamworks 异常", e); };
         SClient.Instance.Connect();
+        SServer.Instance.StartServer("mod","des");
         Ping.Hide();
         ScreenShot.Pressed += () =>
         {
@@ -192,6 +193,10 @@ public partial class SteamManager : CanvasLayer
 
     private async Task OnSteamClientConnected()
     {
+        var ticket = SteamUser.GetAuthSessionTicket(SteamClient.SteamId);
+        var ticketData = ticket.Data;
+        var steamId = SteamClient.SteamId;
+        var beginAuthSession = SteamServer.BeginAuthSession(ticketData, steamId);
         SteamFriends.ListenForFriendsMessages = true;
         Connected.Text = "已连接";
         UserInfo.Text = $@"
