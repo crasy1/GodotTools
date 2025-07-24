@@ -133,7 +133,7 @@ public partial class SteamLobby : Control
 
         Send.Pressed += () =>
         {
-            if (Lobby.HasValue && string.IsNullOrWhiteSpace(SendText.Text))
+            if (Lobby.HasValue && !string.IsNullOrWhiteSpace(SendText.Text))
             {
                 Lobby?.SendChatString(SendText.Text);
             }
