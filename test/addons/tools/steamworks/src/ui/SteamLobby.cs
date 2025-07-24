@@ -11,7 +11,7 @@ namespace Godot;
 [SceneTree]
 public partial class SteamLobby : Control
 {
-    public Lobby? Lobby => SMatchmaking.Instance.Lobby;
+    public Lobby? Lobby { set; get; }
     private LobbyType LobbyType = LobbyType.Public;
 
     public override void _Ready()
@@ -20,6 +20,7 @@ public partial class SteamLobby : Control
         {
             if (result == Result.OK)
             {
+                Lobby = lobby;
                 CreateLobby.Disabled = true;
                 MaxLobbyUser.Editable = false;
                 UpdateLobbyData();
@@ -27,7 +28,7 @@ public partial class SteamLobby : Control
                 Joinable.EmitSignal(BaseButton.SignalName.Toggled, Joinable.ButtonPressed);
                 // 设置gameserver
                 var ServerId = SteamManager.ServerId;
-                Lobby.Value.SetGameServer(ServerId);
+                Lobby?.SetGameServer(ServerId);
             }
         };
         SteamMatchmaking.OnLobbyInvite += async (friend, lobby) =>
@@ -53,10 +54,22 @@ public partial class SteamLobby : Control
         {
             Log.Info($"房间游戏已创建 {lobby.Id} {ip} {port} 服务器id {serverId}");
         };
-        SteamMatchmaking.OnLobbyDataChanged += (lobby) => { UpdateLobbyData(); };
+        SteamMatchmaking.OnLobbyDataChanged += (lobby) =>
+        {
+            Lobby = lobby;
+            UpdateLobbyData();
+        };
         SteamMatchmaking.OnChatMessage += (lobby, friend, message) => { };
-        SteamMatchmaking.OnLobbyMemberJoined += (lobby, friend) => { UpdateLobbyData(); };
-        SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) => { UpdateLobbyData(); };
+        SteamMatchmaking.OnLobbyMemberJoined += (lobby, friend) =>
+        {
+            Lobby = lobby;
+            UpdateLobbyData();
+        };
+        SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) =>
+        {
+            Lobby = lobby;
+            UpdateLobbyData();
+        };
         SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
         {
             Log.Info($"房间成员被禁言 {lobby.Id} {friend} {friend2}");
@@ -126,7 +139,7 @@ public partial class SteamLobby : Control
         {
             SMatchmaking.Instance.LeaveLobby();
             Log.Info("退出大厅");
-            QueueFree();
+            // QueueFree();
         };
         SteamId.Hide();
         MaxUserLabel.Hide();
