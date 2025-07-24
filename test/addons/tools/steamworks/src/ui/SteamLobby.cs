@@ -49,6 +49,7 @@ public partial class SteamLobby : Control
         };
         SteamMatchmaking.OnLobbyGameCreated += (lobby, ip, port, serverId) =>
         {
+            Receive.AppendText($"房间游戏已创建\r\n");
             Log.Info($"房间游戏已创建 {lobby.Id} {ip} {port} 服务器id {serverId}");
         };
         SteamMatchmaking.OnLobbyDataChanged += (lobby) =>
@@ -56,24 +57,36 @@ public partial class SteamLobby : Control
             Lobby = lobby;
             UpdateLobbyData();
         };
-        SteamMatchmaking.OnChatMessage += (lobby, friend, message) => { };
+        SteamMatchmaking.OnChatMessage += (lobby, friend, message) =>
+        {
+            Receive.AppendText($"{friend.Name}: {message}\r\n");
+        };
         SteamMatchmaking.OnLobbyMemberJoined += (lobby, friend) =>
         {
             Lobby = lobby;
+            
+            Receive.AppendText($"{friend.Name}: 加入房间\r\n");
             UpdateLobbyData();
         };
         SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) =>
         {
             Lobby = lobby;
+            Receive.AppendText($"{friend.Name}: 离开房间\r\n");
             UpdateLobbyData();
         };
         SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
         {
+            Receive.AppendText($"{friend.Name}: 被禁言\r\n");
             Log.Info($"房间成员被禁言 {lobby.Id} {friend} {friend2}");
         };
         SteamMatchmaking.OnLobbyMemberDataChanged += (lobby, friend) => { UpdateLobbyData(); };
         SteamMatchmaking.OnLobbyMemberDisconnected += (lobby, friend) => { UpdateLobbyData(); };
-        SteamMatchmaking.OnLobbyMemberKicked += (lobby, friend, friend2) => { UpdateLobbyData(); };
+        SteamMatchmaking.OnLobbyMemberKicked += (lobby, friend, friend2) =>
+        {
+            
+            Receive.AppendText($"{friend.Name}被{friend2.Name}踢厨房间\r\n");
+            UpdateLobbyData();
+        };
         Joinable.Toggled += (value) =>
         {
             Lobby?.SetJoinable(value);
@@ -117,6 +130,14 @@ public partial class SteamLobby : Control
                 Log.Info($"邀请好友 {SteamManager.Friend.Name} {SteamManager.Friend.Id}");
             }
         };
+
+        Send.Pressed += () =>
+        {
+            if (Lobby.HasValue && string.IsNullOrWhiteSpace(SendText.Text))
+            {
+                Lobby?.SendChatString(SendText.Text);
+            }
+        };
         Join.Pressed += async () =>
         {
             if (Lobby.HasValue)
@@ -134,7 +155,7 @@ public partial class SteamLobby : Control
         };
         Exit.Pressed += () =>
         {
-            SMatchmaking.Instance.LeaveLobby();
+            Lobby?.Leave();
             Lobby = new Lobby();
             UpdateLobbyData();
             Log.Info("退出大厅");

@@ -116,6 +116,22 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "退出"
 
+[node name="Receive" type="RichTextLabel" parent="HBoxContainer/FlowContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+
+[node name="Send" type="Button" parent="HBoxContainer/FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "发送"
+
+[node name="SendText" type="TextEdit" parent="HBoxContainer/FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "输入聊天信息"
+
 [node name="ConnectServer" type="Button" parent="HBoxContainer/FlowContainer"]
 unique_name_in_owner = true
 layout_mode = 2
