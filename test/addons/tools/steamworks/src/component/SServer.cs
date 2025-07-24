@@ -1,14 +1,20 @@
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Steamworks;
+using Steamworks.Data;
+using Steamworks.ServerList;
 
 namespace Godot;
 
+/// <summary>
+/// https://partner.steamgames.com/doc/sdk/uploading/distributing_gs
+/// 涉及专用服务器
+/// </summary>
 [Singleton]
 public partial class SServer : SteamComponent
 {
-   
-
-    public override void _Ready()
+    public async override void _Ready()
     {
         base._Ready();
         SteamServer.OnSteamNetAuthenticationStatus += (status) => { Log.Info($"服务器网络验证 {status}"); };
@@ -22,16 +28,25 @@ public partial class SServer : SteamComponent
         SteamManager.AddBeforeGameQuitAction(StopServer);
     }
 
-    public void StartServer(string modDir, string desc)
+    public void StartServer(string modDir, string desc, string mapName = null)
     {
         var serverInit = new SteamServerInit(modDir, desc)
         {
-            VersionString =Project.Version
+            GamePort = 27015,
+            QueryPort = 27016,
+            Secure = true,
+            DedicatedServer = true,
+            VersionString = Project.Version
         };
         try
         {
             SteamServer.Init(SteamConfig.AppId, serverInit);
-            Log.Info("启动steam服务器");
+            Log.Info($"启动steam服务器 {SteamServer.PublicIp} {SteamServer.Product}");
+            SetProcess(true);
+            SteamServer.MapName = mapName ?? Project.GameName;
+            SteamServer.ServerName = Project.GameName;
+            SteamServer.GameTags = $"{Project.GameName},{Project.Version}";
+            SteamServer.LogOnAnonymous();
         }
         catch (Exception e)
         {
@@ -39,8 +54,37 @@ public partial class SServer : SteamComponent
         }
     }
 
+    /// <summary>
+    /// 查找服务器
+    /// </summary>
+    /// <param name="mapName"></param>
+    /// <param name="serverType"></param>
+    public async Task<List<ServerInfo>> ServerList(string mapName = null, ServerType serverType = ServerType.Internet)
+    {
+        using Base list = serverType switch
+        {
+            ServerType.Internet => new Internet(),
+            ServerType.History => new History(),
+            ServerType.Favourites => new Favourites(),
+            ServerType.Friends => new Friends(),
+            ServerType.LocalNetwork => new LocalNetwork(),
+            _ => throw new ArgumentOutOfRangeException(nameof(serverType), serverType, null)
+        };
+
+        list.AddFilter("MAP", mapName);
+        await list.RunQueryAsync();
+        Log.Info($"================服务器列表=================");
+        foreach (var server in list.Responsive)
+        {
+            Log.Info($"{server.Address} {server.Name}");
+        }
+
+        return list.Responsive;
+    }
+
     public void StopServer()
     {
+        SetProcess(false);
         SteamServer.Shutdown();
         Log.Info("退出steam server");
     }
@@ -52,6 +96,4 @@ public partial class SServer : SteamComponent
             SteamServer.RunCallbacks();
         }
     }
-
- 
 }

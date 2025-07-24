@@ -67,6 +67,21 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "显示成就列表"
 
+[node name="StartServer" type="Button" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "启动服务器"
+
+[node name="ConnectServer" type="Button" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "连接服务器"
+
+[node name="SearchServer" type="Button" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "搜索服务器"
+
 [node name="WriteCloud" type="Button" parent="FlowContainer"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -76,6 +91,11 @@ text = "上传到云"
 unique_name_in_owner = true
 layout_mode = 2
 text = "从云读取"
+
+[node name="DeleteCloud" type="Button" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "删除文件"
 
 [node name="OpenStore" type="Button" parent="FlowContainer"]
 unique_name_in_owner = true

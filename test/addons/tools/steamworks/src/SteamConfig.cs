@@ -1,4 +1,3 @@
-
 namespace Godot;
 
 public static class SteamConfig
@@ -7,20 +6,26 @@ public static class SteamConfig
 
     public static uint AppId
     {
-        get => Instance.GetMeta("appId", 480).AsUInt32();
-        set => Save("appId", value);
+        get => Instance.GetMeta(nameof(AppId), 480).AsUInt32();
+        set => Save(nameof(AppId), value);
     }
 
     public static bool Debug
     {
-        get => Instance.GetMeta("debug", false).AsBool();
-        set => Save("debug", value);
+        get => Instance.GetMeta(nameof(Debug), false).AsBool();
+        set => Save(nameof(Debug), value);
+    }
+
+    public static bool AsServer
+    {
+        get => Instance.GetMeta(nameof(AsServer), false).AsBool();
+        set => Save(nameof(AsServer), value);
     }
 
     public static bool CallbackDebug
     {
-        get => Instance.GetMeta("callbackDebug", false).AsBool();
-        set => Save("callbackDebug", value);
+        get => Instance.GetMeta(nameof(CallbackDebug), false).AsBool();
+        set => Save(nameof(CallbackDebug), value);
     }
 
     private static void Save(string key, Variant value)

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Steamworks;
 
 namespace Godot;
@@ -15,33 +17,86 @@ public partial class SRemoteStorage : SteamComponent
     {
         Log.Info($@"
 ----    {nameof(SteamRemoteStorage)}    ----
-FileCount:                  {SteamRemoteStorage.FileCount}
-Files:                      {string.Join(",", SteamRemoteStorage.Files)}
 QuotaBytes:                 {SteamRemoteStorage.QuotaBytes}
 QuotaUsedBytes:             {SteamRemoteStorage.QuotaUsedBytes}
 QuotaRemainingBytes:        {SteamRemoteStorage.QuotaRemainingBytes}
-IsCloudEnabled:             {SteamRemoteStorage.IsCloudEnabled}
-IsCloudEnabledForAccount:   {SteamRemoteStorage.IsCloudEnabledForAccount}
-IsCloudEnabledForApp:       {SteamRemoteStorage.IsCloudEnabledForApp}
+FileCount:                  {SteamRemoteStorage.FileCount}
+Files:                      {string.Join(",", SteamRemoteStorage.Files)}
 ----    {nameof(SteamRemoteStorage)}    ----
 ");
     }
 
-
-    public bool WriteToCloud(string filename, string content)
+    public List<string> GetFileList()
     {
-        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
-        return SteamRemoteStorage.FileWrite(filename, bytes);
+        var files = SteamRemoteStorage.Files.ToList();
+        foreach (var file in files)
+        {
+            Log.Info($"云文件 {file}: 最近修改时间 {FileTime(file)},大小 {FileSize(file)} b");
+        }
+
+        return files;
     }
 
-    public string? ReadFromCloud(string filename)
+    public string? ReadString(string filename)
     {
-        if (SteamRemoteStorage.FileExists(filename))
+        if (FileExists(filename))
         {
             var content = SteamRemoteStorage.FileRead(filename);
             return System.Text.Encoding.UTF8.GetString(content);
         }
 
         return null;
+    }
+
+    public byte[]? ReadBytes(string filename)
+    {
+        if (FileExists(filename))
+        {
+            return SteamRemoteStorage.FileRead(filename);
+        }
+
+        return null;
+    }
+
+    public bool Write(string filename, byte[] bytes)
+    {
+        var result = SteamRemoteStorage.FileWrite(filename, bytes);
+        Log.Info($"上传文件 {filename} 到云 {result}");
+        return result;
+    }
+
+    public bool Write(string filename, string content)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+        return Write(filename, bytes);
+    }
+
+    public bool FileExists(string filename)
+    {
+        var result = SteamRemoteStorage.FileExists(filename);
+        Log.Info($"{(result ? "读取" : "不存在")}云文件 {filename}");
+        return result;
+    }
+
+    public bool FileDelete(string filename)
+    {
+        var result = SteamRemoteStorage.FileDelete(filename);
+        Log.Info($"删除云文件 {filename} {result}");
+        return result;
+    }
+
+    public DateTime FileTime(string filename)
+    {
+        return SteamRemoteStorage.FileTime(filename).ToLocalTime();
+    }
+
+    /// <summary>
+    /// size or 0
+    /// </summary>
+    /// <param name="filename"></param>
+    /// <returns></returns>
+    public int FileSize(string filename)
+    {
+        return SteamRemoteStorage.FileSize(filename);
     }
 }

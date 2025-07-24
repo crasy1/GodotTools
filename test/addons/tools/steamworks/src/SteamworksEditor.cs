@@ -15,6 +15,8 @@ public partial class SteamworksEditor : Control
         AppIdSpinBox.Value = SteamConfig.AppId;
         DebugUI.Toggled += (value) => { SteamConfig.Debug = value; };
         DebugUI.ButtonPressed = SteamConfig.Debug;
+        AsServer.Toggled += (value) => { SteamConfig.AsServer = value; };
+        AsServer.ButtonPressed = SteamConfig.AsServer;
     }
 
     

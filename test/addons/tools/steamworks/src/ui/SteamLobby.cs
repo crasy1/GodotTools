@@ -25,6 +25,8 @@ public partial class SteamLobby : Control
                 UpdateLobbyData();
                 LobbyTypeOption.EmitSignal(OptionButton.SignalName.ItemSelected, (int)LobbyType);
                 Joinable.EmitSignal(BaseButton.SignalName.Toggled, Joinable.ButtonPressed);
+                // TODO 设置gameserver
+                // Lobby.Value.SetGameServer();
             }
         };
         SteamMatchmaking.OnLobbyInvite += (friend, lobby) => { Log.Info($"收到房间邀请 {friend} {lobby.Id}"); };

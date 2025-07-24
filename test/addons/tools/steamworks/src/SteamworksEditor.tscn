@@ -44,3 +44,8 @@ unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 text = "启动游戏时显示调试界面"
+
+[node name="AsServer" type="CheckButton" parent="FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "作为steam服务器"

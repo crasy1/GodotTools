@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Steamworks;
+using Steamworks.ServerList;
 
 namespace Godot;
 
@@ -20,6 +21,8 @@ public partial class SteamManager : CanvasLayer
          */
     private static readonly Stack<Action> QuitActions = new();
 
+    private SteamId ServerId { set; get; }
+
     public override void _Ready()
     {
         GetTree().AutoAcceptQuit = false;
@@ -35,24 +38,37 @@ public partial class SteamManager : CanvasLayer
         }
 
         Dispatch.OnException += (e) => { Log.Error($"steamworks 异常", e); };
-        SClient.Instance.Connect();
-        SServer.Instance.StartServer("mod","des");
+        if (SteamConfig.AsServer)
+        {
+            SServer.Instance.StartServer("mod", "desc");
+        }
+        else
+        {
+            SClient.Instance.Connect();
+        }
+
         Ping.Hide();
         ScreenShot.Pressed += () =>
         {
             SteamScreenshots.TriggerScreenshot();
             Log.Info("截屏");
         };
+        string filename = "test.sav";
         WriteCloud.Pressed += () =>
         {
-            var writeToCloud = SRemoteStorage.Instance.WriteToCloud("test.txt", "test123你好");
+            var writeToCloud = SRemoteStorage.Instance.Write(filename, "test123你好");
             Log.Info($"上传到云端 {writeToCloud}");
         };
         ReadCloud.Pressed += () =>
         {
-            SRemoteStorage.Instance.GetInfo();
-            var readFromCloud = SRemoteStorage.Instance.ReadFromCloud("test.txt");
+            SRemoteStorage.Instance.GetFileList();
+            var readFromCloud = SRemoteStorage.Instance.ReadString(filename);
             Log.Info($"从云端读取到 {readFromCloud}");
+        };
+        DeleteCloud.Pressed += () =>
+        {
+            var result = SRemoteStorage.Instance.FileDelete(filename);
+            Log.Info($"从云端删除 {result}");
         };
         ShowFriends.Pressed += () =>
         {
@@ -63,6 +79,23 @@ public partial class SteamManager : CanvasLayer
         {
             FriendsScrollContainer.Visible = false;
             AchievementsScrollContainer.Visible = true;
+        };
+        StartServer.Pressed += () => { SServer.Instance.StartServer("mod", "desc"); };
+        SearchServer.Pressed += async () =>
+        {
+            var serverList = await SServer.Instance.ServerList(serverType: ServerType.LocalNetwork);
+            foreach (var serverInfo in serverList)
+            {
+                ServerId = serverInfo.SteamId;
+                Log.Info($"服务器设置为 {ServerId}");
+            }
+        };
+        ConnectServer.Pressed += () =>
+        {
+            // 还未验证
+            var ticket = SteamUser.GetAuthSessionTicket(ServerId);
+            var beginAuthSession = SteamUser.BeginAuthSession(ticket.Data, SteamClient.SteamId);
+            Log.Info($"验证 {beginAuthSession}");
         };
         AchievementsScrollContainer.Visible = false;
         OpenStore.Pressed += () => { SteamFriends.OpenStoreOverlay(SteamConfig.AppId); };
@@ -137,7 +170,6 @@ public partial class SteamManager : CanvasLayer
         components.AddChild(SInput.Instance);
         components.AddChild(SInventory.Instance);
         components.AddChild(SMatchmaking.Instance);
-        components.AddChild(SMatchmakingServers.Instance);
         components.AddChild(SMusic.Instance);
         components.AddChild(SNetworking.Instance);
         components.AddChild(SNetworkingSockets.Instance);
@@ -193,10 +225,6 @@ public partial class SteamManager : CanvasLayer
 
     private async Task OnSteamClientConnected()
     {
-        var ticket = SteamUser.GetAuthSessionTicket(SteamClient.SteamId);
-        var ticketData = ticket.Data;
-        var steamId = SteamClient.SteamId;
-        var beginAuthSession = SteamServer.BeginAuthSession(ticketData, steamId);
         SteamFriends.ListenForFriendsMessages = true;
         Connected.Text = "已连接";
         UserInfo.Text = $@"
