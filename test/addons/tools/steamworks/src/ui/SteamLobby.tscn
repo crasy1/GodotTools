@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cvgifx0xtsun0"]
 
-[ext_resource type="Script" uid="uid://xcgncmkh5vjn" path="res://addons/tools/steamworks/src/ui/SteamLobby.cs" id="1_meg5c"]
+[ext_resource type="Script" uid="uid://cani5n4k3hlor" path="res://addons/tools/steamworks/src/ui/SteamLobby.cs" id="1_meg5c"]
 
 [node name="SteamLobby" type="Control"]
 layout_mode = 3
@@ -13,24 +13,28 @@ script = ExtResource("1_meg5c")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 13
+anchors_preset = 8
 anchor_left = 0.5
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -184.0
-offset_right = 184.0
+anchor_bottom = 0.5
+offset_left = -201.5
+offset_top = -95.0
+offset_right = 201.5
+offset_bottom = 95.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="FlowContainer" type="FlowContainer" parent="HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/FlowContainer"]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="HBoxContainer/FlowContainer/HBoxContainer3"]
 layout_mode = 2
-text = "SteamId："
+text = "LobbyId："
 
 [node name="SteamId" type="Label" parent="HBoxContainer/FlowContainer/HBoxContainer3"]
 unique_name_in_owner = true
@@ -101,6 +105,11 @@ text = "创建"
 unique_name_in_owner = true
 layout_mode = 2
 text = "加入"
+
+[node name="Invite" type="Button" parent="HBoxContainer/FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "邀请"
 
 [node name="Exit" type="Button" parent="HBoxContainer/FlowContainer"]
 unique_name_in_owner = true

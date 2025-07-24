@@ -25,18 +25,34 @@ public partial class SteamLobby : Control
                 UpdateLobbyData();
                 LobbyTypeOption.EmitSignal(OptionButton.SignalName.ItemSelected, (int)LobbyType);
                 Joinable.EmitSignal(BaseButton.SignalName.Toggled, Joinable.ButtonPressed);
-                // TODO 设置gameserver
-                // Lobby.Value.SetGameServer();
+                // 设置gameserver
+                var ServerId = SteamManager.ServerId;
+                Lobby.Value.SetGameServer(ServerId);
             }
         };
-        SteamMatchmaking.OnLobbyInvite += (friend, lobby) => { Log.Info($"收到房间邀请 {friend} {lobby.Id}"); };
+        SteamMatchmaking.OnLobbyInvite += async (friend, lobby) =>
+        {
+            Log.Info($"收到房间邀请 {friend} {lobby.Id}");
+            var roomEnter = await lobby.Join();
+            if (roomEnter == RoomEnter.Success)
+            {
+                Log.Info("进入房间");
+            }
+            else
+            {
+                Log.Info($"进入房间失败 {roomEnter}");
+            }
+        };
         SteamMatchmaking.OnLobbyEntered += (lobby) =>
         {
             CreateLobby.Disabled = true;
             MaxLobbyUser.Editable = false;
             UpdateLobbyData();
         };
-        SteamMatchmaking.OnLobbyGameCreated += (lobby, i, s, steamId) => { };
+        SteamMatchmaking.OnLobbyGameCreated += (lobby, ip, port, serverId) =>
+        {
+            Log.Info($"房间游戏已创建 {lobby.Id} {ip} {port} 服务器id {serverId}");
+        };
         SteamMatchmaking.OnLobbyDataChanged += (lobby) => { UpdateLobbyData(); };
         SteamMatchmaking.OnChatMessage += (lobby, friend, message) => { };
         SteamMatchmaking.OnLobbyMemberJoined += (lobby, friend) => { UpdateLobbyData(); };
@@ -83,6 +99,14 @@ public partial class SteamLobby : Control
         };
 
         CreateLobby.Pressed += () => { Create(); };
+        Invite.Pressed += () =>
+        {
+            if (Lobby.HasValue)
+            {
+                Lobby?.InviteFriend(SteamManager.Friend.Id);
+                Log.Info($"邀请好友 {SteamManager.Friend.Name} {SteamManager.Friend.Id}");
+            }
+        };
         Join.Pressed += async () =>
         {
             if (Lobby.HasValue)

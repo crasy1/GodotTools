@@ -21,7 +21,8 @@ public partial class SteamManager : CanvasLayer
          */
     private static readonly Stack<Action> QuitActions = new();
 
-    private SteamId ServerId { set; get; }
+    public static SteamId ServerId { set; get; }
+    public static Friend Friend { set; get; }
 
     public override void _Ready()
     {
@@ -87,6 +88,7 @@ public partial class SteamManager : CanvasLayer
             foreach (var serverInfo in serverList)
             {
                 ServerId = serverInfo.SteamId;
+                ServerIdLabel.Text = ServerId.ToString();
                 Log.Info($"服务器设置为 {ServerId}");
             }
         };
@@ -107,17 +109,7 @@ public partial class SteamManager : CanvasLayer
         OpenStats.Pressed += () => { SteamFriends.OpenOverlay("stats"); };
         OpenOfficalGameGroup.Pressed += () => { SteamFriends.OpenOverlay("officalgamegroup"); };
         OpenAchievements.Pressed += () => { SteamFriends.OpenOverlay("achievements"); };
-        CreateLobby.Pressed += () =>
-        {
-            if (LobbyInfo.GetChildCount() > 0)
-            {
-                Log.Info("大厅已存在");
-                return;
-            }
-
-            var lobby = SteamLobby.Instantiate();
-            LobbyInfo.AddChild(lobby);
-        };
+        CreateLobby.Pressed += () => { SteamLobby.Show(); };
         SearchLobby.Pressed += async () =>
         {
             var lobbies = await SteamLobby.Search();
@@ -254,6 +246,14 @@ IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
 
                 var steamUserInfo = SteamUserInfo.Instantiate(friend);
                 Friends.AddChild(steamUserInfo);
+                steamUserInfo.GuiInput += (@event) =>
+                {
+                    if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
+                    {
+                        Friend = steamUserInfo.Friend;
+                        Log.Info($"选中 {Friend.Id} {Friend.Name}");
+                    }
+                };
             }
         }
 

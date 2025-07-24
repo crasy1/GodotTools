@@ -6,5 +6,5 @@ metadata/debug = true
 metadata/callbackDebug = false
 metadata/AppId = 480
 metadata/Debug = true
-metadata/AsServer = false
+metadata/AsServer = true
 metadata/CallbackDebug = false

@@ -224,6 +224,7 @@ public partial class SteamTest : Node2D
                     if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
                     {
                         SteamUserInfo = steamUserInfo;
+                        Log.Info($"选中 {steamUserInfo.Friend.Id} {steamUserInfo.Friend.Name}");
                     }
                 };
             }
