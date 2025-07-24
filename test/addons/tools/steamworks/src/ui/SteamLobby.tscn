@@ -116,6 +116,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "退出"
 
+[node name="ConnectServer" type="Button" parent="HBoxContainer/FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "连接服务器(开始游戏)"
+
 [node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2

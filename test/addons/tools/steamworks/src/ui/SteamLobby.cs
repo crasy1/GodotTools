@@ -26,9 +26,6 @@ public partial class SteamLobby : Control
                 UpdateLobbyData();
                 LobbyTypeOption.EmitSignal(OptionButton.SignalName.ItemSelected, (int)LobbyType);
                 Joinable.EmitSignal(BaseButton.SignalName.Toggled, Joinable.ButtonPressed);
-                // 设置gameserver
-                var ServerId = SteamManager.ServerId;
-                Lobby?.SetGameServer(ServerId);
             }
         };
         SteamMatchmaking.OnLobbyInvite += async (friend, lobby) =>
@@ -138,9 +135,11 @@ public partial class SteamLobby : Control
         Exit.Pressed += () =>
         {
             SMatchmaking.Instance.LeaveLobby();
+            Lobby = new Lobby();
+            UpdateLobbyData();
             Log.Info("退出大厅");
-            // QueueFree();
         };
+        ConnectServer.Pressed += () => { Lobby?.SetGameServer(SteamManager.ServerId); };
         SteamId.Hide();
         MaxUserLabel.Hide();
     }
