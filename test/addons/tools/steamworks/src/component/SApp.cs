@@ -3,6 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+/// <summary>
+/// https://partner.steamgames.com/doc/store/localization/languages
+/// </summary>
 [Singleton]
 public partial class SApp : SteamComponent
 {
@@ -14,6 +17,7 @@ public partial class SApp : SteamComponent
         SteamApps.OnNewLaunchParameters += () =>
         {
             GD.Print($"启动命令:  {SteamApps.CommandLine}");
+            // connect_lobby
         };
     }
 

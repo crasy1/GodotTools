@@ -40,7 +40,7 @@ public partial class SteamUserInfo : Control
             FriendState.LookingToPlay => "游玩",
             FriendState.Invisible => "隐身"
         };
-        Avatar.Texture = (await SFriends.Avatar(Friend.Id))?.Texture();
+        Avatar.Texture = (await SFriends.Instance.Avatar(Friend.Id))?.Texture();
         Avatar.GuiInput += (@event =>
         {
             if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })

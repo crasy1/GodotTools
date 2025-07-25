@@ -6,11 +6,14 @@ using Steamworks;
 
 namespace Godot;
 
+/// <summary>
+/// https://wiki.facepunch.com/steamworks/Grouping_Friends
+/// </summary>
 [Singleton]
 public partial class SFriends : SteamComponent
 {
-    
     public static readonly Dictionary<SteamId, Friend> Friends = new();
+    private static readonly Dictionary<(SteamId, AvatarSize), Image> Avatars = new();
     public static Friend Me { private set; get; }
 
     public override void _Ready()
@@ -42,21 +45,125 @@ public partial class SFriends : SteamComponent
     }
 
 
-    public static async Task<Image> Avatar(SteamId steamId, int size = 0)
+    /// <summary>
+    /// 获取steam头像
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    public async Task<Image> Avatar(SteamId steamId, AvatarSize size = AvatarSize.Small)
     {
-        var avatar = size switch
+        if (Avatars.TryGetValue((steamId, size), out var image))
         {
-            < 0 => await SteamFriends.GetSmallAvatarAsync(steamId),
-            > 0 => await SteamFriends.GetLargeAvatarAsync(steamId),
-            _ => await SteamFriends.GetMediumAvatarAsync(steamId)
-        };
-
-        if (!avatar.HasValue)
-        {
-            return null;
+            return image;
         }
 
-        var image = avatar.Value;
-        return SteamUtil.CreateImage(image);
+        var avatar = size switch
+        {
+            AvatarSize.Small => await SteamFriends.GetSmallAvatarAsync(steamId),
+            AvatarSize.Middle => await SteamFriends.GetMediumAvatarAsync(steamId),
+            AvatarSize.Large => await SteamFriends.GetLargeAvatarAsync(steamId),
+        };
+
+        image = avatar?.GodotImage();
+        if (image != null)
+        {
+            Avatars.TryAdd((steamId, size), image);
+        }
+
+        return image;
+    }
+
+
+    /// <summary>
+    /// 在 steam_display 中显示自定义状态
+    /// </summary>
+    /// <param name="customStr"></param>
+    public void DisplayCustom(string customStr)
+    {
+        SetRichPresence(RichPresenceKey.steam_display, "#Status_Custom", new()
+        {
+            { "Custom", customStr }
+        });
+    }
+
+    /// <summary>
+    /// 关闭显示状态
+    /// </summary>
+    public void CloseDisplay()
+    {
+        SetRichPresence(RichPresenceKey.steam_display, null, new()
+        {
+            { "Custom", null }
+        });
+    }
+
+    /// <summary>
+    /// 展示一起玩的组
+    /// </summary>
+    /// <param name="group"></param>
+    /// <param name="size"></param>
+    public void ShowGroup(string group, int size)
+    {
+        SetRichPresence(RichPresenceKey.steam_player_group, $"{group}");
+        SetRichPresence(RichPresenceKey.steam_player_group_size, $"{size}");
+    }
+
+    /// <summary>
+    /// 关闭一起玩的组
+    /// </summary>
+    public void CloseGroup()
+    {
+        SetRichPresence(RichPresenceKey.steam_player_group, null);
+        SetRichPresence(RichPresenceKey.steam_player_group_size, null);
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <see cref="https://partner.steamgames.com/doc/api/ISteamFriends#richpresencelocalization"/>
+    /// <see cref="https://partner.steamgames.com/doc/features/enhancedrichpresence"/>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <param name="subKv"></param>
+    public void SetRichPresence(RichPresenceKey key, string value, Dictionary<string, string> subKv = null)
+    {
+        if (subKv != null)
+        {
+            foreach (var kv in subKv)
+            {
+                var r = SteamFriends.SetRichPresence(kv.Key, kv.Value);
+                Log.Info($"设置sub RichPresence {kv.Key} {kv.Value} {r}");
+            }
+        }
+
+        var result = SteamFriends.SetRichPresence(key.ToString(), value);
+        Log.Info($"设置RichPresence {key} {value} {result}");
+    }
+
+
+    public void OpenGameInviteOverlay(SteamId lobbyId)
+    {
+        SteamFriends.OpenGameInviteOverlay(lobbyId);
+    }
+
+    public void OpenStoreOverlay(uint appId)
+    {
+        SteamFriends.OpenStoreOverlay(appId);
+    }
+
+    public void OpenUserOverlay(SteamId steamId, UserOverlayType type = UserOverlayType.steamid)
+    {
+        SteamFriends.OpenUserOverlay(steamId, type.ToString());
+    }
+
+    public void OpenWebOverlay(string url)
+    {
+        SteamFriends.OpenWebOverlay(url);
+    }
+
+    public void OpenOverlay(OverlayType type = OverlayType.friends)
+    {
+        SteamFriends.OpenOverlay(type.ToString());
+        Log.Info($"打开 {type.ToString()}");
     }
 }

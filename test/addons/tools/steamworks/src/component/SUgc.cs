@@ -3,6 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+/// <summary>
+/// https://wiki.facepunch.com/steamworks/Creating_Workshop_Items
+/// </summary>
 [Singleton]
 public partial class SUgc : SteamComponent
 {

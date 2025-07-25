@@ -64,7 +64,7 @@ public partial class SteamLobby : Control
         SteamMatchmaking.OnLobbyMemberJoined += (lobby, friend) =>
         {
             Lobby = lobby;
-            
+
             Receive.AppendText($"{friend.Name}: 加入房间\r\n");
             UpdateLobbyData();
         };
@@ -83,7 +83,6 @@ public partial class SteamLobby : Control
         SteamMatchmaking.OnLobbyMemberDisconnected += (lobby, friend) => { UpdateLobbyData(); };
         SteamMatchmaking.OnLobbyMemberKicked += (lobby, friend, friend2) =>
         {
-            
             Receive.AppendText($"{friend.Name}被{friend2.Name}踢厨房间\r\n");
             UpdateLobbyData();
         };
@@ -127,7 +126,7 @@ public partial class SteamLobby : Control
             if (Lobby.HasValue)
             {
                 Lobby?.InviteFriend(SteamManager.Friend.Id);
-                Log.Info($"邀请好友 {SteamManager.Friend.Name} {SteamManager.Friend.Id}");
+                Log.Info($"邀请好友 {SteamManager.Friend.Name} {Lobby.Value.Id}");
             }
         };
 
@@ -155,10 +154,16 @@ public partial class SteamLobby : Control
         };
         Exit.Pressed += () =>
         {
-            Lobby?.Leave();
+            SMatchmaking.Instance.LeaveLobby();
             Lobby = new Lobby();
             UpdateLobbyData();
-            Log.Info("退出大厅");
+            CreateLobby.Disabled = false;
+            MaxLobbyUser.Editable = true;
+        };
+        Kick.Pressed += () =>
+        {
+            SMatchmaking.Instance.Kick(SteamManager.Friend.Id);
+            Log.Info($"踢出玩家 {SteamManager.Friend.Name}");
         };
         ConnectServer.Pressed += () => { Lobby?.SetGameServer(SteamManager.ServerId); };
         SteamId.Hide();

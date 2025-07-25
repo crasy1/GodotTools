@@ -38,9 +38,6 @@ public partial class AchievementUi : Control
             }
         };
         var icon = await Achievement.GetIconAsync();
-        if (icon.HasValue)
-        {
-            Icon.Texture = SteamUtil.CreateImage(icon.Value).Texture();
-        }
+        Icon.Texture = icon?.GodotImage().Texture();
     }
 }

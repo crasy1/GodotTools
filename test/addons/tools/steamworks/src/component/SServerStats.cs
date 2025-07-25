@@ -5,6 +5,9 @@ using Steamworks.Data;
 
 namespace Godot;
 
+/// <summary>
+/// https://wiki.facepunch.com/steamworks/Leaderboards
+/// </summary>
 [Singleton]
 public partial class SServerStats : SteamComponent
 {

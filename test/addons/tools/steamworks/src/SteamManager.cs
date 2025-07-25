@@ -24,6 +24,8 @@ public partial class SteamManager : CanvasLayer
     public static SteamId ServerId { set; get; }
     public static Friend Friend { set; get; }
 
+    private AudioStreamWav AudioStreamWav { set; get; }
+
     public override void _Ready()
     {
         GetTree().AutoAcceptQuit = false;
@@ -48,6 +50,27 @@ public partial class SteamManager : CanvasLayer
             SClient.Instance.Connect();
         }
 
+        Record.Toggled += (value) =>
+        {
+            RecordStatus.Text = $"{(value ? "录音中" : "未录音")}";
+            SUser.Instance.AudioEffectRecord.SetRecordingActive(value);
+            if (!value)
+            {
+                AudioStreamWav = SUser.Instance.AudioEffectRecord.GetRecording();
+                Log.Info($"录音结束：录音长度 {AudioStreamWav.Data.Length}");
+            }
+        };
+        PlayRecord.Pressed += () =>
+        {
+            RecordStreamPlayer.Stream = AudioStreamWav;
+            RecordStreamPlayer.Play();
+            Log.Info("播放录音");
+        };
+        SaveRecord.Pressed += () =>
+        {
+            AudioStreamWav?.SaveToWav("res://record.wav");
+            Log.Info($"保存录音 res://record.wav");
+        };
         Ping.Hide();
         ScreenShot.Pressed += () =>
         {
@@ -100,15 +123,15 @@ public partial class SteamManager : CanvasLayer
             Log.Info($"验证 {beginAuthSession}");
         };
         AchievementsScrollContainer.Visible = false;
-        OpenStore.Pressed += () => { SteamFriends.OpenStoreOverlay(SteamConfig.AppId); };
-        OpenUrl.Pressed += () => { SteamFriends.OpenWebOverlay("https://www.baidu.com"); };
-        OpenSettings.Pressed += () => { SteamFriends.OpenOverlay("settings"); };
-        OpenFriends.Pressed += () => { SteamFriends.OpenOverlay("friends"); };
-        OpenPlayers.Pressed += () => { SteamFriends.OpenOverlay("players"); };
-        OpenCommunity.Pressed += () => { SteamFriends.OpenOverlay("community"); };
-        OpenStats.Pressed += () => { SteamFriends.OpenOverlay("stats"); };
-        OpenOfficalGameGroup.Pressed += () => { SteamFriends.OpenOverlay("officalgamegroup"); };
-        OpenAchievements.Pressed += () => { SteamFriends.OpenOverlay("achievements"); };
+        OpenStore.Pressed += () => { SFriends.Instance.OpenStoreOverlay(SteamConfig.AppId); };
+        OpenUrl.Pressed += () => { SFriends.Instance.OpenWebOverlay("https://www.baidu.com"); };
+        OpenSettings.Pressed += () => { SFriends.Instance.OpenOverlay(OverlayType.settings); };
+        OpenFriends.Pressed += () => { SFriends.Instance.OpenOverlay(OverlayType.friends); };
+        OpenPlayers.Pressed += () => { SFriends.Instance.OpenOverlay(OverlayType.players); };
+        OpenCommunity.Pressed += () => { SFriends.Instance.OpenOverlay(OverlayType.community); };
+        OpenStats.Pressed += () => { SFriends.Instance.OpenOverlay(OverlayType.stats); };
+        OpenOfficalGameGroup.Pressed += () => { SFriends.Instance.OpenOverlay(OverlayType.officialgamegroup); };
+        OpenAchievements.Pressed += () => { SFriends.Instance.OpenOverlay(OverlayType.achievements); };
         CreateLobby.Pressed += () => { SteamLobby.Show(); };
         SearchLobby.Pressed += async () =>
         {
@@ -129,8 +152,17 @@ public partial class SteamManager : CanvasLayer
             GetTree().ChangeSceneToFile(SteamTest.TscnFilePath);
             Hide();
         };
+        
     }
 
+    private int BusIndex { set; get; }
+    private int BusChannels { set; get; }
+
+    public override void _Process(double delta)
+    {
+        var busPeakVolumeLeftDb = AudioServer.GetBusPeakVolumeLeftDb(1,0 );
+        Log.Info($"record bus peak volume left db: {busPeakVolumeLeftDb}");
+    }
     public override void _Notification(int what)
     {
         if (NotificationWMCloseRequest == what)
@@ -232,7 +264,7 @@ IsPhoneVerified:                    {SteamUser.IsPhoneVerified}
 IsPhoneRequiringVerification:       {SteamUser.IsPhoneRequiringVerification}
 IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
 ";
-        var image = await SFriends.Avatar(SteamClient.SteamId);
+        var image = await SFriends.Instance.Avatar(SteamClient.SteamId);
         Avatar.Texture = image.Texture();
         foreach (var friend in SteamFriends.GetFriends())
         {

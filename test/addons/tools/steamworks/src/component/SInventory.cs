@@ -3,6 +3,9 @@ using Steamworks;
 
 namespace Godot;
 
+/// <summary>
+/// https://wiki.facepunch.com/steamworks/Item_Store_Cart
+/// </summary>
 [Singleton]
 public partial class SInventory: SteamComponent
 {

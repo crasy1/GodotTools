@@ -56,6 +56,7 @@ public partial class SServer : SteamComponent
 
     /// <summary>
     /// 查找服务器
+    /// https://wiki.facepunch.com/steamworks/Get_Server_List
     /// </summary>
     /// <param name="mapName"></param>
     /// <param name="serverType"></param>

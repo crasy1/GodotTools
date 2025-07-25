@@ -27,5 +27,6 @@
     <Content Include="addons\tools\manager\plugin.cfg" />
     <Content Include="addons\tools\manager\src\SceneManager.tscn" />
     <Content Include="addons\tools\plugin.cfg" />
+    <Content Include="addons\tools\steamworks\src\data\rich_presence.vdf" />
   </ItemGroup>
 </Project>

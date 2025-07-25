@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cvgifx0xtsun0"]
 
-[ext_resource type="Script" uid="uid://cani5n4k3hlor" path="res://addons/tools/steamworks/src/ui/SteamLobby.cs" id="1_meg5c"]
+[ext_resource type="Script" uid="uid://xcgncmkh5vjn" path="res://addons/tools/steamworks/src/ui/SteamLobby.cs" id="1_meg5c"]
 
 [node name="SteamLobby" type="Control"]
 layout_mode = 3
@@ -115,6 +115,11 @@ text = "邀请"
 unique_name_in_owner = true
 layout_mode = 2
 text = "退出"
+
+[node name="Kick" type="Button" parent="HBoxContainer/FlowContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "踢出"
 
 [node name="Receive" type="RichTextLabel" parent="HBoxContainer/FlowContainer"]
 unique_name_in_owner = true
