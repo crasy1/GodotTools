@@ -16,10 +16,6 @@ run/main_scene="uid://dgkcl2husjh8w"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
-[audio]
-
-driver/enable_input=true
-
 [autoload]
 
 ConfigUi="*res://addons/tools/config_ui/src/ConfigUi.tscn"

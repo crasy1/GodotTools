@@ -54,20 +54,29 @@ public partial class SteamManager : CanvasLayer
         Log.Info($"输入设备列表{inputDeviceList.Join()}");
         var inputDevice = AudioServer.InputDevice = inputDeviceList[1];
         Log.Info($"输入设备{inputDevice}");
-        Record.Toggled += (value) =>
+        var rpath = ProjectSettings.GlobalizePath("user://r.wav");
+        Record.Toggled += async (value) =>
         {
             RecordStatus.Text = $"{(value ? "录音中" : "未录音")}";
-            SUser.Instance.AudioEffectRecord.SetRecordingActive(value);
-            if (!value)
+            if (value)
             {
-                AudioStreamWav = SUser.Instance.AudioEffectRecord.GetRecording();
-                Log.Info($"录音结束：录音长度 {AudioStreamWav.Data.Length}");
             }
+            else
+            {
+            }
+            // SUser.Instance.AudioEffectRecord.SetRecordingActive(value);
+            // if (!value)
+            // {
+            //     AudioStreamWav = SUser.Instance.AudioEffectRecord.GetRecording();
+            //     Log.Info($"录音结束：录音长度 {AudioStreamWav.Data.Length}");
+            // }
         };
         PlayRecord.Pressed += () =>
         {
-            RecordStreamPlayer.Stream = AudioStreamWav;
-            RecordStreamPlayer.Play();
+            // AudioPlayer.InitializeAudioPlayer();
+            // AudioPlayer.PlayAudio(rpath);
+            // RecordStreamPlayer.Stream = AudioStreamWav;
+            // RecordStreamPlayer.Play();
             Log.Info("播放录音");
         };
         SaveRecord.Pressed += () =>
@@ -158,11 +167,9 @@ public partial class SteamManager : CanvasLayer
         };
     }
 
-    // public override void _Process(double delta)
-    // {
-    //     var busPeakVolumeLeftDb = AudioServer.GetBusPeakVolumeLeftDb(1,0 );
-    //     Log.Info($"record bus peak volume left db: {busPeakVolumeLeftDb}");
-    // }
+    public override void _Process(double delta)
+    {
+    }
 
     public override void _Notification(int what)
     {

@@ -32,6 +32,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[4.8.0]" />
+        <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="protobuf-net" Version="3.2.52" />
         <PackageReference Include="Serilog" Version="4.3.0" />
@@ -47,6 +48,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SourceGenerators\SourceGenerators\SourceGenerators.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Nodes\" />
     </ItemGroup>
 
 </Project>

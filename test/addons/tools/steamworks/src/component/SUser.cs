@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using NAudio.Wave;
 using Steamworks;
 
 namespace Godot;
@@ -8,13 +7,7 @@ namespace Godot;
 [Singleton]
 public partial class SUser : SteamComponent
 {
-    public AudioEffectRecord AudioEffectRecord { set; get; }
-    private AudioStreamGenerator AudioStreamGenerator { set; get; }
-    private AudioStreamGeneratorPlayback AudioStreamGeneratorPlayback { set; get; }
-    private SteamAudio SteamAudio { set; get; }
-    private float _sampleHz;
-    private float _pulseHz = 440.0f; // The frequency of the sound wave.
-    private double phase = 0.0;
+    private StreamPlayer StreamPlayer { set; get; }
 
     public override void _Ready()
     {
@@ -37,85 +30,74 @@ public partial class SUser : SteamComponent
         SClient.Instance.SteamClientConnected += () =>
         {
             SetProcess(true);
-            SteamUser.SampleRate = 44100;
-            // SteamUser.SampleRate = SteamUser.OptimalSampleRate;
-            // Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
-            // AudioStreamGenerator = new AudioStreamGenerator();
-            // var audioStreamPlayer = new AudioStreamPlayer();
-            // AddChild(audioStreamPlayer);
-            // audioStreamPlayer.Stream = AudioStreamGenerator;
-            // AudioStreamGeneratorPlayback = (AudioStreamGeneratorPlayback)audioStreamPlayer.GetStreamPlayback();
-            // AudioStreamGenerator.MixRate = SteamUser.SampleRate;
-            // _sampleHz = SteamUser.SampleRate;
+            SteamUser.SampleRate = SteamUser.OptimalSampleRate;
+            // SteamUser.SampleRate = 44100;
+            Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
+            StreamPlayer = new StreamPlayer();
+            StreamPlayer.Rate = SteamUser.SampleRate;
+            AddChild(StreamPlayer);
         };
-        var idx = AudioServer.GetBusIndex("Record");
-        AudioEffectRecord = (AudioEffectRecord)AudioServer.GetBusEffect(idx, 0);
-        SteamAudio = new SteamAudio();
-    }
-
-    public void FillBuffer()
-    {
-        float increment = _pulseHz / _sampleHz;
-        int framesAvailable = AudioStreamGeneratorPlayback.GetFramesAvailable();
-
-        for (int i = 0; i < framesAvailable; i++)
-        {
-            AudioStreamGeneratorPlayback.PushFrame(Vector2.One * (float)Mathf.Sin(phase * Mathf.Tau));
-            phase = Mathf.PosMod(phase + increment, 1.0);
-        }
     }
 
 
-    public override void _Input(InputEvent @event)
+    public override async void _Input(InputEvent @event)
     {
         if (Input.IsActionJustPressed(Actions.Record))
         {
             SteamUser.VoiceRecord = true;
-            // SteamAudio.StartRecording();
-            // var globalizePath = ProjectSettings.GlobalizePath("user://steam_record.wav");
-            // SteamAudio.StartSavingToFile(globalizePath);
-            // SteamAudio.StartPlayback();
+            StreamPlayer.Play();
             Log.Info($"录音开始");
         }
 
         if (Input.IsActionJustReleased(Actions.Record))
         {
             SteamUser.VoiceRecord = false;
-            // SteamAudio.Dispose();
+            StreamPlayer.Stop();
             Log.Info($"录音结束");
-            if (SteamUser.HasVoiceData)
-            {
-                var globalizePath = ProjectSettings.GlobalizePath("user://steam_record.wav");
-            var voiceData = SteamUser.ReadVoiceDataBytes();
-            var memoryStream = new MemoryStream();
-            var length = SteamUser.DecompressVoice(voiceData, memoryStream);
-            var decompressedBuffer = memoryStream.ToArray();
-            Log.Info($"录音数据大小:{voiceData.Length}");
-            AudioConvert.SavePcmToWav(decompressedBuffer, globalizePath);
-            // DirectSave(decompressedBuffer, globalizePath);
-            //     var fileAccess = FileAccess.Open("user://steam_record.wav", FileAccess.ModeFlags.Write);
-            //     fileAccess.StoreBuffer(voiceData);
-            //     fileAccess.Close();
-            }
-        }
-    }
-    public static void DirectSave(byte[] pcmData, string outputPath)
-    {
-        using (var writer = new WaveFileWriter(outputPath, new WaveFormat(44100, 16, 1)))
-        {
-            writer.Write(pcmData, 0, pcmData.Length);
         }
     }
 
+
     public override void _Process(double delta)
     {
-        // SteamAudio.ProcessAudio();
-        // if (SteamUser.HasVoiceData)
-        // {
-        //     // SteamUser.ReadVoiceData()
-        //     // SteamUser.DecompressVoice()
-        //     var voiceData = SteamUser.ReadVoiceDataBytes();
-        // }
+        if (SteamUser.HasVoiceData)
+        {
+            var readVoiceDataBytes = ReadDecompressVoice();
+            StreamPlayer.AddSamples(readVoiceDataBytes);
+        }
+    }
+
+    /// <summary>
+    /// 解压声音数组
+    /// </summary>
+    /// <param name="from"></param>
+    /// <param name="length"></param>
+    /// <returns>输出数据是原始单通道 16 位 PCM 音频</returns>
+    public unsafe byte[] DecompressVoice(byte[] from, int length = ushort.MaxValue)
+    {
+        var buffer = new byte[length];
+        int writtenCount;
+        fixed (byte* pCompressed = from)
+        {
+            fixed (byte* pDestBuffer = buffer)
+            {
+                writtenCount = SteamUser.DecompressVoice((IntPtr)pCompressed, from.Length, (IntPtr)pDestBuffer,
+                    buffer.Length);
+            }
+        }
+
+        return buffer[..writtenCount];
+    }
+
+    /// <summary>
+    /// 读取并解压steamworks声音数据
+    /// </summary>
+    /// <returns></returns>
+    public byte[] ReadDecompressVoice()
+    {
+        using var memoryStream = new MemoryStream();
+        SteamUser.ReadVoiceData(memoryStream);
+        return DecompressVoice(memoryStream.GetBuffer());
     }
 
     public void GetInfo()
