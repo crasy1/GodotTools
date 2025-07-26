@@ -50,6 +50,10 @@ public partial class SteamManager : CanvasLayer
             SClient.Instance.Connect();
         }
 
+        var inputDeviceList = AudioServer.GetInputDeviceList();
+        Log.Info($"输入设备列表{inputDeviceList.Join()}");
+        var inputDevice = AudioServer.InputDevice = inputDeviceList[1];
+        Log.Info($"输入设备{inputDevice}");
         Record.Toggled += (value) =>
         {
             RecordStatus.Text = $"{(value ? "录音中" : "未录音")}";
@@ -152,17 +156,14 @@ public partial class SteamManager : CanvasLayer
             GetTree().ChangeSceneToFile(SteamTest.TscnFilePath);
             Hide();
         };
-        
     }
 
-    private int BusIndex { set; get; }
-    private int BusChannels { set; get; }
+    // public override void _Process(double delta)
+    // {
+    //     var busPeakVolumeLeftDb = AudioServer.GetBusPeakVolumeLeftDb(1,0 );
+    //     Log.Info($"record bus peak volume left db: {busPeakVolumeLeftDb}");
+    // }
 
-    public override void _Process(double delta)
-    {
-        var busPeakVolumeLeftDb = AudioServer.GetBusPeakVolumeLeftDb(1,0 );
-        Log.Info($"record bus peak volume left db: {busPeakVolumeLeftDb}");
-    }
     public override void _Notification(int what)
     {
         if (NotificationWMCloseRequest == what)

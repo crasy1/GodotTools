@@ -1,9 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://c2amw4dllr24x"]
+[gd_scene load_steps=3 format=3 uid="uid://c2amw4dllr24x"]
 
-[ext_resource type="Script" uid="uid://cdqdk6385w7fo" path="res://addons/tools/steamworks/src/SteamManager.cs" id="1_epupd"]
+[ext_resource type="Script" uid="uid://vlkjmcolrdd6" path="res://addons/tools/steamworks/src/SteamManager.cs" id="1_epupd"]
 [ext_resource type="PackedScene" uid="uid://cvgifx0xtsun0" path="res://addons/tools/steamworks/src/ui/SteamLobby.tscn" id="2_hus17"]
-
-[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_hus17"]
 
 [node name="SteamManager" type="CanvasLayer"]
 layer = 100
@@ -243,4 +241,3 @@ size_flags_vertical = 3
 
 [node name="RecordStreamPlayer" type="AudioStreamPlayer" parent="."]
 unique_name_in_owner = true
-stream = SubResource("AudioStreamGenerator_hus17")
