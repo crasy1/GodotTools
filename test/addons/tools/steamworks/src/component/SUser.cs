@@ -7,6 +7,12 @@ namespace Godot;
 [Singleton]
 public partial class SUser : SteamComponent
 {
+    /// <summary>
+    /// 收到用户steamworks语音压缩数据
+    /// </summary>
+    [Signal]
+    public delegate void ReceiveVoiceDataEventHandler(ulong steamId, byte[] compressData);
+
     private StreamPlayer StreamPlayer { set; get; }
 
     public override void _Ready()
@@ -30,11 +36,11 @@ public partial class SUser : SteamComponent
         SClient.Instance.SteamClientConnected += () =>
         {
             SetProcess(true);
-            SteamUser.SampleRate = SteamUser.OptimalSampleRate;
-            // SteamUser.SampleRate = 44100;
+            // SteamUser.SampleRate = SteamUser.OptimalSampleRate;
+            SteamUser.SampleRate = 44100;
             Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
             StreamPlayer = new StreamPlayer();
-            StreamPlayer.Rate = SteamUser.SampleRate;
+            StreamPlayer.SampleRate = (int)SteamUser.SampleRate;
             AddChild(StreamPlayer);
         };
     }
@@ -62,8 +68,11 @@ public partial class SUser : SteamComponent
     {
         if (SteamUser.HasVoiceData)
         {
-            var readVoiceDataBytes = ReadDecompressVoice();
-            StreamPlayer.AddSamples(readVoiceDataBytes);
+            using var memoryStream = new MemoryStream();
+            var length = SteamUser.ReadVoiceData(memoryStream);
+            EmitSignalReceiveVoiceData(SteamClient.SteamId, memoryStream.GetBuffer());
+            // var readVoiceDataBytes = ReadDecompressVoice();
+            // StreamPlayer.AddSamples(readVoiceDataBytes);
         }
     }
 
@@ -73,7 +82,7 @@ public partial class SUser : SteamComponent
     /// <param name="from"></param>
     /// <param name="length"></param>
     /// <returns>输出数据是原始单通道 16 位 PCM 音频</returns>
-    public unsafe byte[] DecompressVoice(byte[] from, int length = ushort.MaxValue)
+    public static unsafe byte[] DecompressVoice(byte[] from, int length = ushort.MaxValue)
     {
         var buffer = new byte[length];
         int writtenCount;
@@ -93,7 +102,7 @@ public partial class SUser : SteamComponent
     /// 读取并解压steamworks声音数据
     /// </summary>
     /// <returns></returns>
-    public byte[] ReadDecompressVoice()
+    public static byte[] ReadDecompressVoice()
     {
         using var memoryStream = new MemoryStream();
         SteamUser.ReadVoiceData(memoryStream);

@@ -4,7 +4,7 @@ using NAudio.Wave;
 namespace Godot;
 
 /// <summary>
-/// 播放实时音频流
+/// 使用NAudio组件实时播放steamworks音频流
 /// </summary>
 [GlobalClass]
 public partial class StreamPlayer : AudioStreamPlayer
@@ -13,7 +13,7 @@ public partial class StreamPlayer : AudioStreamPlayer
     /// 采样率
     /// </summary>
     [Export(PropertyHint.Enum, "11025,22050,24000,32000,44100,48000")]
-    public uint Rate = 44100;
+    public int SampleRate = 44100;
 
     /// <summary>
     /// 音量
@@ -40,7 +40,7 @@ public partial class StreamPlayer : AudioStreamPlayer
     public override void _Ready()
     {
         base._Ready();
-        var waveFormat = new WaveFormat((int)Rate, 16, 1);
+        var waveFormat = new WaveFormat(SampleRate, 16, 1);
         BufferedWaveProvider = new BufferedWaveProvider(waveFormat)
         {
             // 避免内存溢出
