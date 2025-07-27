@@ -48,7 +48,12 @@ public partial class SNetworking : SteamComponent
                 EmitSignalUserDisconnect(steamId);
             }
         };
-        SClient.Instance.SteamClientConnected += () => { SetProcess(true); };
+        SClient.Instance.SteamClientConnected += () =>
+        {
+            SetProcess(true);
+            // 添加队伍语音
+            AddChild(TeamVoice.Instance);
+        };
         SClient.Instance.SteamClientDisconnected += () => { SetProcess(false); };
     }
 

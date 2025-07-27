@@ -128,7 +128,6 @@ public partial class TeamVoice : Node
     {
         if (_teamMembers.TryGetValue(steamId, out var voiceStreamPlayer))
         {
-            Log.Info($"收到语音数据 steamId:{steamId} , 数据长度:{data.Length}");
             voiceStreamPlayer?.ReceiveRecordVoiceData(steamId, data);
         }
     }
