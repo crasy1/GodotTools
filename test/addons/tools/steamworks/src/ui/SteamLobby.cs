@@ -46,13 +46,6 @@ public partial class SteamLobby : Control
             CreateLobby.Disabled = true;
             MaxLobbyUser.Editable = false;
             UpdateLobbyData();
-            foreach (var lobbyMember in lobby.Members)
-            {
-                if (!lobbyMember.IsMe)
-                {
-                    TeamVoice.Instance.AddTeamMember(lobbyMember.Id);
-                }
-            }
         };
         SteamMatchmaking.OnLobbyGameCreated += (lobby, ip, port, serverId) =>
         {
@@ -73,16 +66,12 @@ public partial class SteamLobby : Control
             Lobby = lobby;
             Receive.AppendText($"{friend.Name}: 加入房间\r\n");
             UpdateLobbyData();
-            // 语音
-            TeamVoice.Instance.AddTeamMember(friend.Id);
         };
         SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) =>
         {
             Lobby = lobby;
             Receive.AppendText($"{friend.Name}: 离开房间\r\n");
             UpdateLobbyData();
-            // 语音
-            TeamVoice.Instance.AddTeamMember(friend.Id);
         };
         SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
         {
@@ -169,7 +158,6 @@ public partial class SteamLobby : Control
             UpdateLobbyData();
             CreateLobby.Disabled = false;
             MaxLobbyUser.Editable = true;
-            TeamVoice.Instance.RemoveAllTeamMember();
         };
         Kick.Pressed += () =>
         {

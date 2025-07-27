@@ -38,8 +38,17 @@ public partial class SMatchmaking : SteamComponent
         {
             Log.Info($"进入房间 {lobby.Id}");
             Lobby = lobby;
+            // 添加steam状态
             SFriends.Instance.DisplayCustom("在大厅中");
             SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
+            // 添加队伍语音
+            foreach (var lobbyMember in lobby.Members)
+            {
+                if (!lobbyMember.IsMe)
+                {
+                    TeamVoice.Instance.AddTeamMember(lobbyMember.Id);
+                }
+            }
         };
         SteamMatchmaking.OnLobbyGameCreated += (lobby, i, s, steamId) =>
         {
@@ -70,13 +79,19 @@ public partial class SMatchmaking : SteamComponent
         {
             Log.Info($"房间成员加入 {lobby.Id} {friend}");
             Lobby = lobby;
+            // 改变steam状态
             SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
+            // 添加队伍语音
+            TeamVoice.Instance.AddTeamMember(friend.Id);
         };
         SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) =>
         {
             Log.Info($"房间成员离开 {lobby.Id} {friend}");
             Lobby = lobby;
+            // 改变steam状态
             SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
+            // 移除队伍语音
+            TeamVoice.Instance.AddTeamMember(friend.Id);
         };
         SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
         {
@@ -111,8 +126,11 @@ public partial class SMatchmaking : SteamComponent
         Lobby?.Leave();
         Lobby = null;
         Log.Info("退出大厅");
+        // 移除steam状态
         SFriends.Instance.CloseDisplay();
-        SFriends.Instance.CloseDisplay();
+        SFriends.Instance.CloseGroup();
+        // 退出队伍语音
+        TeamVoice.Instance.RemoveAllTeamMember();
     }
 
     public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10)
