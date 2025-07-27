@@ -13,7 +13,7 @@ public partial class SUser : SteamComponent
     [Signal]
     public delegate void ReceiveVoiceDataEventHandler(ulong steamId, byte[] compressData);
 
-    private StreamPlayer StreamPlayer { set; get; }
+    private NVoiceStreamPlayer StreamPlayer { set; get; }
 
     public override void _Ready()
     {
@@ -40,14 +40,11 @@ public partial class SUser : SteamComponent
             // SteamUser.SampleRate = SteamUser.OptimalSampleRate;
             SteamUser.SampleRate = 44100;
             Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
-            // StreamPlayer = new StreamPlayer();
-            // StreamPlayer.SampleRate = (int)SteamUser.SampleRate;
-            // AddChild(StreamPlayer);
         };
     }
 
 
-    public override async void _Input(InputEvent @event)
+    public override void _Input(InputEvent @event)
     {
         if (Input.IsActionJustPressed(Actions.Record))
         {
@@ -63,14 +60,12 @@ public partial class SUser : SteamComponent
     public void StartRecord()
     {
         SteamUser.VoiceRecord = true;
-        StreamPlayer?.Play();
         Log.Info($"录音开始");
     }
 
     public void StopRecord()
     {
         SteamUser.VoiceRecord = false;
-        StreamPlayer?.Stop();
         Log.Info($"录音结束");
     }
 
@@ -82,8 +77,6 @@ public partial class SUser : SteamComponent
             using var memoryStream = new MemoryStream();
             var length = SteamUser.ReadVoiceData(memoryStream);
             EmitSignalReceiveVoiceData(SteamClient.SteamId, memoryStream.GetBuffer());
-            // var readVoiceDataBytes = ReadDecompressVoice();
-            // StreamPlayer.AddSamples(readVoiceDataBytes);
         }
     }
 

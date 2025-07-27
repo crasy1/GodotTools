@@ -57,13 +57,13 @@ public partial class SteamManager : CanvasLayer
             RecordStatus.Text = $"{(value ? "录音中" : "未录音")}";
             if (value)
             {
-                VoiceStreamPlayer.PlayStream();
+                VoiceStreamPlayer.Play();
                 SUser.Instance.StartRecord();
             }
             else
             {
                 SUser.Instance.StopRecord();
-                VoiceStreamPlayer.StopStream();
+                VoiceStreamPlayer.Stop();
             }
         };
         PlayRecord.Pressed += () => { };

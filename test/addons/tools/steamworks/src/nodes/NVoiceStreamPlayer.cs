@@ -6,11 +6,10 @@ namespace Godot;
 /// <summary>
 /// 使用NAudio组件实时播放steamworks音频流
 /// </summary>
-[GlobalClass]
-public partial class StreamPlayer : AudioStreamPlayer
+public partial class NVoiceStreamPlayer : Node
 {
     /// <summary>
-    /// 采样率
+    /// 采样率 需要与音频流一致，否则音色会失真
     /// </summary>
     [Export(PropertyHint.Enum, "11025,22050,24000,32000,44100,48000")]
     public int SampleRate = 44100;
@@ -39,7 +38,8 @@ public partial class StreamPlayer : AudioStreamPlayer
 
     public override void _Ready()
     {
-        base._Ready();
+        SetProcess(false);
+        SetPhysicsProcess(false);
         var waveFormat = new WaveFormat(SampleRate, 16, 1);
         BufferedWaveProvider = new BufferedWaveProvider(waveFormat)
         {
@@ -61,21 +61,30 @@ public partial class StreamPlayer : AudioStreamPlayer
             BufferedWaveProvider.ClearBuffer();
             Log.Info($"播放停止");
         };
+        SUser.Instance.ReceiveVoiceData += OnReceiveVoiceData;
     }
 
-    public new void Play(float fromPosition = 0.0f)
+    private void OnReceiveVoiceData(ulong steamId, byte[] compressData)
+    {
+        if (IsPlaying())
+        {
+            AddSamples(SUser.DecompressVoice(compressData));
+        }
+    }
+
+    public void Play(float fromPosition = 0.0f)
 
     {
         WaveOutEvent.Init(BufferedWaveProvider);
         WaveOutEvent.Play();
     }
 
-    public new void Stop()
+    public void Stop()
     {
         WaveOutEvent.Stop();
     }
 
-    public new bool IsPlaying() => WaveOutEvent.PlaybackState == PlaybackState.Playing;
+    public bool IsPlaying() => WaveOutEvent.PlaybackState == PlaybackState.Playing;
 
     public void AddSamples(byte[] data)
     {

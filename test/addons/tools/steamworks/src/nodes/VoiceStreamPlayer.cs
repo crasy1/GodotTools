@@ -1,20 +1,21 @@
 using Godot;
 using System;
-using Steamworks;
 
 /// <summary>
 /// 使用godot组件实时播放steamworks音频流
 /// </summary>
+[GlobalClass]
 [SceneTree]
 public partial class VoiceStreamPlayer : AudioStreamPlayer
 {
-    // 音频配置
-    /// 100ms 缓冲区
+    /// <summary>
+    /// 缓冲区
+    /// </summary>
     [Export(PropertyHint.Range, "0.05,1,0.05")]
     public float BufferLength { get; set; } = 0.1f;
 
     /// <summary>
-    /// 采样率
+    /// 采样率 需要与音频流一致，否则音色会失真
     /// </summary>
     [Export(PropertyHint.Enum, "11025,22050,24000,32000,44100,48000")]
     public int SampleRate { get; set; } = 44100;
@@ -60,13 +61,18 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
         SetProcess(true);
         SetProcessMode(ProcessModeEnum.Always);
         SUser.Instance.ReceiveVoiceData += OnReceiveVoiceData;
+
+        AudioStreamGenerator = new AudioStreamGenerator()
+        {
+            MixRate = SampleRate,
+            BufferLength = 0.05f
+        };
+        Stream = AudioStreamGenerator;
     }
 
     private void OnReceiveVoiceData(ulong steamId, byte[] compressData)
     {
-        Log.Info($"{IsPlaying()} {compressData.Length}");
         if (IsPlaying())
-            // if (Playing && steamId != SteamClient.SteamId)
         {
             PushData(SUser.DecompressVoice(compressData));
         }
@@ -75,25 +81,33 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
     /// <summary>
     /// 播放音频流
     /// </summary>
-    public void PlayStream()
+    private void PlayStream()
     {
-        AudioStreamGenerator = new AudioStreamGenerator()
-        {
-            MixRate = SampleRate,
-            BufferLength = 0.05f
-        };
-        Stream = AudioStreamGenerator;
-        Play();
         Playback = GetStreamPlayback() as AudioStreamGeneratorPlayback;
     }
 
     /// <summary>
     /// 停止音频流
     /// </summary>
-    public void StopStream()
+    private void StopStream()
     {
-        Stop();
-        Playback.ClearBuffer();
+        Playback?.Stop();
+        Playback?.ClearBuffer();
+    }
+
+
+    public override void _Process(double delta)
+    {
+        var playing = IsPlaying();
+        switch (playing)
+        {
+            case true when !LastFrameIsPlaying:
+                PlayStream();
+                break;
+            case false when LastFrameIsPlaying:
+                StopStream();
+                break;
+        }
     }
 
     // 处理音频帧
@@ -108,7 +122,6 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
         var framesAvailable = Playback.GetFramesAvailable();
         // 计算最大可推送帧数
         var framesToPush = Math.Min(framesAvailable, decompress.Length / FrameByte);
-        Log.Info($"push frames:{framesToPush}");
         if (framesToPush <= 0)
         {
             return;
