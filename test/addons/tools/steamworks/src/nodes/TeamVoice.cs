@@ -108,8 +108,8 @@ public partial class TeamVoice : Node
         voiceStreamPlayer.Name = steamId.ToString();
         AddChild(voiceStreamPlayer);
         _teamMembers.TryAdd(steamId, voiceStreamPlayer);
-        // 默认静音
-        // voiceStreamPlayer.Play();
+        // 默认播放队伍语音
+        voiceStreamPlayer.Play();
         Log.Info($"队伍语音添加 {steamId}");
     }
 
