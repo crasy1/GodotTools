@@ -35,13 +35,14 @@ public partial class SUser : SteamComponent
         };
         SClient.Instance.SteamClientConnected += () =>
         {
+            SetProcessMode(ProcessModeEnum.Always);
             SetProcess(true);
             // SteamUser.SampleRate = SteamUser.OptimalSampleRate;
             SteamUser.SampleRate = 44100;
             Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
-            StreamPlayer = new StreamPlayer();
-            StreamPlayer.SampleRate = (int)SteamUser.SampleRate;
-            AddChild(StreamPlayer);
+            // StreamPlayer = new StreamPlayer();
+            // StreamPlayer.SampleRate = (int)SteamUser.SampleRate;
+            // AddChild(StreamPlayer);
         };
     }
 
@@ -50,17 +51,27 @@ public partial class SUser : SteamComponent
     {
         if (Input.IsActionJustPressed(Actions.Record))
         {
-            SteamUser.VoiceRecord = true;
-            StreamPlayer.Play();
-            Log.Info($"录音开始");
+            StartRecord();
         }
 
         if (Input.IsActionJustReleased(Actions.Record))
         {
-            SteamUser.VoiceRecord = false;
-            StreamPlayer.Stop();
-            Log.Info($"录音结束");
+            StopRecord();
         }
+    }
+
+    public void StartRecord()
+    {
+        SteamUser.VoiceRecord = true;
+        StreamPlayer?.Play();
+        Log.Info($"录音开始");
+    }
+
+    public void StopRecord()
+    {
+        SteamUser.VoiceRecord = false;
+        StreamPlayer?.Stop();
+        Log.Info($"录音结束");
     }
 
 

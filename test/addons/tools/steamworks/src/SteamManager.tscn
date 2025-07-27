@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ndgq81as814s" path="res://addons/tools/steamworks/src/SteamManager.cs" id="1_epupd"]
 [ext_resource type="PackedScene" uid="uid://cvgifx0xtsun0" path="res://addons/tools/steamworks/src/ui/SteamLobby.tscn" id="2_hus17"]
-[ext_resource type="PackedScene" uid="uid://cn5x8xib6swk7" path="res://addons/tools/steamworks/src/nodes/RecordStreamPlayer.tscn" id="3_dkm1i"]
+[ext_resource type="PackedScene" uid="uid://cn5x8xib6swk7" path="res://addons/tools/steamworks/src/nodes/VoiceStreamPlayer.tscn" id="3_dkm1i"]
 
 [node name="SteamManager" type="CanvasLayer"]
 layer = 100
@@ -98,11 +98,13 @@ text = "未录音"
 
 [node name="PlayRecord" type="Button" parent="FlowContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 text = "播放录音"
 
 [node name="SaveRecord" type="Button" parent="FlowContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 text = "保存录音"
 
@@ -240,5 +242,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="RecordStreamPlayer" parent="." instance=ExtResource("3_dkm1i")]
+[node name="VoiceStreamPlayer" parent="." instance=ExtResource("3_dkm1i")]
 unique_name_in_owner = true
+process_mode = 3

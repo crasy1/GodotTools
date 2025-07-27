@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cn5x8xib6swk7"]
-
-[ext_resource type="Script" uid="uid://d3amnc3ow00k8" path="res://addons/tools/steamworks/src/nodes/RecordStreamPlayer.cs" id="1_dgxru"]
-
-[node name="RecordStreamPlayer" type="AudioStreamPlayer"]
-script = ExtResource("1_dgxru")

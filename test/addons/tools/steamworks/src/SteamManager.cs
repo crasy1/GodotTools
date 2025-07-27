@@ -24,8 +24,6 @@ public partial class SteamManager : CanvasLayer
     public static SteamId ServerId { set; get; }
     public static Friend Friend { set; get; }
 
-    private AudioStreamWav AudioStreamWav { set; get; }
-
     public override void _Ready()
     {
         GetTree().AutoAcceptQuit = false;
@@ -54,36 +52,22 @@ public partial class SteamManager : CanvasLayer
         Log.Info($"输入设备列表{inputDeviceList.Join()}");
         var inputDevice = AudioServer.InputDevice = inputDeviceList[1];
         Log.Info($"输入设备{inputDevice}");
-        var rpath = ProjectSettings.GlobalizePath("user://r.wav");
         Record.Toggled += async (value) =>
         {
             RecordStatus.Text = $"{(value ? "录音中" : "未录音")}";
             if (value)
             {
+                VoiceStreamPlayer.PlayStream();
+                SUser.Instance.StartRecord();
             }
             else
             {
+                SUser.Instance.StopRecord();
+                VoiceStreamPlayer.StopStream();
             }
-            // SUser.Instance.AudioEffectRecord.SetRecordingActive(value);
-            // if (!value)
-            // {
-            //     AudioStreamWav = SUser.Instance.AudioEffectRecord.GetRecording();
-            //     Log.Info($"录音结束：录音长度 {AudioStreamWav.Data.Length}");
-            // }
         };
-        PlayRecord.Pressed += () =>
-        {
-            // AudioPlayer.InitializeAudioPlayer();
-            // AudioPlayer.PlayAudio(rpath);
-            // RecordStreamPlayer.Stream = AudioStreamWav;
-            // RecordStreamPlayer.Play();
-            Log.Info("播放录音");
-        };
-        SaveRecord.Pressed += () =>
-        {
-            AudioStreamWav?.SaveToWav("res://record.wav");
-            Log.Info($"保存录音 res://record.wav");
-        };
+        PlayRecord.Pressed += () => { };
+        SaveRecord.Pressed += () => { };
         Ping.Hide();
         ScreenShot.Pressed += () =>
         {
@@ -165,10 +149,6 @@ public partial class SteamManager : CanvasLayer
             GetTree().ChangeSceneToFile(SteamTest.TscnFilePath);
             Hide();
         };
-    }
-
-    public override void _Process(double delta)
-    {
     }
 
     public override void _Notification(int what)

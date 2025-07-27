@@ -63,7 +63,8 @@ public partial class StreamPlayer : AudioStreamPlayer
         };
     }
 
-    public void Play()
+    public new void Play(float fromPosition = 0.0f)
+
     {
         WaveOutEvent.Init(BufferedWaveProvider);
         WaveOutEvent.Play();
@@ -73,6 +74,8 @@ public partial class StreamPlayer : AudioStreamPlayer
     {
         WaveOutEvent.Stop();
     }
+
+    public new bool IsPlaying() => WaveOutEvent.PlaybackState == PlaybackState.Playing;
 
     public void AddSamples(byte[] data)
     {

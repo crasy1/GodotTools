@@ -5,7 +5,8 @@ using Steamworks;
 /// <summary>
 /// 使用godot组件实时播放steamworks音频流
 /// </summary>
-public partial class RecordStreamPlayer : AudioStreamPlayer
+[SceneTree]
+public partial class VoiceStreamPlayer : AudioStreamPlayer
 {
     // 音频配置
     /// 100ms 缓冲区
@@ -51,15 +52,21 @@ public partial class RecordStreamPlayer : AudioStreamPlayer
 
     private AudioStreamGeneratorPlayback Playback { set; get; }
 
+    private bool LastFrameIsPlaying { set; get; }
+
     public override void _Ready()
     {
+        SetPhysicsProcess(false);
+        SetProcess(true);
+        SetProcessMode(ProcessModeEnum.Always);
         SUser.Instance.ReceiveVoiceData += OnReceiveVoiceData;
-        PlayStream();
     }
 
     private void OnReceiveVoiceData(ulong steamId, byte[] compressData)
     {
-        if (Playing && steamId != SteamClient.SteamId)
+        Log.Info($"{IsPlaying()} {compressData.Length}");
+        if (IsPlaying())
+            // if (Playing && steamId != SteamClient.SteamId)
         {
             PushData(SUser.DecompressVoice(compressData));
         }
@@ -101,6 +108,7 @@ public partial class RecordStreamPlayer : AudioStreamPlayer
         var framesAvailable = Playback.GetFramesAvailable();
         // 计算最大可推送帧数
         var framesToPush = Math.Min(framesAvailable, decompress.Length / FrameByte);
+        Log.Info($"push frames:{framesToPush}");
         if (framesToPush <= 0)
         {
             return;
