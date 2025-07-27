@@ -169,6 +169,7 @@ public partial class SteamLobby : Control
             UpdateLobbyData();
             CreateLobby.Disabled = false;
             MaxLobbyUser.Editable = true;
+            TeamVoice.Instance.RemoveAllTeamMember();
         };
         Kick.Pressed += () =>
         {

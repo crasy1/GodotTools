@@ -79,6 +79,21 @@ public partial class TeamVoice : Node
     }
 
     /// <summary>
+    /// 移除所有成员和播放器
+    /// </summary>
+    /// <param name="steamId"></param>
+    public void RemoveAllTeamMember()
+    {
+        foreach (var steamId in _teamMembers.Keys)
+        {
+            GetTeamMember(steamId)?.RemoveAndQueueFree();
+            _teamMembers.Remove(steamId);
+        }
+
+        Log.Info($"退出队伍语音");
+    }
+
+    /// <summary>
     /// 添加成员和播放器
     /// </summary>
     /// <param name="steamId"></param>
@@ -113,6 +128,7 @@ public partial class TeamVoice : Node
     {
         if (_teamMembers.TryGetValue(steamId, out var voiceStreamPlayer))
         {
+            Log.Info($"收到语音数据 steamId:{steamId} , 数据长度:{data.Length}");
             voiceStreamPlayer?.ReceiveRecordVoiceData(steamId, data);
         }
     }
