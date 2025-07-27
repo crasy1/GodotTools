@@ -38,9 +38,12 @@ public partial class SUser : SteamComponent
             SetProcessMode(ProcessModeEnum.Always);
             SetProcess(true);
             // SteamUser.SampleRate = SteamUser.OptimalSampleRate;
-            SteamUser.SampleRate = 44100;
+            SteamUser.SampleRate = (uint)SteamConfig.SampleRate;
             Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
         };
+        var min = Mathf.LinearToDb(0.05);
+        var max = Mathf.LinearToDb(1);
+        Log.Info($" min {min} max {max}");
     }
 
 

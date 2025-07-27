@@ -15,22 +15,22 @@ public partial class NVoiceStreamPlayer : Node
     public int SampleRate = 44100;
 
     /// <summary>
-    /// 音量
+    /// 音量 分贝
     /// </summary>
-    [Export(PropertyHint.Range, "0,1,0.05")]
-    private float _volume = 1;
+    [Export(PropertyHint.Range, "-60,0,1")]
+    private float _volumeDb = 1;
 
-    public float Volume
+    public float VolumeDb
     {
         set
         {
-            _volume = Mathf.Clamp(value, 0, 1);
+            _volumeDb = Mathf.Clamp(value, -60, 0);
             if (WaveOutEvent != null)
             {
-                WaveOutEvent.Volume = _volume;
+                WaveOutEvent.Volume = Mathf.DbToLinear(_volumeDb);
             }
         }
-        get => _volume;
+        get => _volumeDb;
     }
 
     private BufferedWaveProvider BufferedWaveProvider { set; get; }
@@ -54,7 +54,7 @@ public partial class NVoiceStreamPlayer : Node
             DesiredLatency = 50,
             // 越多稳定性越好但延迟越高
             NumberOfBuffers = 2,
-            Volume = Volume
+            Volume = Mathf.DbToLinear(_volumeDb)
         };
         WaveOutEvent.PlaybackStopped += (sender, args) =>
         {

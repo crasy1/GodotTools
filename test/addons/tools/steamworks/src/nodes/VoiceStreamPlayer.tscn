@@ -3,4 +3,5 @@
 [ext_resource type="Script" uid="uid://d3amnc3ow00k8" path="res://addons/tools/steamworks/src/nodes/VoiceStreamPlayer.cs" id="1_dgxru"]
 
 [node name="VoiceStreamPlayer" type="AudioStreamPlayer"]
+bus = &"TeamVoice"
 script = ExtResource("1_dgxru")

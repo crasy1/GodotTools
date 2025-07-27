@@ -27,12 +27,21 @@ public static class SteamConfig
         get => Instance.GetMeta(nameof(CallbackDebug), false).AsBool();
         set => Save(nameof(CallbackDebug), value);
     }
+    public static bool CustomBusLayout
+    {
+        get => Instance.GetMeta(nameof(CustomBusLayout), false).AsBool();
+        set => Save(nameof(CustomBusLayout), value);
+    }
+
+    public static int SampleRate
+    {
+        get => Instance.GetMeta(nameof(SampleRate), 44100).AsInt32();
+        set => Save(nameof(SampleRate), value);
+    }
 
     private static void Save(string key, Variant value)
     {
-        Log.Info($"save {string.Join(",",Instance.GetMetaList())}");
         Instance.SetMeta(key, value);
-        
         ResourceSaver.Save(Instance, Paths.SteamworksConfig);
     }
 }
