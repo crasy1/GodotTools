@@ -30,7 +30,9 @@ public static class SteamConfig
 
     private static void Save(string key, Variant value)
     {
+        Log.Info($"save {string.Join(",",Instance.GetMetaList())}");
         Instance.SetMeta(key, value);
+        
         ResourceSaver.Save(Instance, Paths.SteamworksConfig);
     }
 }

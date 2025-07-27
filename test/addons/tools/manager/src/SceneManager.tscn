@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bcl6dhr2eked8"]
 
-[ext_resource type="Script" uid="uid://mobnbya3jwc" path="res://addons/tools/manager/src/SceneManager.cs" id="1_evvsr"]
+[ext_resource type="Script" uid="uid://cofcc0dax3wcc" path="res://addons/tools/manager/src/SceneManager.cs" id="1_evvsr"]
 
 [node name="SceneManager" type="CanvasLayer"]
 layer = 110

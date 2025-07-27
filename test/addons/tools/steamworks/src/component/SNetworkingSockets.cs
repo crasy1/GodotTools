@@ -8,7 +8,6 @@ namespace Godot;
 [Singleton]
 public partial class SNetworkingSockets : SteamComponent
 {
-
     public override void _Ready()
     {
         base._Ready();
@@ -27,6 +26,12 @@ public partial class SNetworkingSockets : SteamComponent
 
     private void CloseAllSocket()
     {
+        if (GetChildCount() <= 0)
+        {
+            Log.Info("---------------- 未检测到[steam socket] ----------------");
+            return;
+        }
+
         Log.Info("---------------- 关闭[steam socket]开始 ----------------");
         foreach (var child in GetChildren())
         {

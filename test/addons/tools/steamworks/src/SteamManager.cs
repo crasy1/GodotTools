@@ -48,11 +48,7 @@ public partial class SteamManager : CanvasLayer
             SClient.Instance.Connect();
         }
 
-        var inputDeviceList = AudioServer.GetInputDeviceList();
-        Log.Info($"输入设备列表{inputDeviceList.Join()}");
-        var inputDevice = AudioServer.InputDevice = inputDeviceList[1];
-        Log.Info($"输入设备{inputDevice}");
-        Record.Toggled += async (value) =>
+        Record.Toggled += (value) =>
         {
             RecordStatus.Text = $"{(value ? "录音中" : "未录音")}";
             if (value)

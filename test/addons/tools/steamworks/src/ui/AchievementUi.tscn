@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bhu5bstcybqgu"]
 
-[ext_resource type="Script" uid="uid://b5ovyxg1gbnf" path="res://addons/tools/steamworks/src/ui/AchievementUi.cs" id="1_3w7c6"]
+[ext_resource type="Script" uid="uid://s8jlx8skwk06" path="res://addons/tools/steamworks/src/ui/AchievementUi.cs" id="1_3w7c6"]
 
 [node name="AchievementUI" type="Control"]
 custom_minimum_size = Vector2(120, 120)

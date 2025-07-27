@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://5d16l3scxach"]
 
-[ext_resource type="Script" uid="uid://b8o5bdgltr7hn" path="res://addons/tools/steamworks/src/SteamworksEditor.cs" id="1_mcy6p"]
+[ext_resource type="Script" uid="uid://ecfycpicmjkl" path="res://addons/tools/steamworks/src/SteamworksEditor.cs" id="1_mcy6p"]
 
 [node name="SteamworksEditor" type="Control"]
 layout_mode = 3
