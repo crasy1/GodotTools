@@ -60,7 +60,6 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
         SetPhysicsProcess(false);
         SetProcess(true);
         SetProcessMode(ProcessModeEnum.Always);
-        SUser.Instance.ReceiveVoiceData += OnReceiveVoiceData;
 
         AudioStreamGenerator = new AudioStreamGenerator()
         {
@@ -70,7 +69,7 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
         Stream = AudioStreamGenerator;
     }
 
-    private void OnReceiveVoiceData(ulong steamId, byte[] compressData)
+    public void ReceiveRecordVoiceData(ulong steamId, byte[] compressData)
     {
         if (IsPlaying())
         {
@@ -111,7 +110,7 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
     }
 
     // 处理音频帧
-    public void PushData(byte[] decompress)
+    private void PushData(byte[] decompress)
     {
         if (Playback == null || decompress.Length == 0)
         {

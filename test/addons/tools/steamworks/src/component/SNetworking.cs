@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Steamworks;
 
@@ -8,7 +9,22 @@ namespace Godot;
 public partial class SNetworking : SteamComponent
 {
     [Signal]
-    public delegate void ReceiveMessageEventHandler(ulong steamId, string content);
+    public delegate void ReceiveVoiceEventHandler(ulong steamId, byte[] data);
+
+    [Signal]
+    public delegate void ReceiveMessageEventHandler(ulong steamId, string data);
+
+
+    [Signal]
+    public delegate void UserConnectEventHandler(ulong steamId);
+
+    [Signal]
+    public delegate void UserDisconnectEventHandler(ulong steamId);
+
+    /// <summary>
+    /// 已连接的玩家id
+    /// </summary>
+    public readonly List<SteamId> ConnectedIds = new();
 
     public override void _Ready()
     {
@@ -17,30 +33,65 @@ public partial class SNetworking : SteamComponent
         {
             var success = SteamNetworking.AcceptP2PSessionWithUser(steamId);
             Log.Info($"p2p连接请求 {steamId} : {success}");
+            if (success && !ConnectedIds.Contains(steamId))
+            {
+                ConnectedIds.Add(steamId);
+                EmitSignalUserConnect(steamId);
+            }
         };
-        SteamNetworking.OnP2PConnectionFailed += (steamId, error) => { Log.Info($"p2p连接失败 {steamId},{error}"); };
+        SteamNetworking.OnP2PConnectionFailed += (steamId, error) =>
+        {
+            Log.Info($"p2p连接失败 {steamId},{error}");
+            if (ConnectedIds.Contains(steamId))
+            {
+                ConnectedIds.Remove(steamId);
+                EmitSignalUserDisconnect(steamId);
+            }
+        };
         SClient.Instance.SteamClientConnected += () => { SetProcess(true); };
         SClient.Instance.SteamClientDisconnected += () => { SetProcess(false); };
     }
 
+    /// <summary>
+    /// 与某人断开
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <returns></returns>
+    public bool Disconnect(SteamId steamId)
+    {
+        return SteamNetworking.CloseP2PSessionWithUser(steamId);
+    }
+
     public override void _Process(double delta)
     {
-        if (SteamNetworking.IsP2PPacketAvailable(0))
+        if (SteamNetworking.IsP2PPacketAvailable((int)Channel.Voice))
         {
-            var readP2PPacket = SteamNetworking.ReadP2PPacket(0);
+            var readP2PPacket = SteamNetworking.ReadP2PPacket((int)Channel.Voice);
             if (readP2PPacket.HasValue)
             {
-                var steamId = readP2PPacket.Value.SteamId;
-                var data = Encoding.UTF8.GetString(readP2PPacket.Value.Data);
-                Log.Info($"p2p从 {steamId} 收到数据 ,{data}");
-                EmitSignalReceiveMessage(steamId, data);
+                EmitSignalReceiveVoice(readP2PPacket.Value.SteamId, readP2PPacket.Value.Data);
+            }
+        }
+
+        if (SteamNetworking.IsP2PPacketAvailable((int)Channel.Msg))
+        {
+            var readP2PPacket = SteamNetworking.ReadP2PPacket((int)Channel.Msg);
+            if (readP2PPacket.HasValue)
+            {
+                EmitSignalReceiveMessage(readP2PPacket.Value.SteamId,
+                    Encoding.UTF8.GetString(readP2PPacket.Value.Data));
             }
         }
     }
 
-    public static void SendP2P(SteamId steamId, string content, P2PSend sendType = P2PSend.Reliable)
+    public void SendP2P(SteamId steamId, string content, Channel channel, P2PSend sendType = P2PSend.Reliable)
     {
         var bytes = Encoding.UTF8.GetBytes(content);
-        SteamNetworking.SendP2PPacket(steamId, bytes, bytes.Length, 0, sendType);
+        SendP2P(steamId, bytes, channel, sendType);
+    }
+
+    public void SendP2P(SteamId steamId, byte[] data, Channel channel, P2PSend sendType = P2PSend.Reliable)
+    {
+        SteamNetworking.SendP2PPacket(steamId, data, data.Length, (int)channel, sendType);
     }
 }

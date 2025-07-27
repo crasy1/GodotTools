@@ -29,7 +29,16 @@ public partial class SteamTest : Node2D
                 return;
             }
 
-            SNetworking.SendP2P(SteamUserInfo.Friend.Id, P2PText.Text);
+            SNetworking.Instance.SendP2P(SteamUserInfo.Friend.Id, P2PText.Text, Channel.Msg);
+        };
+        DisconnectP2P.Pressed += () =>
+        {
+            if (SteamUserInfo == null)
+            {
+                return;
+            }
+
+            SNetworking.Instance.Disconnect(SteamUserInfo.Friend.Id);
         };
         // NormalServerIp,NormalServerPort,NormalServerText,NormalServerReceiveText
         CreateNormalServer.Pressed += () =>
@@ -117,10 +126,7 @@ public partial class SteamTest : Node2D
             NormalClient?.Close();
             NormalClient = null;
         };
-        SendToNormalServer.Pressed += () =>
-        {
-            NormalClient?.Send(ProtoBufMsg.From(NormalClientText.Text));
-        };
+        SendToNormalServer.Pressed += () => { NormalClient?.Send(ProtoBufMsg.From(NormalClientText.Text)); };
 
         // RelayServerIp,RelayServerPort,RelayServerText,RelayServerReceiveText
         CreateRelayServer.Pressed += () =>

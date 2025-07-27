@@ -61,10 +61,9 @@ public partial class NVoiceStreamPlayer : Node
             BufferedWaveProvider.ClearBuffer();
             Log.Info($"播放停止");
         };
-        SUser.Instance.ReceiveVoiceData += OnReceiveVoiceData;
     }
 
-    private void OnReceiveVoiceData(ulong steamId, byte[] compressData)
+    public void ReceiveRecordVoiceData(ulong steamId, byte[] compressData)
     {
         if (IsPlaying())
         {
@@ -86,7 +85,7 @@ public partial class NVoiceStreamPlayer : Node
 
     public bool IsPlaying() => WaveOutEvent.PlaybackState == PlaybackState.Playing;
 
-    public void AddSamples(byte[] data)
+    private void AddSamples(byte[] data)
     {
         BufferedWaveProvider.AddSamples(data, 0, data.Length);
     }

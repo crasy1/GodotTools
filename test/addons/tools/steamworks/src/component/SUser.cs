@@ -8,10 +8,10 @@ namespace Godot;
 public partial class SUser : SteamComponent
 {
     /// <summary>
-    /// 收到用户steamworks语音压缩数据
+    /// 录到用户steamworks语音压缩数据
     /// </summary>
     [Signal]
-    public delegate void ReceiveVoiceDataEventHandler(ulong steamId, byte[] compressData);
+    public delegate void RecordVoiceDataEventHandler(ulong steamId, byte[] compressData);
 
     private NVoiceStreamPlayer StreamPlayer { set; get; }
 
@@ -35,7 +35,6 @@ public partial class SUser : SteamComponent
         };
         SClient.Instance.SteamClientConnected += () =>
         {
-            SetProcessMode(ProcessModeEnum.Always);
             SetProcess(true);
             // SteamUser.SampleRate = SteamUser.OptimalSampleRate;
             SteamUser.SampleRate = (uint)SteamConfig.SampleRate;
@@ -79,7 +78,7 @@ public partial class SUser : SteamComponent
         {
             using var memoryStream = new MemoryStream();
             var length = SteamUser.ReadVoiceData(memoryStream);
-            EmitSignalReceiveVoiceData(SteamClient.SteamId, memoryStream.GetBuffer());
+            EmitSignalRecordVoiceData(SteamClient.SteamId, memoryStream.GetBuffer());
         }
     }
 
