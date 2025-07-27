@@ -48,6 +48,7 @@ public partial class SteamManager : CanvasLayer
             SClient.Instance.Connect();
         }
 
+        SUser.Instance.RecordVoiceData += VoiceStreamPlayer.ReceiveRecordVoiceData;
         Record.Toggled += (value) =>
         {
             RecordStatus.Text = $"{(value ? "录音中" : "未录音")}";

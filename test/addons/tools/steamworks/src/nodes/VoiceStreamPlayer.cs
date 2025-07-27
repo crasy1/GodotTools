@@ -52,8 +52,16 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
     private AudioStreamGenerator AudioStreamGenerator { set; get; }
 
     private AudioStreamGeneratorPlayback Playback { set; get; }
+    private AudioEffectSpectrumAnalyzerInstance AudioEffectSpectrumAnalyzerInstance { set; get; }
 
     private bool LastFrameIsPlaying { set; get; }
+
+    /// <summary>
+    /// 总共视为静音的连续帧数,连续达到5帧，则认为没有声音
+    /// </summary>
+    private int SilenceFrame { set; get; }
+
+    private const int MaxSilenceFrame = 10;
 
     public override void _Ready()
     {
@@ -67,6 +75,8 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
             BufferLength = 0.05f
         };
         Stream = AudioStreamGenerator;
+        AudioEffectSpectrumAnalyzerInstance = AudioServer.GetBusEffectInstance(4, 0)
+            as AudioEffectSpectrumAnalyzerInstance;
     }
 
     public void ReceiveRecordVoiceData(ulong steamId, byte[] compressData)
@@ -107,6 +117,26 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
                 StopStream();
                 break;
         }
+
+        // 统计静音的帧数
+        var magnitude = AudioEffectSpectrumAnalyzerInstance.GetMagnitudeForFrequencyRange(0, 20000);
+        var volumeDb = Mathf.LinearToDb(Mathf.Max(magnitude.X, magnitude.Y));
+        // 设置静音检测阈值（通常-60dB以下视为静音）
+        SilenceFrame = volumeDb > Consts.MinDb ? 0 : Mathf.Min(10, SilenceFrame + 1);
+    }
+
+    /// <summary>
+    /// 是否静音
+    /// </summary>
+    /// <returns></returns>
+    public bool IsSilence()
+    {
+        if (Playback == null || !Playback.IsPlaying())
+        {
+            return true;
+        }
+
+        return SilenceFrame > MaxSilenceFrame;
     }
 
     // 处理音频帧
