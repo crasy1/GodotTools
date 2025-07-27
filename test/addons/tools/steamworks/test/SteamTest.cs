@@ -38,7 +38,8 @@ public partial class SteamTest : Node2D
                 return;
             }
 
-            SNetworking.Instance.Disconnect(SteamUserInfo.Friend.Id);
+            var disconnect = SNetworking.Instance.Disconnect(SteamUserInfo.Friend.Id);
+            Log.Info(disconnect);
         };
         // NormalServerIp,NormalServerPort,NormalServerText,NormalServerReceiveText
         CreateNormalServer.Pressed += () =>

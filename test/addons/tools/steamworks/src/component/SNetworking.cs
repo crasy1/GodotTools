@@ -31,8 +31,9 @@ public partial class SNetworking : SteamComponent
         base._Ready();
         SteamNetworking.OnP2PSessionRequest += (steamId) =>
         {
+            Log.Info($"p2p:收到 {steamId}连接请求");
             var success = SteamNetworking.AcceptP2PSessionWithUser(steamId);
-            Log.Info($"p2p连接请求 {steamId} : {success}");
+            Log.Info($"p2p:接受 {steamId}连接请求: {success}");
             if (success && !ConnectedIds.Contains(steamId))
             {
                 ConnectedIds.Add(steamId);
@@ -41,7 +42,7 @@ public partial class SNetworking : SteamComponent
         };
         SteamNetworking.OnP2PConnectionFailed += (steamId, error) =>
         {
-            Log.Info($"p2p连接失败 {steamId},{error}");
+            Log.Info($"p2p:与 {steamId} 连接失败,{error}");
             if (ConnectedIds.Contains(steamId))
             {
                 ConnectedIds.Remove(steamId);
@@ -64,7 +65,15 @@ public partial class SNetworking : SteamComponent
     /// <returns></returns>
     public bool Disconnect(SteamId steamId)
     {
-        return SteamNetworking.CloseP2PSessionWithUser(steamId);
+        var result = SteamNetworking.CloseP2PSessionWithUser(steamId);
+        if (result)
+        {
+            Log.Info($"p2p:与 {steamId} 断开连接");
+            ConnectedIds.Remove(steamId);
+            EmitSignalUserDisconnect(steamId);
+        }
+
+        return result;
     }
 
     public override void _Process(double delta)
