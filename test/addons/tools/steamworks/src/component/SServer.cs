@@ -14,7 +14,7 @@ namespace Godot;
 [Singleton]
 public partial class SServer : SteamComponent
 {
-    public async override void _Ready()
+    public override void _Ready()
     {
         base._Ready();
         SteamServer.OnSteamNetAuthenticationStatus += (status) => { Log.Info($"服务器网络验证 {status}"); };

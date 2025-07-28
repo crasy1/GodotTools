@@ -63,6 +63,7 @@ public partial class SFriends : SteamComponent
             AvatarSize.Small => await SteamFriends.GetSmallAvatarAsync(steamId),
             AvatarSize.Middle => await SteamFriends.GetMediumAvatarAsync(steamId),
             AvatarSize.Large => await SteamFriends.GetLargeAvatarAsync(steamId),
+            _ => throw new ArgumentOutOfRangeException(nameof(size), size,"不的支持头像尺寸")
         };
 
         image = avatar?.GodotImage();

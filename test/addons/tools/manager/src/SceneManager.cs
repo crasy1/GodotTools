@@ -1,11 +1,11 @@
 using System;
+using System.Threading.Tasks;
 using Godot;
 
 [SceneTree]
 [Singleton]
 public partial class SceneManager : CanvasLayer
 {
-    
     [Signal]
     public delegate void SceneChangedEventHandler();
 
@@ -19,6 +19,17 @@ public partial class SceneManager : CanvasLayer
         SimpleColorRect.Color = SimpleColorRect.Color with { A = 0 };
     }
 
+    public override void _Notification(int what)
+    {
+        switch ((long)what)
+        {
+            case NotificationApplicationFocusIn: Log.Info("应用聚焦"); break;
+            case NotificationApplicationFocusOut: Log.Info("应用失焦"); break;
+            case NotificationApplicationPaused: Log.Info("应用暂停"); break;
+            case NotificationApplicationResumed: Log.Info("应用取消暂停"); break;
+        }
+    }
+
     /// <summary>
     /// 简单转场效果
     /// </summary>
@@ -26,7 +37,7 @@ public partial class SceneManager : CanvasLayer
     /// <param name="tips"></param>
     /// <param name="duration"></param>
     /// <param name="showTip"></param>
-    public async void SimpleColorChange(PackedScene scene, string tips = null, double duration = 0.4,
+    public async Task SimpleColorChange(PackedScene scene, string? tips = null, double duration = 0.4,
         bool showTip = true)
     {
         StopBgm();
@@ -58,7 +69,7 @@ public partial class SceneManager : CanvasLayer
     /// <param name="tips"></param>
     /// <param name="duration"></param>
     /// <param name="showTip"></param>
-    public async void SimpleColorChange(Action action, string tips = null, double duration = 0.4, bool showTip = true)
+    public async void SimpleColorChange(Action action, string? tips = null, double duration = 0.4, bool showTip = true)
     {
         StopBgm();
         SceneTree.Paused = true;
@@ -77,7 +88,7 @@ public partial class SceneManager : CanvasLayer
         SceneTree.Paused = false;
     }
 
-    public void ShowTips(string tips, double duration = 0.4)
+    public void ShowTips(string? tips, double duration = 0.4)
     {
         if (string.IsNullOrEmpty(tips))
         {

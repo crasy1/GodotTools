@@ -11,7 +11,7 @@ namespace Godot;
 [Singleton]
 public partial class SServerStats : SteamComponent
 {
-    public async override void _Ready()
+    public override void _Ready()
     {
         base._Ready();
     }

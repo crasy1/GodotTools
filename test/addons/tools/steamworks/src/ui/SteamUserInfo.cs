@@ -8,16 +8,6 @@ public partial class SteamUserInfo : Control
 {
     public Friend Friend { set; get; }
 
-    public override bool Equals(object obj)
-    {
-        if (obj == null)
-        {
-            return false;
-        }
-
-        return obj.GetType() == GetType() && ((SteamUserInfo)obj).Friend.Id == Friend.Id;
-    }
-
     [OnInstantiate]
     private void InitFriend(Friend friend)
     {
@@ -38,7 +28,9 @@ public partial class SteamUserInfo : Control
             FriendState.Snooze => "勿扰",
             FriendState.LookingToTrade => "交易",
             FriendState.LookingToPlay => "游玩",
-            FriendState.Invisible => "隐身"
+            FriendState.Invisible => "隐身",
+            FriendState.Max => "",
+            _ => throw new ArgumentOutOfRangeException()
         };
         Avatar.Texture = (await SFriends.Instance.Avatar(Friend.Id))?.Texture();
         Avatar.GuiInput += (@event =>

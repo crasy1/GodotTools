@@ -40,20 +40,17 @@ public partial class SUser : SteamComponent
             SteamUser.SampleRate = (uint)SteamConfig.SampleRate;
             Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
         };
-        var min = Mathf.LinearToDb(0.05);
-        var max = Mathf.LinearToDb(1);
-        Log.Info($" min {min} max {max}");
     }
 
 
     public override void _Input(InputEvent @event)
     {
-        if (Input.IsActionJustPressed(Actions.Record))
+        if (Actions.Record.IsJustPressed())
         {
             StartRecord();
         }
 
-        if (Input.IsActionJustReleased(Actions.Record))
+        if (Actions.Record.IsJustReleased())
         {
             StopRecord();
         }
