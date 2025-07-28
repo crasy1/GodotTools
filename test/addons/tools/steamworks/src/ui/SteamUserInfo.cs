@@ -1,12 +1,11 @@
 using Godot;
 using System;
-using System.Threading.Tasks;
 using Steamworks;
 
 [SceneTree]
 public partial class SteamUserInfo : Control
 {
-    public Friend Friend { set; get; }
+    public Friend Friend { private set; get; }
 
     [OnInstantiate]
     private void InitFriend(Friend friend)
@@ -19,19 +18,7 @@ public partial class SteamUserInfo : Control
         base._Ready();
         UserName.Text = Friend.Name;
         NickName.Text = Friend.Nickname;
-        State.Text = Friend.State switch
-        {
-            FriendState.Offline => "离线",
-            FriendState.Online => "在线",
-            FriendState.Busy => "忙碌",
-            FriendState.Away => "离开",
-            FriendState.Snooze => "勿扰",
-            FriendState.LookingToTrade => "交易",
-            FriendState.LookingToPlay => "游玩",
-            FriendState.Invisible => "隐身",
-            FriendState.Max => "",
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        State.Text = Friend.State.State();
         Avatar.Texture = (await SFriends.Instance.Avatar(Friend.Id))?.Texture();
         Avatar.GuiInput += (@event =>
         {
