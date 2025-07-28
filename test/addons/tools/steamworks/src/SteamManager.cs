@@ -253,7 +253,7 @@ IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
         Avatar.Texture = image.Texture();
         foreach (var friend in SteamFriends.GetFriends())
         {
-            if (friend.IsOnline)
+            // if (friend.IsOnline)
             {
                 var lobby = friend.GameInfo?.Lobby;
                 if (lobby.HasValue)

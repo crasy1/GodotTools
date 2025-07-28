@@ -6,6 +6,10 @@ using Steamworks;
 public partial class SteamUserInfo : Control
 {
     public Friend Friend { private set; get; }
+    private const string Silent = "silent";
+    private const string Mute = "mute";
+    private const string Speak = "speak";
+    private VoiceStreamPlayer? VoiceStreamPlayer { set; get; }
 
     [OnInstantiate]
     private void InitFriend(Friend friend)
@@ -16,6 +20,8 @@ public partial class SteamUserInfo : Control
     public async override void _Ready()
     {
         base._Ready();
+        Menu.Hide();
+        Voice.Hide();
         UserName.Text = Friend.Name;
         NickName.Text = Friend.Nickname;
         State.Text = Friend.State.State();
@@ -30,6 +36,49 @@ public partial class SteamUserInfo : Control
         InviteGame.Pressed += () => { Friend.InviteToGame("来"); };
         InviteLobby.Pressed += () => { SMatchmaking.Instance.Invite(Friend.Id); };
         RemotePlay.Pressed += () => { SRemotePlay.Invite(Friend.Id); };
-        Menu.Hide();
+        TeamVoice.Instance.MemberJoin += (teamMemberId) =>
+        {
+            if (teamMemberId == Friend.Id)
+            {
+                Voice.Show();
+                VoiceStreamPlayer = TeamVoice.Instance.GetTeamMember(Friend.Id);
+            }
+        };
+        TeamVoice.Instance.MemberLeave += (teamMemberId) =>
+        {
+            if (teamMemberId == Friend.Id)
+            {
+                Voice.Hide();
+            }
+        };
+        Voice.Pressed += () =>
+        {
+            if (TeamVoice.Instance.IsPlaying(Friend.Id))
+            {
+                AnimationPlayer.Play(Mute);
+                TeamVoice.Instance.Mute(Friend.Id);
+            }
+            else
+            {
+                AnimationPlayer.Play(Silent);
+                TeamVoice.Instance.Play(Friend.Id);
+            }
+        };
+    }
+
+    public override void _Process(double delta)
+    {
+        if (VoiceStreamPlayer == null)
+        {
+            return;
+        }
+
+        switch (VoiceStreamPlayer.IsSilence())
+        {
+            case true when AnimationPlayer.CurrentAnimation != Silent:
+                AnimationPlayer.Play(Silent); break;
+            case false when AnimationPlayer.CurrentAnimation != Speak:
+                AnimationPlayer.Play(Speak); break;
+        }
     }
 }

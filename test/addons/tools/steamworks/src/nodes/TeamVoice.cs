@@ -6,6 +6,12 @@ namespace Godot;
 [Singleton]
 public partial class TeamVoice : Node
 {
+    [Signal]
+    public delegate void MemberJoinEventHandler(ulong steamId);
+
+    [Signal]
+    public delegate void MemberLeaveEventHandler(ulong steamId);
+
     /// <summary>
     /// 队伍成员
     /// </summary>
@@ -26,7 +32,7 @@ public partial class TeamVoice : Node
     /// </summary>
     /// <param name="steamId"></param>
     /// <returns></returns>
-    public VoiceStreamPlayer GetTeamMember(SteamId steamId)
+    public VoiceStreamPlayer? GetTeamMember(SteamId steamId)
     {
         return _teamMembers.GetValueOrDefault(steamId);
     }
@@ -73,8 +79,14 @@ public partial class TeamVoice : Node
     /// <param name="steamId"></param>
     public void RemoveTeamMember(SteamId steamId)
     {
+        if (!_teamMembers.ContainsKey(steamId))
+        {
+            return;
+        }
+
         GetTeamMember(steamId)?.RemoveAndQueueFree();
         _teamMembers.Remove(steamId);
+        EmitSignalMemberLeave(steamId);
         Log.Info($"队伍语音移除 {steamId}");
     }
 
@@ -88,6 +100,7 @@ public partial class TeamVoice : Node
         {
             GetTeamMember(steamId)?.RemoveAndQueueFree();
             _teamMembers.Remove(steamId);
+            EmitSignalMemberLeave(steamId);
         }
 
         Log.Info($"退出队伍语音");
@@ -110,6 +123,7 @@ public partial class TeamVoice : Node
         _teamMembers.TryAdd(steamId, voiceStreamPlayer);
         // 默认播放队伍语音
         voiceStreamPlayer.Play();
+        EmitSignalMemberJoin(steamId);
         Log.Info($"队伍语音添加 {steamId}");
     }
 

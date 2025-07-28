@@ -16,7 +16,6 @@ public partial class InputManager : Control
 
     public override void _Input(InputEvent @event)
     {
-        Log.Info(@event.AsText());
     }
 
     public override void _UnhandledInput(InputEvent @event)

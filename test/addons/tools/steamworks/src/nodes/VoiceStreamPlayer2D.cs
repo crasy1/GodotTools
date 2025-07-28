@@ -1,11 +1,12 @@
-using Godot;
+﻿using Godot;
 using System;
 
 /// <summary>
 /// 使用godot组件实时播放steamworks音频流
+/// 2D空间
 /// </summary>
 [GlobalClass]
-public partial class VoiceStreamPlayer : AudioStreamPlayer
+public partial class VoiceStreamPlayer2D : AudioStreamPlayer2D
 {
     /// <summary>
     /// 缓冲区
