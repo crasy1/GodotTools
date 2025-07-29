@@ -12,6 +12,9 @@ public partial class TeamVoice : Node
     [Signal]
     public delegate void MemberLeaveEventHandler(ulong steamId);
 
+    public int BusTeamVoiceIndex { private set; get; }
+    public AudioEffectSpectrumAnalyzerInstance? AudioEffectSpectrumAnalyzerInstance { private set; get; }
+
     /// <summary>
     /// 队伍成员
     /// </summary>
@@ -25,6 +28,29 @@ public partial class TeamVoice : Node
         SetPhysicsProcess(false);
         SNetworking.Instance.ReceiveVoice += OnReceiveVoice;
         SUser.Instance.RecordVoiceData += OnRecordVoiceData;
+        (BusTeamVoiceIndex, AudioEffectSpectrumAnalyzerInstance) = BusTeamVoiceInfo();
+    }
+
+    private (int, AudioEffectSpectrumAnalyzerInstance?) BusTeamVoiceInfo()
+    {
+        var busIndex = AudioServer.GetBusIndex(Consts.BusTeamVoice);
+        if (busIndex < 0)
+        {
+            Log.Error($"音频总线未找到 {Consts.BusTeamVoice}");
+            return (busIndex, null);
+        }
+
+        for (var i = 0; i < AudioServer.GetBusEffectCount(busIndex); i++)
+        {
+            var audioEffectInstance = AudioServer.GetBusEffectInstance(busIndex, i);
+            if (audioEffectInstance is AudioEffectSpectrumAnalyzerInstance audioEffectSpectrumAnalyzerInstance)
+            {
+                return (busIndex, audioEffectSpectrumAnalyzerInstance);
+            }
+        }
+
+        Log.Error($"音频总线未找到 {Consts.BusTeamVoice} 频谱分析仪");
+        return (busIndex, null);
     }
 
     /// <summary>

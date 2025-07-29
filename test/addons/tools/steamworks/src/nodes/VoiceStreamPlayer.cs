@@ -67,7 +67,7 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
         SetPhysicsProcess(false);
         SetProcess(true);
         SetProcessMode(ProcessModeEnum.Always);
-        Bus = "TeamVoice";
+        Bus = Consts.BusTeamVoice;
 
         AudioStreamGenerator = new AudioStreamGenerator()
         {
@@ -75,8 +75,7 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
             BufferLength = 0.05f
         };
         Stream = AudioStreamGenerator;
-        AudioEffectSpectrumAnalyzerInstance = AudioServer.GetBusEffectInstance(4, 0)
-            as AudioEffectSpectrumAnalyzerInstance;
+        AudioEffectSpectrumAnalyzerInstance = TeamVoice.Instance.AudioEffectSpectrumAnalyzerInstance;
     }
 
     public void ReceiveRecordVoiceData(ulong steamId, byte[] compressData)
@@ -150,7 +149,7 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
         // 获取可用帧数
         var framesAvailable = Playback.GetFramesAvailable();
         // 计算最大可推送帧数
-        var framesToPush = Math.Min(framesAvailable, decompress.Length / FrameByte);
+        var framesToPush = Mathf.Min(framesAvailable, decompress.Length / FrameByte);
         if (framesToPush <= 0)
         {
             return;
