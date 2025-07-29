@@ -17,6 +17,10 @@ public partial class TeamVoice : Node
     /// </summary>
     private readonly Dictionary<SteamId, VoiceStreamPlayer> _teamMembers = new();
 
+    public static int BusTeamVoiceIndex => AudioServer.GetBusIndex(Consts.BusTeamVoice);
+    public static AudioEffectSpectrumAnalyzerInstance? AudioEffectSpectrumAnalyzerInstance => BusTeamVoiceInfo();
+
+
     public override void _Ready()
     {
         Name = GetType().Name;
@@ -27,7 +31,28 @@ public partial class TeamVoice : Node
         SUser.Instance.RecordVoiceData += OnRecordVoiceData;
     }
 
-    
+
+    private static AudioEffectSpectrumAnalyzerInstance? BusTeamVoiceInfo()
+    {
+        var busIndex = AudioServer.GetBusIndex(Consts.BusTeamVoice);
+        if (busIndex < 0)
+        {
+            Log.Error($"音频总线未找到 {Consts.BusTeamVoice}");
+            return null;
+        }
+
+        for (var i = 0; i < AudioServer.GetBusEffectCount(busIndex); i++)
+        {
+            var audioEffectInstance = AudioServer.GetBusEffectInstance(busIndex, i);
+            if (audioEffectInstance is AudioEffectSpectrumAnalyzerInstance audioEffectSpectrumAnalyzerInstance)
+            {
+                return audioEffectSpectrumAnalyzerInstance;
+            }
+        }
+
+        Log.Error($"音频总线未找到 {Consts.BusTeamVoice} 频谱分析仪");
+        return null;
+    }
 
     /// <summary>
     /// 获取该用户的播放器

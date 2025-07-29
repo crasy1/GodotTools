@@ -100,7 +100,7 @@ public partial class VoiceStreamPlayer2D : AudioStreamPlayer2D
             BufferLength = 0.05f
         };
         Stream = AudioStreamGenerator;
-        AudioEffectSpectrumAnalyzerInstance = SteamManager.Instance.AudioEffectSpectrumAnalyzerInstance;
+        AudioEffectSpectrumAnalyzerInstance = TeamVoice.AudioEffectSpectrumAnalyzerInstance;
     }
 
     public void ReceiveRecordVoiceData(ulong steamId, byte[] compressData)
