@@ -42,6 +42,8 @@ public partial class SteamUserInfo : Control
             {
                 Voice.Show();
                 VoiceStreamPlayer = TeamVoice.Instance.GetTeamMember(Friend.Id);
+                VoiceStreamPlayer.Speak += () => { AnimationPlayer.Play(Speak); };
+                VoiceStreamPlayer.Silent += () => { AnimationPlayer.Play(Silent); };
             }
         };
         TeamVoice.Instance.MemberLeave += (teamMemberId) =>
@@ -64,21 +66,5 @@ public partial class SteamUserInfo : Control
                 TeamVoice.Instance.Play(Friend.Id);
             }
         };
-    }
-
-    public override void _Process(double delta)
-    {
-        if (VoiceStreamPlayer == null)
-        {
-            return;
-        }
-
-        switch (VoiceStreamPlayer.IsSilence())
-        {
-            case true when AnimationPlayer.CurrentAnimation != Silent:
-                AnimationPlayer.Play(Silent); break;
-            case false when AnimationPlayer.CurrentAnimation != Speak:
-                AnimationPlayer.Play(Speak); break;
-        }
     }
 }

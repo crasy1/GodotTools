@@ -24,8 +24,12 @@ public partial class SteamManager : CanvasLayer
     public static SteamId ServerId { set; get; }
     public static Friend Friend { set; get; }
 
+    public int BusTeamVoiceIndex { private set; get; }
+    public AudioEffectSpectrumAnalyzerInstance? AudioEffectSpectrumAnalyzerInstance { private set; get; }
+
     public override void _Ready()
     {
+        (BusTeamVoiceIndex, AudioEffectSpectrumAnalyzerInstance) = BusTeamVoiceInfo();
         GetTree().AutoAcceptQuit = false;
         SteamUtil.InitEnvironment();
         SetVisible(SteamConfig.Debug);
@@ -204,6 +208,28 @@ public partial class SteamManager : CanvasLayer
     public static void AddBeforeGameQuitAction(Action action)
     {
         QuitActions.Push(action);
+    }
+
+    private (int, AudioEffectSpectrumAnalyzerInstance?) BusTeamVoiceInfo()
+    {
+        var busIndex = AudioServer.GetBusIndex(Consts.BusTeamVoice);
+        if (busIndex < 0)
+        {
+            Log.Error($"音频总线未找到 {Consts.BusTeamVoice}");
+            return (busIndex, null);
+        }
+
+        for (var i = 0; i < AudioServer.GetBusEffectCount(busIndex); i++)
+        {
+            var audioEffectInstance = AudioServer.GetBusEffectInstance(busIndex, i);
+            if (audioEffectInstance is AudioEffectSpectrumAnalyzerInstance audioEffectSpectrumAnalyzerInstance)
+            {
+                return (busIndex, audioEffectSpectrumAnalyzerInstance);
+            }
+        }
+
+        Log.Error($"音频总线未找到 {Consts.BusTeamVoice} 频谱分析仪");
+        return (busIndex, null);
     }
 
     private void BeforeGameQuit()
