@@ -140,11 +140,6 @@ public partial class VoiceStreamPlayer : AudioStreamPlayer
                 break;
         }
 
-        if (AudioEffectSpectrumAnalyzerInstance == null)
-        {
-            return;
-        }
-
         // 统计静音的帧数
         var magnitude = AudioEffectSpectrumAnalyzerInstance.GetMagnitudeForFrequencyRange(0, 20000);
         var volumeDb = Mathf.LinearToDb(Mathf.Max(magnitude.X, magnitude.Y));

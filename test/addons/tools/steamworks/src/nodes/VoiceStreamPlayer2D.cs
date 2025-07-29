@@ -8,6 +8,13 @@ using System;
 [GlobalClass]
 public partial class VoiceStreamPlayer2D : AudioStreamPlayer2D
 {
+    
+    [Signal]
+    public delegate void SpeakEventHandler();
+
+    [Signal]
+    public delegate void SilentEventHandler();
+
     /// <summary>
     /// 缓冲区
     /// </summary>
@@ -59,7 +66,24 @@ public partial class VoiceStreamPlayer2D : AudioStreamPlayer2D
     /// <summary>
     /// 总共视为静音的连续帧数,连续达到5帧，则认为没有声音
     /// </summary>
-    private int SilenceFrame { set; get; }
+    private int silenceFrame;
+
+    private int SilenceFrame
+    {
+        set
+        {
+            if (silenceFrame >= MaxSilenceFrame && value < MaxSilenceFrame)
+            {
+                EmitSignalSilent();
+            }
+            else if (silenceFrame < MaxSilenceFrame && value >= MaxSilenceFrame)
+            {
+                EmitSignalSpeak();
+            }
+            silenceFrame = value;
+        }
+        get => silenceFrame;
+    }
 
     private const int MaxSilenceFrame = 10;
 
@@ -76,7 +100,7 @@ public partial class VoiceStreamPlayer2D : AudioStreamPlayer2D
             BufferLength = 0.05f
         };
         Stream = AudioStreamGenerator;
-        AudioEffectSpectrumAnalyzerInstance = TeamVoice.Instance.AudioEffectSpectrumAnalyzerInstance;
+        AudioEffectSpectrumAnalyzerInstance = SteamManager.Instance.AudioEffectSpectrumAnalyzerInstance;
     }
 
     public void ReceiveRecordVoiceData(ulong steamId, byte[] compressData)
@@ -122,7 +146,7 @@ public partial class VoiceStreamPlayer2D : AudioStreamPlayer2D
         var magnitude = AudioEffectSpectrumAnalyzerInstance.GetMagnitudeForFrequencyRange(0, 20000);
         var volumeDb = Mathf.LinearToDb(Mathf.Max(magnitude.X, magnitude.Y));
         // 设置静音检测阈值（通常-60dB以下视为静音）
-        SilenceFrame = volumeDb > Consts.MinDb ? 0 : Mathf.Min(10, SilenceFrame + 1);
+        SilenceFrame = volumeDb > Consts.MinDb ? 0 : Mathf.Min(MaxSilenceFrame, SilenceFrame + 1);
     }
 
     /// <summary>
