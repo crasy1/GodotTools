@@ -59,11 +59,13 @@ public partial class SteamUserInfo : Control
             {
                 AnimationPlayer.Play(Mute);
                 TeamVoice.Instance.Mute(Friend.Id);
+                Log.Info("Mute");
             }
             else
             {
                 AnimationPlayer.Play(Silent);
                 TeamVoice.Instance.Play(Friend.Id);
+                Log.Info("Silent");
             }
         };
     }

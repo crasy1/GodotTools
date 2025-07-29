@@ -146,7 +146,7 @@ public partial class VoiceStreamPlayer2D : AudioStreamPlayer2D
         var magnitude = AudioEffectSpectrumAnalyzerInstance.GetMagnitudeForFrequencyRange(0, 20000);
         var volumeDb = Mathf.LinearToDb(Mathf.Max(magnitude.X, magnitude.Y));
         // 设置静音检测阈值（通常-60dB以下视为静音）
-        SilenceFrame = volumeDb > Consts.MinDb ? 0 : Mathf.Min(MaxSilenceFrame, SilenceFrame + 1);
+        SilenceFrame = volumeDb < Consts.MinDb ? 0 : Mathf.Min(MaxSilenceFrame, SilenceFrame + 1);
     }
 
     /// <summary>
