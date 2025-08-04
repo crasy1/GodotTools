@@ -25,5 +25,13 @@ public static class SceneTreeExtension
         var name = typeof(T).Name;
         return NodesInGroup<T>(sceneTree, name);
     }
-    
+
+    /// <summary>
+    /// 传播退出通知，推荐停止游戏的时候用这个方法，会通知其他节点
+    /// </summary>
+    /// <param name="sceneTree"></param>
+    public static void QuitNotification(this SceneTree sceneTree)
+    {
+        sceneTree.Root.PropagateNotification((int)Node.NotificationWMCloseRequest);
+    }
 }
