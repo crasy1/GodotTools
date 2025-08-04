@@ -13,7 +13,10 @@ public partial class SUser : SteamComponent
     [Signal]
     public delegate void RecordVoiceDataEventHandler(ulong steamId, byte[] compressData);
 
-    private NVoiceStreamPlayer StreamPlayer { set; get; }
+    /// <summary>
+    /// 和steam服务器的网络状态
+    /// </summary>
+    public bool ServerConnected { set; get; } = true;
 
     public override void _Ready()
     {
@@ -26,9 +29,21 @@ public partial class SUser : SteamComponent
         {
             Log.Info($"用户响应微事务授权请求 {appId} {orderId} {userAuthorized}");
         };
-        SteamUser.OnSteamServersConnected += () => { Log.Info($"已连接到Steam服务器"); };
-        SteamUser.OnSteamServersDisconnected += () => { Log.Info($"已断开Steam服务器"); };
-        SteamUser.OnSteamServerConnectFailure += () => { Log.Info($"Steam服务器连接失败"); };
+        SteamUser.OnSteamServersConnected += () =>
+        {
+            Log.Info($"已连接到Steam服务器");
+            ServerConnected = true;
+        };
+        SteamUser.OnSteamServersDisconnected += () =>
+        {
+            Log.Info($"已断开Steam服务器");
+            ServerConnected = false;
+        };
+        SteamUser.OnSteamServerConnectFailure += () =>
+        {
+            Log.Info($"Steam服务器连接失败");
+            ServerConnected = false;
+        };
         SteamUser.OnValidateAuthTicketResponse += (steamId, steamId2, authResponse) =>
         {
             Log.Info($"用户验证授权 {steamId} {steamId2} {authResponse}");

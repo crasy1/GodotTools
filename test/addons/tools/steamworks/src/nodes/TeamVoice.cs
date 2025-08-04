@@ -15,9 +15,8 @@ public partial class TeamVoice : Node
     /// <summary>
     /// 队伍成员
     /// </summary>
-    private readonly Dictionary<SteamId, VoiceStreamPlayer> _teamMembers = new();
+    private readonly Dictionary<SteamId, IVoiceStreamPlayer> _teamMembers = new();
 
-    public static int BusTeamVoiceIndex => AudioServer.GetBusIndex(Consts.BusTeamVoice);
     public static AudioEffectSpectrumAnalyzerInstance? AudioEffectSpectrumAnalyzerInstance => BusTeamVoiceInfo();
 
 
@@ -59,7 +58,7 @@ public partial class TeamVoice : Node
     /// </summary>
     /// <param name="steamId"></param>
     /// <returns></returns>
-    public VoiceStreamPlayer? GetTeamMember(SteamId steamId)
+    public IVoiceStreamPlayer? GetTeamMember(SteamId steamId)
     {
         return _teamMembers.GetValueOrDefault(steamId);
     }
@@ -111,7 +110,7 @@ public partial class TeamVoice : Node
             return;
         }
 
-        GetTeamMember(steamId)?.RemoveAndQueueFree();
+        GetTeamMember(steamId)?.Exit();
         _teamMembers.Remove(steamId);
         EmitSignalMemberLeave(steamId);
         Log.Info($"队伍语音移除 {steamId}");
@@ -125,7 +124,7 @@ public partial class TeamVoice : Node
     {
         foreach (var steamId in _teamMembers.Keys)
         {
-            GetTeamMember(steamId)?.RemoveAndQueueFree();
+            GetTeamMember(steamId)?.Exit();
             _teamMembers.Remove(steamId);
             EmitSignalMemberLeave(steamId);
         }
@@ -170,7 +169,7 @@ public partial class TeamVoice : Node
     {
         if (_teamMembers.TryGetValue(steamId, out var voiceStreamPlayer))
         {
-            voiceStreamPlayer?.ReceiveRecordVoiceData(steamId, data);
+            voiceStreamPlayer.ReceiveRecordVoiceData(steamId, data);
         }
     }
 }

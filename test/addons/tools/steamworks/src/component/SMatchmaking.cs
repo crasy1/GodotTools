@@ -91,7 +91,7 @@ public partial class SMatchmaking : SteamComponent
             // 改变steam状态
             SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
             // 移除队伍语音
-            TeamVoice.Instance.AddTeamMember(friend.Id);
+            TeamVoice.Instance.RemoveTeamMember(friend.Id);
         };
         SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
         {

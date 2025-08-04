@@ -41,7 +41,7 @@ public partial class SteamUserInfo : Control
             if (teamMemberId == Friend.Id)
             {
                 Voice.Show();
-                VoiceStreamPlayer = TeamVoice.Instance.GetTeamMember(Friend.Id);
+                VoiceStreamPlayer = TeamVoice.Instance.GetTeamMember(Friend.Id) as VoiceStreamPlayer;
                 VoiceStreamPlayer.Speak += () => { AnimationPlayer.Play(Speak); };
                 VoiceStreamPlayer.Silent += () => { AnimationPlayer.Play(Silent); };
             }

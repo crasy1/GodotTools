@@ -6,7 +6,6 @@ namespace Godot;
 [Singleton]
 public partial class SClient : SteamComponent
 {
-
     [Signal]
     public delegate void SteamClientConnectedEventHandler();
 
@@ -53,6 +52,16 @@ public partial class SClient : SteamComponent
         {
             Log.Error($"steam client 初始化错误: {e.Message}");
             EmitSignalSteamClientDisconnected();
+            var acceptDialog = new AcceptDialog();
+            acceptDialog.Title = "退出游戏";
+            acceptDialog.DialogText = "请先检查steam是否正常启动";
+            acceptDialog.OkButtonText = "确定";
+            acceptDialog.Size = Project.ViewportSize / 4;
+            GetTree().CurrentScene.AddChild(acceptDialog);
+            acceptDialog.PopupCentered();
+            acceptDialog.Show();
+            acceptDialog.Confirmed += () => { GetTree().QuitNotification(); };
+            acceptDialog.CloseRequested += () => { GetTree().QuitNotification(); };
         }
     }
 
