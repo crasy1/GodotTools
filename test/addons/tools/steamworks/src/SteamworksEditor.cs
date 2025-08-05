@@ -19,10 +19,13 @@ public partial class SteamworksEditor : Control
         DebugUI.ButtonPressed = SteamConfig.Debug;
         AsServer.Toggled += (value) => { SteamConfig.AsServer = value; };
         AsServer.ButtonPressed = SteamConfig.AsServer;
-        SampleRate.ItemSelected += (value) => { SteamConfig.SampleRate = SampleRate.GetItemText((int)value).ToInt(); };
+        SampleRate.ItemSelected += (value) =>
+        {
+            SteamConfig.SampleRate = (SampleRate)SampleRate.GetItemText((int)value).ToInt();
+        };
         for (int i = 0; i < SampleRate.GetItemCount(); i++)
         {
-            if (SampleRate.GetItemText(i).ToInt() == SteamConfig.SampleRate)
+            if ((SampleRate)SampleRate.GetItemText(i).ToInt() == SteamConfig.SampleRate)
             {
                 SampleRate.Selected = i;
             }

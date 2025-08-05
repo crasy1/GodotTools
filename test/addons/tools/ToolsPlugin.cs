@@ -32,7 +32,13 @@ public partial class ToolsPlugin : EditorPlugin
     {
         foreach (var subPlugin in SubPlugins)
         {
-            EditorInterface.Singleton.SetPluginEnabled(subPlugin, false);
+            var isPluginEnabled = EditorInterface.Singleton.IsPluginEnabled(subPlugin);
+            if (isPluginEnabled)
+            {
+                EditorInterface.Singleton.SetPluginEnabled(subPlugin, false);
+            }
+
+            GD.Print($"插件 {subPlugin} 状态：{isPluginEnabled}");
         }
 
         GD.Print($"关闭插件：{string.Join(",", SubPlugins)}");

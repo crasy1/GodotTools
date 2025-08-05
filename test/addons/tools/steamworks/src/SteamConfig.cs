@@ -27,16 +27,17 @@ public static class SteamConfig
         get => Instance.GetMeta(nameof(CallbackDebug), false).AsBool();
         set => Save(nameof(CallbackDebug), value);
     }
+
     public static bool CustomBusLayout
     {
         get => Instance.GetMeta(nameof(CustomBusLayout), false).AsBool();
         set => Save(nameof(CustomBusLayout), value);
     }
 
-    public static int SampleRate
+    public static SampleRate SampleRate
     {
-        get => Instance.GetMeta(nameof(SampleRate), 44100).AsInt32();
-        set => Save(nameof(SampleRate), value);
+        get => (SampleRate)Instance.GetMeta(nameof(SampleRate), (int)SampleRate.Hz44100).AsInt32();
+        set => Save(nameof(SampleRate), (int)value);
     }
 
     private static void Save(string key, Variant value)

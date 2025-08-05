@@ -20,7 +20,7 @@ public partial class VoiceStream : Node
     /// <summary>
     /// 采样率 需要与音频流一致，否则音色会失真
     /// </summary>
-    public SampleRate SampleRate { get; set; } = SampleRate.Hz44100;
+    public SampleRate SampleRate { get; set; } = SteamConfig.SampleRate;
 
     /// <summary>
     /// 通道数 1=单声道, 2=立体声
@@ -149,7 +149,7 @@ public partial class VoiceStream : Node
         }
 
         // 统计静音的帧数
-        var magnitude = AudioEffectSpectrumAnalyzerInstance?.GetMagnitudeForFrequencyRange(0, (int)SampleRate.Hz48000);
+        var magnitude = AudioEffectSpectrumAnalyzerInstance?.GetMagnitudeForFrequencyRange(0, (int)SteamConfig.SampleRate);
         if (magnitude.HasValue)
         {
             var volumeDb = Mathf.LinearToDb(Mathf.Max(magnitude.Value.X, magnitude.Value.Y));
