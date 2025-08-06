@@ -10,7 +10,7 @@ namespace Godot;
 /// </summary>
 public partial class RelayServer : SteamSocket
 {
-    public bool Started { set; get; }
+    public bool Started { private set; get; }
     public SocketManager? SocketManager { set; get; }
     public ProtoSocket? ISocketManager { set; get; }
     private int Port { set; get; }

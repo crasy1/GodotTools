@@ -29,14 +29,16 @@ public partial class SFriends : SteamComponent
         SteamFriends.OnOverlayBrowserProtocol += (s) => { Log.Info($"steam 覆盖界面浏览器协议 {s}"); };
         SteamFriends.OnPersonaStateChange += (friend) =>
         {
-            if (friend.IsMe)
-            {
-                Me = friend;
-                Friends.TryAdd(friend.Id, Me);
-            }
+            // if (friend.IsMe)
+            // {
+            //     Me = friend;
+            //     Friends.TryAdd(friend.Id, Me);
+            // }
         };
         SClient.Instance.SteamClientConnected += () =>
         {
+            Me = new(SteamClient.SteamId);
+            Friends.TryAdd(SteamClient.SteamId, Me);
             foreach (var friend in SteamFriends.GetFriends())
             {
                 Friends.Add(friend.Id, friend);
@@ -63,7 +65,7 @@ public partial class SFriends : SteamComponent
             AvatarSize.Small => await SteamFriends.GetSmallAvatarAsync(steamId),
             AvatarSize.Middle => await SteamFriends.GetMediumAvatarAsync(steamId),
             AvatarSize.Large => await SteamFriends.GetLargeAvatarAsync(steamId),
-            _ => throw new ArgumentOutOfRangeException(nameof(size), size,"不的支持头像尺寸")
+            _ => throw new ArgumentOutOfRangeException(nameof(size), size, "不的支持头像尺寸")
         };
 
         image = avatar?.GodotImage();

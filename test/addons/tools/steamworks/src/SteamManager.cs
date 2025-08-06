@@ -30,6 +30,9 @@ public partial class SteamManager : CanvasLayer
         SteamUtil.InitEnvironment();
         SetVisible(SteamConfig.Debug);
         SteamInit();
+        
+        SClient.Instance.SteamClientConnected += async () => await OnSteamClientConnected();
+        SClient.Instance.SteamClientDisconnected += OnSteamClientDisconnected;
         if (SteamConfig.CallbackDebug)
         {
             Dispatch.OnDebugCallback += (type, message, server) =>
@@ -170,8 +173,6 @@ public partial class SteamManager : CanvasLayer
         var components = new Node();
         components.Name = $"{nameof(SteamComponent)}s";
         AddChild(components);
-        SClient.Instance.SteamClientConnected += async () => await OnSteamClientConnected();
-        SClient.Instance.SteamClientDisconnected += OnSteamClientDisconnected;
         components.AddChild(SClient.Instance);
         components.AddChild(SServer.Instance);
         components.AddChild(SApp.Instance);
@@ -251,9 +252,9 @@ IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
 ";
         var image = await SFriends.Instance.Avatar(SteamClient.SteamId);
         Avatar.Texture = image.Texture();
-        foreach (var friend in SteamFriends.GetFriends())
+        foreach (var (id,friend) in SFriends.Friends)
         {
-            // if (friend.IsOnline)
+            if (friend.IsOnline)
             {
                 var lobby = friend.GameInfo?.Lobby;
                 if (lobby.HasValue)

@@ -14,6 +14,8 @@ config/name="Test"
 config/version="0.0.0.1"
 run/main_scene="uid://dgkcl2husjh8w"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
 config/icon="res://icon.svg"
 
 [audio]
