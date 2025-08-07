@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://q5vydp6ufsn2"]
+
+[ext_resource type="Script" uid="uid://ccb8qgvaqe7jx" path="res://addons/tools/steamworks/test/Test2dPlayer.cs" id="1_72sq8"]
+[ext_resource type="Texture2D" uid="uid://c7j4otde0c7ro" path="res://icon.svg" id="2_wcooh"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_x278h"]
+radius = 60.0
+height = 120.0
+
+[node name="Test2DPlayer" type="CharacterBody2D"]
+script = ExtResource("1_72sq8")
+metadata/_edit_group_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_x278h")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_wcooh")
+
+[node name="Camera2D" type="Camera2D" parent="."]

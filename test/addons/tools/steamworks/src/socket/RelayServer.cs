@@ -18,7 +18,7 @@ public partial class RelayServer : SteamSocket
     public RelayServer(int port)
     {
         Port = port;
-        SocketName = $"[RelayServer] {Port}";
+        SocketName = $"[{nameof(RelayServer)}] {Port}";
     }
 
     public override void _Ready()
@@ -48,7 +48,7 @@ public partial class RelayServer : SteamSocket
         }
     }
 
-    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
+    public override void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
         if (SocketManager != null && Started)
         {
@@ -78,5 +78,6 @@ public partial class RelayServer : SteamSocket
         ISocketManager = null;
         Log.Info($"{SocketName} => 关闭");
         Started = false;
+        this.RemoveAndQueueFree();
     }
 }

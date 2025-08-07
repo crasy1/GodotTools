@@ -19,13 +19,13 @@ public partial class RelayClient : SteamSocket
     {
         Port = port;
         ServerId = serverId;
-        SocketName = $"[RelayClient] {serverId}";
+        SocketName = $"[{nameof(RelayClient)}] {serverId}";
     }
 
     public override void _Ready()
     {
         base._Ready();
-        Disconnected += (id) => QueueFree();
+        Disconnected += (id) => this.RemoveAndQueueFree();
     }
 
     public override void _Process(double delta)
@@ -47,7 +47,7 @@ public partial class RelayClient : SteamSocket
         }
     }
 
-    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
+    public override void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
         if (ConnectionManager is { Connected: true })
         {

@@ -1,4 +1,5 @@
 using Steamworks;
+using Steamworks.Data;
 
 namespace Godot;
 
@@ -27,7 +28,8 @@ public abstract partial class SteamSocket : SteamComponent
     /// <summary>
     /// steam socket名字
     /// </summary>
-    public string SocketName { set; get; }
+    public string SocketName { protected set; get; }
 
+    public abstract void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable);
     public abstract void Close();
 }

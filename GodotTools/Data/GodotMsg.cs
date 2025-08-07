@@ -2,6 +2,9 @@ using ProtoBuf;
 
 namespace Godot;
 
+/// <summary>
+/// 测试godot类型
+/// </summary>
 [ProtoContract]
 public class GodotMsg
 {

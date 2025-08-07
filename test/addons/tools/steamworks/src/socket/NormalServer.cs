@@ -21,7 +21,7 @@ public partial class NormalServer : SteamSocket
     {
         Port = port;
         NetAddress = NetAddress.AnyIp(Port);
-        SocketName = $"[NormalServer] {NetAddress}";
+        SocketName = $"[{nameof(NormalServer)}] {NetAddress}";
     }
 
     public override void _Ready()
@@ -51,7 +51,7 @@ public partial class NormalServer : SteamSocket
         }
     }
 
-    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
+    public override void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
         if (SocketManager != null && Started)
         {
@@ -81,5 +81,6 @@ public partial class NormalServer : SteamSocket
         ISocketManager = null;
         Log.Info($"{SocketName} => 关闭");
         Started = false;
+        this.RemoveAndQueueFree();
     }
 }

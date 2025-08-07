@@ -1,50 +1,88 @@
 using Godot;
 using System;
+using Steamworks.Data;
 
 [SceneTree]
 public partial class Test2d : Node2D
 {
+    private bool IsServer { set; get; }
+    private NormalServer NormalServer { set; get; }
+    private NormalClient NormalClient { set; get; }
+
+    public Test2dPlayer LocalPlayer { set; get; }
+    public Test2dPlayer OtherPlayer { set; get; }
+
     public override void _Ready()
     {
         Create.Pressed += () =>
         {
-            var normalServer = new NormalServer(5000);
-            Create.AddChild(normalServer);
-            normalServer.ReceiveMessage += OnServerReceiveMessage;
-            normalServer.Connected += (steamId) =>
+            NormalServer = new NormalServer(5000);
+            Create.AddChild(NormalServer);
+            NormalServer.ReceiveMessage += OnReceiveMessage;
+            NormalServer.Connected += (steamId) =>
             {
                 Log.Info($"[服务端]已连接：{steamId}");
-                Menu.Hide();
+                OtherPlayer = Test2dPlayer.Instantiate();
+                OtherPlayer.IsLocal = false;
+                AddChild(OtherPlayer);
+                OtherPlayer.Position = new Vector2(1500, 300);
             };
-            normalServer.Disconnected += (steamId) => { Log.Info($"[服务端]已断开：{steamId}"); };
-            normalServer.Create();
+            NormalServer.Disconnected += (steamId) => { Log.Info($"[服务端]已断开：{steamId}"); };
+            NormalServer.Create();
+            LocalPlayer = Test2dPlayer.Instantiate();
+            LocalPlayer.IsLocal = true;
+            AddChild(LocalPlayer);
+            LocalPlayer.Position = new Vector2(500, 300);
+            LocalPlayer.SteamSocket = NormalServer;
+            IsServer = true;
+            Menu.Hide();
         };
         Search.Pressed += () => { };
         Join.Pressed += () =>
         {
-            var normalClient = new NormalClient("127.0.0.1", 5000);
-            Join.AddChild(normalClient);
-            normalClient.ReceiveMessage += OnClientReceiveMessage;
-            normalClient.Connected += (steamId) =>
+            NormalClient = new NormalClient("127.0.0.1", 5000);
+            Join.AddChild(NormalClient);
+            NormalClient.ReceiveMessage += OnReceiveMessage;
+            NormalClient.Connected += (steamId) =>
             {
                 Log.Info($"[客户端]已连接：{steamId}");
-                Menu.Hide();
+                OtherPlayer = Test2dPlayer.Instantiate();
+                OtherPlayer.IsLocal = false;
+                AddChild(OtherPlayer);
+                OtherPlayer.Position = new Vector2(500, 300);
             };
-            normalClient.Disconnected += (steamId) => { Log.Info($"[客户端]已断开：{steamId}"); };
-            normalClient.Connect();
+            NormalClient.Disconnected += (steamId) => { Log.Info($"[客户端]已断开：{steamId}"); };
+            NormalClient.Connect();
+            LocalPlayer = Test2dPlayer.Instantiate();
+            LocalPlayer.IsLocal = true;
+            AddChild(LocalPlayer);
+            LocalPlayer.Position = new Vector2(1500, 300);
+            LocalPlayer.SteamSocket = NormalClient;
+            IsServer = false;
+            Menu.Hide();
         };
     }
 
-
-    private void OnServerReceiveMessage(ulong steamId, GodotObject msg)
+    private void OnReceiveMessage(ulong steamId, GodotObject msg)
     {
         var protoBufMsg = msg as ProtoBufMsg;
-        var deserialize = protoBufMsg.Deserialize();
+        if (protoBufMsg.Type == typeof(TestMsg))
+        {
+            var testMsg = protoBufMsg.Deserialize<TestMsg>();
+            OtherPlayer.TestMsg = testMsg;
+        }
     }
 
-    private void OnClientReceiveMessage(ulong steamId, GodotObject msg)
+
+    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
-        var protoBufMsg = msg as ProtoBufMsg;
-        var deserialize = protoBufMsg.Deserialize();
+        if (IsServer)
+        {
+            NormalServer?.Send(msg, sendType);
+        }
+        else
+        {
+            NormalClient?.Send(msg, sendType);
+        }
     }
 }

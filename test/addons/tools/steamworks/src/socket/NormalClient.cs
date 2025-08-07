@@ -28,13 +28,13 @@ public partial class NormalClient : SteamSocket
             NetAddress = NetAddress.From(Host, Port);
         }
 
-        SocketName = $"[NormalClient] {NetAddress}";
+        SocketName = $"[{nameof(NormalClient)}] {NetAddress}";
     }
 
     public override void _Ready()
     {
         base._Ready();
-        Disconnected += (id) => QueueFree();
+        Disconnected += (id) => this.RemoveAndQueueFree();
     }
 
     public override void _Process(double delta)
@@ -56,7 +56,7 @@ public partial class NormalClient : SteamSocket
         }
     }
 
-    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
+    public override void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
         if (ConnectionManager is { Connected: true })
         {
