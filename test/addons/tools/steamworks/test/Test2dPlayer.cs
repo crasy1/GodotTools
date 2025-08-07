@@ -8,8 +8,8 @@ public partial class Test2dPlayer : CharacterBody2D
     public const float Speed = 300.0f;
     public const float JumpVelocity = -400.0f;
 
-    [Export(PropertyHint.Range, "0,1,0.02")]
-    public double UpdateRate { set; get; } = 0.2;
+    [Export(PropertyHint.Range, "0,0.2,0.02")]
+    public double UpdateRate { set; get; } = 0.1;
 
     public bool IsLocal { set; get; }
     private double LastUpdateTime { set; get; }
@@ -65,8 +65,8 @@ public partial class Test2dPlayer : CharacterBody2D
         {
             if (TestMsg != null)
             {
-                Position = Position.Lerp(TestMsg.Position, 0.5f);
-                Rotation = Mathf.LerpAngle(Rotation, TestMsg.Rotation, 0.5f);
+                Position = Position.Lerp(TestMsg.Position, (float)(delta*10));
+                Rotation = Mathf.LerpAngle(Rotation, TestMsg.Rotation, (float)(delta*10));
             }
         }
     }
