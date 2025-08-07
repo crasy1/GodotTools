@@ -42,7 +42,6 @@ text = "打开\"user_data\"文件夹"
 [node name="DebugUI" type="CheckButton" parent="FlowContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-button_pressed = true
 text = "启动游戏时显示调试界面"
 
 [node name="AsServer" type="CheckButton" parent="FlowContainer"]
@@ -93,4 +92,5 @@ wrap_mode = 1
 [node name="CustomBusLayout" type="CheckButton" parent="FlowContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+button_pressed = true
 text = "使用自定义音频总线"

@@ -219,7 +219,16 @@ public partial class SteamTest : Node2D
     public void ShowFriends()
     {
         Friends.ClearAndFreeChildren();
-        Friends.AddChild(SteamUserInfo.Instantiate(SFriends.Me));
+        var userInfo = SteamUserInfo.Instantiate(SFriends.Me);
+        Friends.AddChild(userInfo);
+        userInfo.GuiInput += (@event) =>
+        {
+            if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
+            {
+                SteamUserInfo = userInfo;
+                Log.Info($"选中 {userInfo.Friend.Id} {userInfo.Friend.Name}");
+            }
+        };
         foreach (var friend in SteamFriends.GetFriends())
         {
             if (friend.IsOnline)

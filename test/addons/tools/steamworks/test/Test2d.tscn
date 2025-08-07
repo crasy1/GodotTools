@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bhslj14rdsk7p"]
 
-[ext_resource type="Script" uid="uid://mx77o12gq54u" path="res://addons/tools/steamworks/test/Test2d.cs" id="1_linxh"]
+[ext_resource type="Script" uid="uid://c7a6sgyyb7hdm" path="res://addons/tools/steamworks/test/Test2d.cs" id="1_linxh"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_linxh"]
 size = Vector2(600, 100)
@@ -39,6 +39,14 @@ text = "搜索服务器"
 unique_name_in_owner = true
 layout_mode = 2
 text = "加入服务器"
+
+[node name="Friends" type="VBoxContainer" parent="CanvasLayer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 200.0
+grow_vertical = 2
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 position = Vector2(600, 600)

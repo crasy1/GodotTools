@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using Steamworks;
 using Steamworks.Data;
 
 [SceneTree]
@@ -11,6 +12,8 @@ public partial class Test2d : Node2D
 
     public Test2dPlayer LocalPlayer { set; get; }
     public Test2dPlayer OtherPlayer { set; get; }
+
+    private Friend ChooseFriend { set; get; }
 
     public override void _Ready()
     {
@@ -50,17 +53,34 @@ public partial class Test2d : Node2D
                 OtherPlayer.IsLocal = false;
                 AddChild(OtherPlayer);
                 OtherPlayer.Position = new Vector2(500, 300);
+
+                LocalPlayer = Test2dPlayer.Instantiate();
+                LocalPlayer.IsLocal = true;
+                AddChild(LocalPlayer);
+                LocalPlayer.Position = new Vector2(1500, 300);
+                LocalPlayer.SteamSocket = NormalClient;
+                IsServer = false;
+                Menu.Hide();
             };
             NormalClient.Disconnected += (steamId) => { Log.Info($"[客户端]已断开：{steamId}"); };
             NormalClient.Connect();
-            LocalPlayer = Test2dPlayer.Instantiate();
-            LocalPlayer.IsLocal = true;
-            AddChild(LocalPlayer);
-            LocalPlayer.Position = new Vector2(1500, 300);
-            LocalPlayer.SteamSocket = NormalClient;
-            IsServer = false;
-            Menu.Hide();
         };
+        foreach (var (steamId, friend) in SFriends.Friends)
+        {
+            if (friend.IsOnline)
+            {
+                var steamUserInfo = SteamUserInfo.Instantiate(friend);
+                Friends.AddChild(steamUserInfo);
+                steamUserInfo.GuiInput += (@event) =>
+                {
+                    if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
+                    {
+                        ChooseFriend = friend;
+                        Log.Info(friend.Id);
+                    }
+                };
+            }
+        }
     }
 
     private void OnReceiveMessage(ulong steamId, GodotObject msg)
