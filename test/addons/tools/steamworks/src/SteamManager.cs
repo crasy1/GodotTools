@@ -23,14 +23,16 @@ public partial class SteamManager : CanvasLayer
 
     public static SteamId ServerId { set; get; }
     public static Friend Friend { set; get; }
-    
+
     public override void _Ready()
     {
         GetTree().AutoAcceptQuit = false;
         SteamUtil.InitEnvironment();
+        Log.FileLogLevel = SteamConfig.FileLogLevel;
+        Log.GdLogLevel = SteamConfig.GdLogLevel;
         SetVisible(SteamConfig.Debug);
         SteamInit();
-        
+
         SClient.Instance.SteamClientConnected += async () => await OnSteamClientConnected();
         SClient.Instance.SteamClientDisconnected += OnSteamClientDisconnected;
         if (SteamConfig.CallbackDebug)
@@ -252,7 +254,7 @@ IsTwoFactorEnabled:                 {SteamUser.IsTwoFactorEnabled}
 ";
         var image = await SFriends.Instance.Avatar(SteamClient.SteamId);
         Avatar.Texture = image.Texture();
-        foreach (var (id,friend) in SFriends.Friends)
+        foreach (var (id, friend) in SFriends.Friends)
         {
             if (friend.IsOnline)
             {

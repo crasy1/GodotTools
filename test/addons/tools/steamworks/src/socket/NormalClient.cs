@@ -61,7 +61,7 @@ public partial class NormalClient : SteamSocket
         if (ConnectionManager is { Connected: true })
         {
             var result = ConnectionManager.Connection.SendMsg(msg, sendType);
-            Log.Info($"{SocketName} => 向 {ConnectionManager.ConnectionInfo.Identity} 发送消息 {msg.Type} {result}");
+            Log.Debug($"{SocketName} => 向 {ConnectionManager.ConnectionInfo.Identity} 发送消息 {msg.Type} {result}");
         }
     }
 

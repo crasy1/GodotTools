@@ -7,3 +7,5 @@ metadata/AsServer = false
 metadata/CallbackDebug = false
 metadata/SampleRate = 44100
 metadata/CustomBusLayout = true
+metadata/FileLogLevel = 2
+metadata/GdLogLevel = 2

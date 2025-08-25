@@ -78,6 +78,60 @@ popup/item_4/id = 4
 popup/item_5/text = "48000"
 popup/item_5/id = 5
 
+[node name="HBoxContainer2" type="HBoxContainer" parent="FlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Label" type="Label" parent="FlowContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "文件日志等级："
+
+[node name="FileLogLevel" type="OptionButton" parent="FlowContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+selected = 2
+item_count = 5
+popup/item_0/text = "VERBOSE"
+popup/item_0/id = 0
+popup/item_1/text = "DEBUG"
+popup/item_1/id = 1
+popup/item_2/text = "INFO"
+popup/item_2/id = 2
+popup/item_3/text = "WARN"
+popup/item_3/id = 3
+popup/item_4/text = "ERROR"
+popup/item_4/id = 4
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="FlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Label" type="Label" parent="FlowContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "打印日志等级："
+
+[node name="GdLogLevel" type="OptionButton" parent="FlowContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+selected = 2
+item_count = 5
+popup/item_0/text = "VERBOSE"
+popup/item_0/id = 0
+popup/item_1/text = "DEBUG"
+popup/item_1/id = 1
+popup/item_2/text = "INFO"
+popup/item_2/id = 2
+popup/item_3/text = "WARN"
+popup/item_3/id = 3
+popup/item_4/text = "ERROR"
+popup/item_4/id = 4
+
 [node name="Label" type="Label" parent="FlowContainer"]
 layout_mode = 2
 text = "自定义音频总线："

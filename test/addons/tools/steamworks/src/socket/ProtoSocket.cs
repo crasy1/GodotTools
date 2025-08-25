@@ -68,7 +68,7 @@ public class ProtoSocket : ISocketManager
                 if (SFriends.Friends.TryGetValue(identity.SteamId, out var friend))
                 {
                     var protoBufMsg = ProtoBufMsg.From(data, size);
-                    Log.Info($"{SteamSocket.SocketName} => 从 {friend.Id},{friend.Name} 收到信息 {protoBufMsg.Type}");
+                    Log.Debug($"{SteamSocket.SocketName} => 从 {friend.Id},{friend.Name} 收到信息 {protoBufMsg.Type}");
                     SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, identity.SteamId.Value, protoBufMsg);
                 }
             }

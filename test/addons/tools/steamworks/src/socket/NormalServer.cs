@@ -58,7 +58,7 @@ public partial class NormalServer : SteamSocket
             foreach (var connection in SocketManager.Connected)
             {
                 var result = connection.SendMsg(msg, sendType);
-                Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {msg.Type} {result}");
+                Log.Debug($"{SocketName} => 向 {connection.Id} 发送消息 {msg.Type} {result}");
             }
         }
     }
@@ -69,7 +69,7 @@ public partial class NormalServer : SteamSocket
         {
             var connection = ISocketManager.Connections.FirstOrDefault(kv => steamId == kv.Value.Id).Key;
             var result = connection.SendMsg(msg, sendType);
-            Log.Info($"{SocketName} => 向 {connection.Id} 发送消息 {msg.Type} {result}");
+            Log.Debug($"{SocketName} => 向 {connection.Id} 发送消息 {msg.Type} {result}");
         }
     }
 

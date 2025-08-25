@@ -1,4 +1,5 @@
 using System;
+using Serilog.Events;
 
 namespace Godot;
 
@@ -28,6 +29,30 @@ public partial class SteamworksEditor : Control
             if ((SampleRate)SampleRate.GetItemText(i).ToInt() == SteamConfig.SampleRate)
             {
                 SampleRate.Selected = i;
+            }
+        }
+
+        FileLogLevel.ItemSelected += (value) =>
+        {
+            SteamConfig.FileLogLevel = (LogEventLevel)FileLogLevel.GetItemId((int)value);
+        };
+        for (int i = 0; i < FileLogLevel.GetItemCount(); i++)
+        {
+            if ((LogEventLevel)FileLogLevel.GetItemId(i) == SteamConfig.FileLogLevel)
+            {
+                FileLogLevel.Selected = i;
+            }
+        }
+
+        GdLogLevel.ItemSelected += (value) =>
+        {
+            SteamConfig.GdLogLevel = (LogEventLevel)GdLogLevel.GetItemId((int)value);
+        };
+        for (int i = 0; i < GdLogLevel.GetItemCount(); i++)
+        {
+            if ((LogEventLevel)GdLogLevel.GetItemId(i) == SteamConfig.GdLogLevel)
+            {
+                GdLogLevel.Selected = i;
             }
         }
 

@@ -62,7 +62,7 @@ public class ProtoConnection : IConnectionManager
         if (GodotObject.IsInstanceValid(SteamSocket))
         {
             var protoBufMsg = ProtoBufMsg.From(data, size);
-            Log.Info($"{SteamSocket.SocketName} => 从 {Friend.Id},{Friend.Name} 收到信息 {protoBufMsg.Type}");
+            Log.Debug($"{SteamSocket.SocketName} => 从 {Friend.Id},{Friend.Name} 收到信息 {protoBufMsg.Type}");
             SteamSocket.EmitSignal(SteamSocket.SignalName.ReceiveMessage, Friend.Id.Value, protoBufMsg);
         }
     }

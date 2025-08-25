@@ -1,3 +1,5 @@
+using Serilog.Events;
+
 namespace Godot;
 
 public static class SteamConfig
@@ -38,6 +40,18 @@ public static class SteamConfig
     {
         get => (SampleRate)Instance.GetMeta(nameof(SampleRate), (int)SampleRate.Hz44100).AsInt32();
         set => Save(nameof(SampleRate), (int)value);
+    }
+
+    public static LogEventLevel FileLogLevel
+    {
+        get => (LogEventLevel)Instance.GetMeta(nameof(FileLogLevel), (int)LogEventLevel.Information).AsInt32();
+        set => Save(nameof(FileLogLevel), (int)value);
+    }
+
+    public static LogEventLevel GdLogLevel
+    {
+        get => (LogEventLevel)Instance.GetMeta(nameof(GdLogLevel), (int)LogEventLevel.Information).AsInt32();
+        set => Save(nameof(GdLogLevel), (int)value);
     }
 
     private static void Save(string key, Variant value)
