@@ -17,4 +17,5 @@ shape = SubResource("CapsuleShape2D_x278h")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_wcooh")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="PlayerCamera" type="Camera2D" parent="."]
+unique_name_in_owner = true

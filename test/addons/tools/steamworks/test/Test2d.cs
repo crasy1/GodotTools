@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Reflection;
 using Steamworks;
 using Steamworks.Data;
 
@@ -28,14 +29,14 @@ public partial class Test2d : Node2D
                 OtherPlayer = Test2dPlayer.Instantiate();
                 OtherPlayer.IsLocal = false;
                 AddChild(OtherPlayer);
-                OtherPlayer.Position = new Vector2(1500, 300);
+                OtherPlayer.Position = new Vector2(750, 300);
             };
             NormalServer.Disconnected += (steamId) => { Log.Info($"[服务端]已断开：{steamId}"); };
             NormalServer.Create();
             LocalPlayer = Test2dPlayer.Instantiate();
             LocalPlayer.IsLocal = true;
             AddChild(LocalPlayer);
-            LocalPlayer.Position = new Vector2(500, 300);
+            LocalPlayer.Position = new Vector2(150, 300);
             LocalPlayer.SteamSocket = NormalServer;
             IsServer = true;
             Menu.Hide();
@@ -52,12 +53,12 @@ public partial class Test2d : Node2D
                 OtherPlayer = Test2dPlayer.Instantiate();
                 OtherPlayer.IsLocal = false;
                 AddChild(OtherPlayer);
-                OtherPlayer.Position = new Vector2(500, 300);
+                OtherPlayer.Position = new Vector2(150, 300);
 
                 LocalPlayer = Test2dPlayer.Instantiate();
                 LocalPlayer.IsLocal = true;
                 AddChild(LocalPlayer);
-                LocalPlayer.Position = new Vector2(1500, 300);
+                LocalPlayer.Position = new Vector2(750, 300);
                 LocalPlayer.SteamSocket = NormalClient;
                 IsServer = false;
                 Menu.Hide();

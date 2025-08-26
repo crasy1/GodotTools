@@ -6,4 +6,6 @@ public static class Node2DExtension
     {
         return (node.GetGlobalMousePosition() - node.GlobalPosition).Normalized();
     }
+
+    public static void Rotate(this Node2D node, double radians) => node.Rotate((float)radians);
 }

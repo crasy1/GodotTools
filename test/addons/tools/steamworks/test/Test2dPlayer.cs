@@ -6,6 +6,7 @@ using Steamworks.Data;
 public partial class Test2dPlayer : CharacterBody2D
 {
     public const float Speed = 300.0f;
+    public const float RotateSpeed = Mathf.Pi;
     public const float JumpVelocity = -400.0f;
 
     [Export(PropertyHint.Range, "0,0.2,0.02")]
@@ -16,6 +17,14 @@ public partial class Test2dPlayer : CharacterBody2D
     public SteamSocket SteamSocket { set; get; }
 
     public TestMsg TestMsg { set; get; }
+
+    public override void _Ready()
+    {
+        if (IsLocal)
+        {
+            PlayerCamera.MakeCurrent();
+        }
+    }
 
     public override void _PhysicsProcess(double delta)
     {
@@ -50,6 +59,7 @@ public partial class Test2dPlayer : CharacterBody2D
 
             Velocity = velocity;
             MoveAndSlide();
+            Rotate(RotateSpeed * (float)delta);
             if (LastUpdateTime > UpdateRate)
             {
                 var protoBufMsg = ProtoBufMsg.From(new TestMsg()
@@ -65,8 +75,8 @@ public partial class Test2dPlayer : CharacterBody2D
         {
             if (TestMsg != null)
             {
-                Position = Position.Lerp(TestMsg.Position, (float)(delta*10));
-                Rotation = Mathf.LerpAngle(Rotation, TestMsg.Rotation, (float)(delta*10));
+                Position = Position.Lerp(TestMsg.Position, (float)(delta * 10));
+                Rotation = Mathf.LerpAngle(Rotation, TestMsg.Rotation, (float)(delta * 10));
             }
         }
     }
