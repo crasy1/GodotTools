@@ -2,7 +2,7 @@
 
 [resource]
 metadata/AppId = 480
-metadata/Debug = false
+metadata/Debug = true
 metadata/AsServer = false
 metadata/CallbackDebug = false
 metadata/SampleRate = 44100

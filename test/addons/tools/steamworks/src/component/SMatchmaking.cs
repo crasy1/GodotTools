@@ -133,11 +133,13 @@ public partial class SMatchmaking : SteamComponent
         TeamVoice.Instance.RemoveAllTeamMember();
     }
 
-    public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10)
+    public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10,
+        Dictionary<string, string>? lobbyData = null)
     {
         var lobbyQuery = SteamMatchmaking.LobbyList.WithMaxResults(maxResult);
         lobbyQuery = lobbyQuery.WithSlotsAvailable(minSlots);
         lobbyQuery = lobbyQuery.WithKeyValue(nameof(Project.Version), Project.Version);
+        lobbyData?.Keys.ToList().ForEach(key => lobbyQuery = lobbyQuery.WithKeyValue(key, lobbyData[key]));
         var lobbies = await lobbyQuery.RequestAsync();
         return lobbies == null ? [] : lobbies.ToList();
     }

@@ -174,9 +174,10 @@ public partial class SteamLobby : Control
         SteamMatchmaking.CreateLobbyAsync((int)MaxLobbyUser.Value);
     }
 
-    public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10)
+    public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10,
+        Dictionary<string, string>? lobbyData = null)
     {
-        return await SMatchmaking.Search(minSlots, maxResult);
+        return await SMatchmaking.Search(minSlots, maxResult, lobbyData);
     }
 
     private void UpdateLobbyData()
