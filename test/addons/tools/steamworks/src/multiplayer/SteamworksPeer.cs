@@ -3,21 +3,21 @@ namespace Godot.multiplayer;
 public partial class SteamworksPeer : MultiplayerPeerExtension
 {
     /// <summary>
-    /// <para>Called when the multiplayer peer should be immediately closed (see <see cref="Godot.MultiplayerPeer.Close()"/>).</para>
+    /// <para>当多人游戏对等体应该立即关闭时调用（参见 <see cref="Godot.MultiplayerPeer.Close()"/>）。</para>
     /// </summary>
     public override void _Close()
     {
     }
 
     /// <summary>
-    /// <para>Called when the connected <paramref name="pPeer"/> should be forcibly disconnected (see <see cref="Godot.MultiplayerPeer.DisconnectPeer(int, bool)"/>).</para>
+    /// <para>当应该强制断开连接的 <paramref name="pPeer"/> 时调用（参见 <see cref="Godot.MultiplayerPeer.DisconnectPeer(int, bool)"/>）。</para>
     /// </summary>
     public override void _DisconnectPeer(int pPeer, bool pForce)
     {
     }
 
     /// <summary>
-    /// <para>Called when the available packet count is internally requested by the <see cref="Godot.MultiplayerApi"/>.</para>
+    /// <para>当 <see cref="Godot.MultiplayerApi"/> 内部请求可用数据包计数时调用。</para>
     /// </summary>
     public override int _GetAvailablePacketCount()
     {
@@ -25,7 +25,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the connection status is requested on the <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.GetConnectionStatus()"/>).</para>
+    /// <para>当请求 <see cref="Godot.MultiplayerPeer"/> 上的连接状态时调用（参见 <see cref="Godot.MultiplayerPeer.GetConnectionStatus()"/>）。</para>
     /// </summary>
     public override MultiplayerPeer.ConnectionStatus _GetConnectionStatus()
     {
@@ -33,7 +33,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the maximum allowed packet size (in bytes) is requested by the <see cref="Godot.MultiplayerApi"/>.</para>
+    /// <para>当 <see cref="Godot.MultiplayerApi"/> 请求最大允许的数据包大小（以字节为单位）时调用。</para>
     /// </summary>
     public override int _GetMaxPacketSize()
     {
@@ -41,7 +41,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called to get the channel over which the next available packet was received. See <see cref="Godot.MultiplayerPeer.GetPacketChannel()"/>.</para>
+    /// <para>调用以获取接收到下一个可用数据包的通道。参见 <see cref="Godot.MultiplayerPeer.GetPacketChannel()"/>。</para>
     /// </summary>
     public override int _GetPacketChannel()
     {
@@ -49,7 +49,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called to get the transfer mode the remote peer used to send the next available packet. See <see cref="Godot.MultiplayerPeer.GetPacketMode()"/>.</para>
+    /// <para>调用以获取远程对等体用于发送下一个可用数据包的传输模式。参见 <see cref="Godot.MultiplayerPeer.GetPacketMode()"/>。</para>
     /// </summary>
     public override MultiplayerPeer.TransferModeEnum _GetPacketMode()
     {
@@ -57,7 +57,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the ID of the <see cref="Godot.MultiplayerPeer"/> who sent the most recent packet is requested (see <see cref="Godot.MultiplayerPeer.GetPacketPeer()"/>).</para>
+    /// <para>当请求发送最近数据包的 <see cref="Godot.MultiplayerPeer"/> 的 ID 时调用（参见 <see cref="Godot.MultiplayerPeer.GetPacketPeer()"/>）。</para>
     /// </summary>
     public override int _GetPacketPeer()
     {
@@ -65,7 +65,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when a packet needs to be received by the <see cref="Godot.MultiplayerApi"/>, if <c>_get_packet</c> isn't implemented. Use this when extending this class via GDScript.</para>
+    /// <para>当 <see cref="Godot.MultiplayerApi"/> 需要接收数据包时调用，如果未实现 <c>_get_packet</c>。通过 GDScript 扩展此类时使用。</para>
     /// </summary>
     public override byte[] _GetPacketScript()
     {
@@ -73,7 +73,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the transfer channel to use is read on this <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.TransferChannel"/>).</para>
+    /// <para>当在此 <see cref="Godot.MultiplayerPeer"/> 上读取传输通道时调用（参见 <see cref="Godot.MultiplayerPeer.TransferChannel"/>）。</para>
     /// </summary>
     public override int _GetTransferChannel()
     {
@@ -81,7 +81,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the transfer mode to use is read on this <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.TransferMode"/>).</para>
+    /// <para>当在此 <see cref="Godot.MultiplayerPeer"/> 上读取传输模式时调用（参见 <see cref="Godot.MultiplayerPeer.TransferMode"/>）。</para>
     /// </summary>
     public override MultiplayerPeer.TransferModeEnum _GetTransferMode()
     {
@@ -89,7 +89,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the unique ID of this <see cref="Godot.MultiplayerPeer"/> is requested (see <see cref="Godot.MultiplayerPeer.GetUniqueId()"/>). The value must be between <c>1</c> and <c>2147483647</c>.</para>
+    /// <para>当请求此 <see cref="Godot.MultiplayerPeer"/> 的唯一 ID 时调用（参见 <see cref="Godot.MultiplayerPeer.GetUniqueId()"/>）。该值必须在 <c>1</c> 和 <c>2147483647</c> 之间。</para>
     /// </summary>
     public override int _GetUniqueId()
     {
@@ -97,7 +97,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the "refuse new connections" status is requested on this <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.RefuseNewConnections"/>).</para>
+    /// <para>当在此 <see cref="Godot.MultiplayerPeer"/> 上请求"拒绝新连接"状态时调用（参见 <see cref="Godot.MultiplayerPeer.RefuseNewConnections"/>）。</para>
     /// </summary>
     public override bool _IsRefusingNewConnections()
     {
@@ -105,7 +105,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the "is server" status is requested on the <see cref="Godot.MultiplayerApi"/>. See <see cref="Godot.MultiplayerApi.IsServer()"/>.</para>
+    /// <para>当在 <see cref="Godot.MultiplayerApi"/> 上请求"是否为服务器"状态时调用。参见 <see cref="Godot.MultiplayerApi.IsServer()"/>。</para>
     /// </summary>
     public override bool _IsServer()
     {
@@ -113,7 +113,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called to check if the server can act as a relay in the current configuration. See <see cref="Godot.MultiplayerPeer.IsServerRelaySupported()"/>.</para>
+    /// <para>调用以检查服务器在当前配置中是否可以充当中继。参见 <see cref="Godot.MultiplayerPeer.IsServerRelaySupported()"/>。</para>
     /// </summary>
     public override bool _IsServerRelaySupported()
     {
@@ -121,14 +121,14 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the <see cref="Godot.MultiplayerApi"/> is polled. See <see cref="Godot.MultiplayerApi.Poll()"/>.</para>
+    /// <para>当 <see cref="Godot.MultiplayerApi"/> 被轮询时调用。参见 <see cref="Godot.MultiplayerApi.Poll()"/>。</para>
     /// </summary>
     public override void _Poll()
     {
     }
 
     /// <summary>
-    /// <para>Called when a packet needs to be sent by the <see cref="Godot.MultiplayerApi"/>, if <c>_put_packet</c> isn't implemented. Use this when extending this class via GDScript.</para>
+    /// <para>当 <see cref="Godot.MultiplayerApi"/> 需要发送数据包时调用，如果未实现 <c>_put_packet</c>。通过 GDScript 扩展此类时使用。</para>
     /// </summary>
     public override Error _PutPacketScript(byte[] pBuffer)
     {
@@ -136,28 +136,28 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     }
 
     /// <summary>
-    /// <para>Called when the "refuse new connections" status is set on this <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.RefuseNewConnections"/>).</para>
+    /// <para>当在此 <see cref="Godot.MultiplayerPeer"/> 上设置"拒绝新连接"状态时调用（参见 <see cref="Godot.MultiplayerPeer.RefuseNewConnections"/>）。</para>
     /// </summary>
     public override void _SetRefuseNewConnections(bool pEnable)
     {
     }
 
     /// <summary>
-    /// <para>Called when the target peer to use is set for this <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.SetTargetPeer(int)"/>).</para>
+    /// <para>当为此 <see cref="Godot.MultiplayerPeer"/> 设置目标对等体时调用（参见 <see cref="Godot.MultiplayerPeer.SetTargetPeer(int)"/>）。</para>
     /// </summary>
     public override void _SetTargetPeer(int pPeer)
     {
     }
 
     /// <summary>
-    /// <para>Called when the channel to use is set for this <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.TransferChannel"/>).</para>
+    /// <para>当为此 <see cref="Godot.MultiplayerPeer"/> 设置要使用的通道时调用（参见 <see cref="Godot.MultiplayerPeer.TransferChannel"/>）。</para>
     /// </summary>
     public override void _SetTransferChannel(int pChannel)
     {
     }
 
     /// <summary>
-    /// <para>Called when the transfer mode is set on this <see cref="Godot.MultiplayerPeer"/> (see <see cref="Godot.MultiplayerPeer.TransferMode"/>).</para>
+    /// <para>当在此 <see cref="Godot.MultiplayerPeer"/> 上设置传输模式时调用（参见 <see cref="Godot.MultiplayerPeer.TransferMode"/>）。</para>
     /// </summary>
     public override void _SetTransferMode(MultiplayerPeer.TransferModeEnum pMode)
     {
