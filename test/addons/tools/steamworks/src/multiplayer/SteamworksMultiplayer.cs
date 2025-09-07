@@ -1,8 +1,9 @@
+using Steamworks;
+
 namespace Godot.multiplayer;
 
 public partial class SteamworksMultiplayer : MultiplayerApiExtension
 {
-    
     /// <summary>
     /// <para>当获取到 <see cref="Godot.MultiplayerApi.MultiplayerPeer"/> 时调用。</para>
     /// </summary>
@@ -31,9 +32,14 @@ public partial class SteamworksMultiplayer : MultiplayerApiExtension
     /// <para><see cref="Godot.MultiplayerApi.GetUniqueId()"/> 的回调。</para>
     /// </summary>
     public override int _GetUniqueId()
-    {
+    {   
+        var accountId = SteamClient.SteamId - 0x0110000100000000;
+        var steamIdAccountId = SteamClient.SteamId.AccountId;
+        // 76561197960265728
         return default;
     }
+
+    public SteamId SteamId(uint accountId) => accountId + 0x0110000100000000UL;
 
     /// <summary>
     /// <para><see cref="Godot.MultiplayerApi.ObjectConfigurationAdd(GodotObject, Variant)"/> 的回调。</para>
@@ -73,5 +79,4 @@ public partial class SteamworksMultiplayer : MultiplayerApiExtension
     public override void _SetMultiplayerPeer(MultiplayerPeer multiplayerPeer)
     {
     }
-
 }
