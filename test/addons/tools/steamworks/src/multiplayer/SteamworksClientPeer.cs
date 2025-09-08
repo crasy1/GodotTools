@@ -1,33 +1,24 @@
 using System;
-using System.Linq;
 using Steamworks;
+using Steamworks.Data;
 
 namespace Godot;
 
 /// <summary>
-/// 相当于steamworks socket的包装
+/// 相当于steamworks socket client的包装
 /// </summary>
-public partial class SteamworksPeer : MultiplayerPeerExtension
+public partial class SteamworksClientPeer : MultiplayerPeerExtension
 {
-    private SteamworksPeer(PeerConnectionManager peerConnectionManager, ConnectionManager connectionManager)
+    private SteamworksClientPeer(PeerConnectionManager peerConnectionManager, ConnectionManager connectionManager)
     {
         PeerConnectionManager = peerConnectionManager;
         ConnectionManager = connectionManager;
     }
 
-    private SteamworksPeer(PeerSocketManager peerSocketManager, SocketManager socketManager)
-    {
-        PeerSocketManager = peerSocketManager;
-        SocketManager = socketManager;
-        IsServer = true;
-    }
+    private PeerConnectionManager PeerConnectionManager { get; }
+    private ConnectionManager ConnectionManager { get; }
 
-    private PeerConnectionManager PeerConnectionManager { set; get; }
-    private ConnectionManager ConnectionManager { set; get; }
-    private PeerSocketManager PeerSocketManager { set; get; }
-    private SocketManager SocketManager { set; get; }
-
-    private bool IsServer { set; get; }
+    private SteamMessage? LastPacket { set; get; }
 
     /// <summary>
     /// 创建客户端
@@ -35,39 +26,18 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// <param name="steamId"></param>
     /// <param name="port"></param>
     /// <returns></returns>
-    public static SteamworksPeer CreateClient(SteamId steamId, int port)
+    public static SteamworksClientPeer CreateClient(SteamId steamId, int port)
     {
         try
         {
             var peerConnectionManager = new PeerConnectionManager();
             var connectionManager = SteamNetworkingSockets.ConnectRelay(steamId, port, peerConnectionManager);
-            var steamworksPeer = new SteamworksPeer(peerConnectionManager, connectionManager);
+            var steamworksPeer = new SteamworksClientPeer(peerConnectionManager, connectionManager);
             return steamworksPeer;
         }
         catch (Exception e)
         {
-            Log.Error($"创建{nameof(SteamworksPeer)} client 异常, {e.Message}");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// 创建服务端
-    /// </summary>
-    /// <param name="port"></param>
-    /// <returns></returns>
-    public static SteamworksPeer CreateServer(int port)
-    {
-        try
-        {
-            var peerSocketManager = new PeerSocketManager();
-            var socketManager = SteamNetworkingSockets.CreateRelaySocket(port, peerSocketManager);
-            var steamworksPeer = new SteamworksPeer(peerSocketManager, socketManager);
-            return steamworksPeer;
-        }
-        catch (Exception e)
-        {
-            Log.Error($"创建{nameof(SteamworksPeer)} server 异常, {e.Message}");
+            Log.Error($"创建{nameof(SteamworksClientPeer)} 异常, {e.Message}");
             throw;
         }
     }
@@ -77,14 +47,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override void _Close()
     {
-        if (IsServer)
-        {
-            SocketManager.Close();
-        }
-        else
-        {
-            ConnectionManager.Close();
-        }
+        ConnectionManager.Close();
     }
 
     /// <summary>
@@ -92,15 +55,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override void _DisconnectPeer(int pPeer, bool pForce)
     {
-        if (IsServer)
-        {
-            var connection = PeerSocketManager.Connections.FirstOrDefault(kv => (uint)pPeer == kv.Value.AccountId).Key;
-            connection.Close();
-        }
-        else
-        {
-            ConnectionManager.Close();
-        }
+        ConnectionManager.Close();
     }
 
     /// <summary>
@@ -108,11 +63,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override int _GetAvailablePacketCount()
     {
-        if (IsServer)
-        {
-        }
-
-        return default;
+        return PeerConnectionManager.PacketQueue.Count;
     }
 
     /// <summary>
@@ -120,14 +71,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override ConnectionStatus _GetConnectionStatus()
     {
-        if (IsServer)
-        {
-            return PeerSocketManager.ConnectionStatus;
-        }
-        else
-        {
-            return PeerConnectionManager.ConnectionStatus;
-        }
+        return PeerConnectionManager.ConnectionStatus;
     }
 
     /// <summary>
@@ -135,7 +79,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override int _GetMaxPacketSize()
     {
-        return default;
+        return 512 * 1024;
     }
 
     /// <summary>
@@ -143,13 +87,18 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override int _GetPacketChannel()
     {
+        if (PeerConnectionManager.PacketQueue.TryPeek(out var packet))
+        {
+            return packet.TransferChannel;
+        }
+
         return default;
     }
 
     /// <summary>
     /// <para>调用以获取远程对等体用于发送下一个可用数据包的传输模式。参见 <see cref="Godot.MultiplayerPeer.GetPacketMode()"/>。</para>
     /// </summary>
-    public override MultiplayerPeer.TransferModeEnum _GetPacketMode()
+    public override TransferModeEnum _GetPacketMode()
     {
         return default;
     }
@@ -159,6 +108,11 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override int _GetPacketPeer()
     {
+        if (PeerConnectionManager.PacketQueue.TryPeek(out var packet))
+        {
+            return packet.PeerId;
+        }
+
         return default;
     }
 
@@ -167,24 +121,24 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override byte[] _GetPacketScript()
     {
-        return default;
+        if (PeerConnectionManager.PacketQueue.Count <= 0)
+        {
+            return null;
+        }
+
+        LastPacket = PeerConnectionManager.PacketQueue.Dequeue();
+        return LastPacket.Value.Data;
     }
 
     /// <summary>
     /// <para>当在此 <see cref="Godot.MultiplayerPeer"/> 上读取传输通道时调用（参见 <see cref="Godot.MultiplayerPeer.TransferChannel"/>）。</para>
     /// </summary>
-    public override int _GetTransferChannel()
-    {
-        return default;
-    }
+    public override int _GetTransferChannel() => TransferChannel;
 
     /// <summary>
     /// <para>当在此 <see cref="Godot.MultiplayerPeer"/> 上读取传输模式时调用（参见 <see cref="Godot.MultiplayerPeer.TransferMode"/>）。</para>
     /// </summary>
-    public override MultiplayerPeer.TransferModeEnum _GetTransferMode()
-    {
-        return default;
-    }
+    public override TransferModeEnum _GetTransferMode() => TransferMode;
 
     /// <summary>
     /// <para>当请求此 <see cref="Godot.MultiplayerPeer"/> 的唯一 ID 时调用（参见 <see cref="Godot.MultiplayerPeer.GetUniqueId()"/>）。该值必须在 <c>1</c> 和 <c>2147483647</c> 之间。</para>
@@ -199,20 +153,20 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override bool _IsRefusingNewConnections()
     {
-        return default;
+        return RefuseNewConnections;
     }
 
     /// <summary>
     /// <para>当在 <see cref="Godot.MultiplayerApi"/> 上请求"是否为服务器"状态时调用。参见 <see cref="Godot.MultiplayerApi.IsServer()"/>。</para>
     /// </summary>
-    public override bool _IsServer() => IsServer;
+    public override bool _IsServer() => false;
 
     /// <summary>
     /// <para>调用以检查服务器在当前配置中是否可以充当中继。参见 <see cref="Godot.MultiplayerPeer.IsServerRelaySupported()"/>。</para>
     /// </summary>
     public override bool _IsServerRelaySupported()
     {
-        return IsServer;
+        return true;
     }
 
     /// <summary>
@@ -220,14 +174,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override void _Poll()
     {
-        if (IsServer)
-        {
-            SocketManager.Receive();
-        }
-        else
-        {
-            ConnectionManager.Receive();
-        }
+        var receive = ConnectionManager.Receive();
     }
 
     /// <summary>
@@ -235,7 +182,28 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override Error _PutPacketScript(byte[] pBuffer)
     {
-        return default;
+        try
+        {
+            var sendType = TransferMode switch
+            {
+                TransferModeEnum.Reliable => SendType.Reliable,
+                TransferModeEnum.Unreliable => SendType.Unreliable,
+                TransferModeEnum.UnreliableOrdered => SendType.NoNagle,
+                _ => SendType.Reliable
+            };
+
+            var result = ConnectionManager.Connection.SendMessage(pBuffer, sendType, (ushort)TransferChannel);
+            return result switch
+            {
+                Result.OK => Error.Ok,
+                _ => Error.Failed
+            };
+        }
+        catch (Exception e)
+        {
+            Log.Error($"{nameof(SteamworksClientPeer)} 发送数据包异常, {e.Message}");
+            return Error.Failed;
+        }
     }
 
     /// <summary>
@@ -243,13 +211,16 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override void _SetRefuseNewConnections(bool pEnable)
     {
+        RefuseNewConnections = pEnable;
     }
+
 
     /// <summary>
     /// <para>当为此 <see cref="Godot.MultiplayerPeer"/> 设置目标对等体时调用（参见 <see cref="Godot.MultiplayerPeer.SetTargetPeer(int)"/>）。</para>
     /// </summary>
     public override void _SetTargetPeer(int pPeer)
     {
+        SetTargetPeer(pPeer);
     }
 
     /// <summary>
@@ -257,6 +228,7 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override void _SetTransferChannel(int pChannel)
     {
+        TransferChannel = pChannel;
     }
 
     /// <summary>
@@ -264,5 +236,6 @@ public partial class SteamworksPeer : MultiplayerPeerExtension
     /// </summary>
     public override void _SetTransferMode(TransferModeEnum pMode)
     {
+        TransferMode = pMode;
     }
 }

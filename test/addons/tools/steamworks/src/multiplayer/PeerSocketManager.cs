@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Steamworks;
 using Steamworks.Data;
+using Test.addons.tools.steamworks.multiplayer;
 
 namespace Godot;
 
 public class PeerSocketManager : ISocketManager
 {
-    private string Name { set; get; }
-
     public readonly Dictionary<Connection, SteamId> Connections = new();
+
+    public readonly Queue<SteamMessage> PacketQueue = new();
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connected;
 
-    public PeerSocketManager()
-    {
-    }
 
     public void OnConnecting(Connection connection, ConnectionInfo info)
     {
@@ -40,13 +38,20 @@ public class PeerSocketManager : ISocketManager
         }
     }
 
-    public void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum,
+    public unsafe void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum,
         long recvTime,
         int channel)
     {
-        if (identity.IsSteamId)
+        if (identity.IsSteamId && Connections.TryGetValue(connection, out var steamId))
         {
-            var msg = Marshal.PtrToStringUTF8(data, size);
+            var span = new Span<byte>((byte*)data.ToPointer(), size);
+            var steamMessage = new SteamMessage
+            {
+                PeerId = (int)steamId.AccountId,
+                Data = span.ToArray(),
+                TransferChannel = channel
+            };
+            PacketQueue.Enqueue(steamMessage);
         }
     }
 }

@@ -1,6 +1,6 @@
 using Steamworks;
 
-namespace Godot.multiplayer;
+namespace Godot;
 
 public partial class SteamworksMultiplayer : MultiplayerApiExtension
 {
