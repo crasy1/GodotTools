@@ -12,6 +12,7 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
     private SteamworksClientPeer(PeerConnectionManager peerConnectionManager, ConnectionManager connectionManager)
     {
         PeerConnectionManager = peerConnectionManager;
+        PeerConnectionManager.SteamworksClientPeer = this;
         ConnectionManager = connectionManager;
     }
 

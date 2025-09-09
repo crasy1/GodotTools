@@ -10,6 +10,7 @@ public class PeerSocketManager : ISocketManager
     public readonly Dictionary<Connection, SteamId> Connections = new();
 
     public readonly Queue<SteamMessage> PacketQueue = new();
+    public SteamworksServerPeer SteamworksServerPeer { set; get; }
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connected;
@@ -17,13 +18,14 @@ public class PeerSocketManager : ISocketManager
 
     public void OnConnecting(Connection connection, ConnectionInfo info)
     {
-        Log.Info( $"{info.Identity.IsSteamId} 正在连接");
+        Log.Info( $"{info.Identity.SteamId} 正在连接");
         connection.Accept();
     }
 
     public void OnConnected(Connection connection, ConnectionInfo info)
     {
-        Log.Info( $"{info.Identity.IsSteamId} 已经连接");
+        Log.Info( $"{info.Identity.SteamId} 已经连接");
+        SteamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, (int)info.Identity.SteamId.AccountId);
         if (info.Identity.IsSteamId)
         {
             Connections.TryAdd(connection, info.Identity.SteamId);
@@ -32,7 +34,8 @@ public class PeerSocketManager : ISocketManager
 
     public void OnDisconnected(Connection connection, ConnectionInfo info)
     {
-        Log.Info( $"{info.Identity.IsSteamId} 断开连接");
+        SteamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerDisconnected, (int)info.Identity.SteamId.AccountId);
+        Log.Info( $"{info.Identity.SteamId} 断开连接");
         if (info.Identity.IsSteamId)
         {
             Connections.Remove(connection);

@@ -13,6 +13,7 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
     private SteamworksServerPeer(PeerSocketManager peerSocketManager, SocketManager socketManager)
     {
         PeerSocketManager = peerSocketManager;
+        PeerSocketManager.SteamworksServerPeer = this;
         SocketManager = socketManager;
     }
 
@@ -102,7 +103,7 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
 
     public override int _GetUniqueId()
     {
-        return (int)SteamClient.SteamId.AccountId;
+        return 1;
     }
 
     public override bool _IsRefusingNewConnections() => RefuseNewConnections;
