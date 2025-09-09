@@ -23,10 +23,10 @@ public partial class SceneManager : CanvasLayer
     {
         switch ((long)what)
         {
-            case NotificationApplicationFocusIn: Log.Info("应用聚焦"); break;
-            case NotificationApplicationFocusOut: Log.Info("应用失焦"); break;
-            case NotificationApplicationPaused: Log.Info("应用暂停"); break;
-            case NotificationApplicationResumed: Log.Info("应用取消暂停"); break;
+            // case NotificationApplicationFocusIn: Log.Info("应用聚焦"); break;
+            // case NotificationApplicationFocusOut: Log.Info("应用失焦"); break;
+            // case NotificationApplicationPaused: Log.Info("应用暂停"); break;
+            // case NotificationApplicationResumed: Log.Info("应用取消暂停"); break;
         }
     }
 

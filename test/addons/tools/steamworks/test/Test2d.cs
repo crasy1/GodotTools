@@ -8,9 +8,6 @@ using Steamworks.Data;
 public partial class Test2d : Node2D
 {
     private bool IsServer { set; get; }
-    private NormalServer NormalServer { set; get; }
-    private NormalClient NormalClient { set; get; }
-
     public Test2dPlayer LocalPlayer { set; get; }
     public Test2dPlayer OtherPlayer { set; get; }
 
@@ -18,38 +15,32 @@ public partial class Test2d : Node2D
 
     public override void _Ready()
     {
+        var multiplayerApi = GetTree().GetMultiplayer();
         Create.Pressed += () =>
         {
-            NormalServer = new NormalServer(5000);
-            Create.AddChild(NormalServer);
-            NormalServer.ReceiveMessage += OnReceiveMessage;
-            NormalServer.Connected += (steamId) =>
+            multiplayerApi.PeerConnected += (id) =>
             {
-                Log.Info($"[服务端]已连接：{steamId}");
+                Log.Info($"[服务端]已连接：{id}");
                 OtherPlayer = Test2dPlayer.Instantiate();
                 OtherPlayer.IsLocal = false;
                 AddChild(OtherPlayer);
                 OtherPlayer.Position = new Vector2(750, 300);
             };
-            NormalServer.Disconnected += (steamId) => { Log.Info($"[服务端]已断开：{steamId}"); };
-            NormalServer.Create();
+            multiplayerApi.PeerDisconnected += (id) => { Log.Info($"[服务端]已断开：{id}"); };
+            multiplayerApi.SetMultiplayerPeer(SteamworksServerPeer.CreateServer(5000));
             LocalPlayer = Test2dPlayer.Instantiate();
             LocalPlayer.IsLocal = true;
             AddChild(LocalPlayer);
             LocalPlayer.Position = new Vector2(150, 300);
-            LocalPlayer.SteamSocket = NormalServer;
             IsServer = true;
             Menu.Hide();
         };
         Search.Pressed += () => { };
         Join.Pressed += () =>
         {
-            NormalClient = new NormalClient("127.0.0.1", 5000);
-            Join.AddChild(NormalClient);
-            NormalClient.ReceiveMessage += OnReceiveMessage;
-            NormalClient.Connected += (steamId) =>
+            multiplayerApi.PeerConnected += (id) =>
             {
-                Log.Info($"[客户端]已连接：{steamId}");
+                Log.Info($"[客户端]已连接：{id}");
                 OtherPlayer = Test2dPlayer.Instantiate();
                 OtherPlayer.IsLocal = false;
                 AddChild(OtherPlayer);
@@ -59,12 +50,11 @@ public partial class Test2d : Node2D
                 LocalPlayer.IsLocal = true;
                 AddChild(LocalPlayer);
                 LocalPlayer.Position = new Vector2(750, 300);
-                LocalPlayer.SteamSocket = NormalClient;
                 IsServer = false;
                 Menu.Hide();
             };
-            NormalClient.Disconnected += (steamId) => { Log.Info($"[客户端]已断开：{steamId}"); };
-            NormalClient.Connect();
+            multiplayerApi.PeerDisconnected += (id) => { Log.Info($"[客户端]已断开：{id}"); };
+            multiplayerApi.SetMultiplayerPeer(SteamworksClientPeer.CreateClient(SteamClient.SteamId, 5000));
         };
         foreach (var (steamId, friend) in SFriends.Friends)
         {
@@ -97,13 +87,6 @@ public partial class Test2d : Node2D
 
     public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
     {
-        if (IsServer)
-        {
-            NormalServer?.Send(msg, sendType);
-        }
-        else
-        {
-            NormalClient?.Send(msg, sendType);
-        }
+      
     }
 }

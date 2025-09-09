@@ -14,7 +14,6 @@ public partial class Test2dPlayer : CharacterBody2D
 
     public bool IsLocal { set; get; }
     private double LastUpdateTime { set; get; }
-    public SteamSocket SteamSocket { set; get; }
 
     public TestMsg TestMsg { set; get; }
 
@@ -28,7 +27,6 @@ public partial class Test2dPlayer : CharacterBody2D
 
     public override void _PhysicsProcess(double delta)
     {
-        LastUpdateTime += delta;
         if (IsLocal)
         {
             Vector2 velocity = Velocity;
@@ -59,25 +57,6 @@ public partial class Test2dPlayer : CharacterBody2D
 
             Velocity = velocity;
             MoveAndSlide();
-            Rotate(RotateSpeed * (float)delta);
-            if (LastUpdateTime > UpdateRate)
-            {
-                var protoBufMsg = ProtoBufMsg.From(new TestMsg()
-                {
-                    Position = Position,
-                    Rotation = Rotation
-                });
-                SteamSocket.Send(protoBufMsg, SendType.Unreliable);
-                LastUpdateTime = 0;
-            }
-        }
-        else
-        {
-            if (TestMsg != null)
-            {
-                Position = Position.Lerp(TestMsg.Position, (float)(delta * 10));
-                Rotation = Mathf.LerpAngle(Rotation, TestMsg.Rotation, (float)(delta * 10));
-            }
         }
     }
 }
