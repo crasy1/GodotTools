@@ -54,7 +54,7 @@ public partial class Test2d : Node2D
                 Menu.Hide();
             };
             multiplayerApi.PeerDisconnected += (id) => { Log.Info($"[客户端]已断开：{id}"); };
-            multiplayerApi.SetMultiplayerPeer(SteamworksClientPeer.CreateClient(SteamClient.SteamId, 5000));
+            multiplayerApi.SetMultiplayerPeer(SteamworksClientPeer.CreateClient(ChooseFriend.Id, 5000));
         };
         foreach (var (steamId, friend) in SFriends.Friends)
         {
