@@ -17,11 +17,13 @@ public class PeerSocketManager : ISocketManager
 
     public void OnConnecting(Connection connection, ConnectionInfo info)
     {
+        Log.Info( $"{info.Identity.IsSteamId} 正在连接");
         connection.Accept();
     }
 
     public void OnConnected(Connection connection, ConnectionInfo info)
     {
+        Log.Info( $"{info.Identity.IsSteamId} 已经连接");
         if (info.Identity.IsSteamId)
         {
             Connections.TryAdd(connection, info.Identity.SteamId);
@@ -30,6 +32,7 @@ public class PeerSocketManager : ISocketManager
 
     public void OnDisconnected(Connection connection, ConnectionInfo info)
     {
+        Log.Info( $"{info.Identity.IsSteamId} 断开连接");
         if (info.Identity.IsSteamId)
         {
             Connections.Remove(connection);
@@ -40,6 +43,7 @@ public class PeerSocketManager : ISocketManager
         long recvTime,
         int channel)
     {
+        Log.Info( $"从 {identity.SteamId} 收到消息");
         if (identity.IsSteamId && Connections.TryGetValue(connection, out var steamId))
         {
             var span = new Span<byte>((byte*)data.ToPointer(), size);
