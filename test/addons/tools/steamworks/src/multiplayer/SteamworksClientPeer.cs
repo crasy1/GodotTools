@@ -116,7 +116,6 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
     public override void _SetTransferChannel(int pChannel)
     {
         Log.Debug("client ", nameof(_SetTransferChannel));
-        TransferChannel = pChannel;
     }
 
     public override void _SetTransferMode(TransferModeEnum pMode)
