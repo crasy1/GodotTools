@@ -10,18 +10,10 @@ namespace Godot;
 /// </summary>
 public partial class SteamworksServerPeer : MultiplayerPeerExtension
 {
-    private SteamworksServerPeer(PeerSocketManager peerSocketManager, SocketManager socketManager)
-    {
-        PeerSocketManager = peerSocketManager;
-        PeerSocketManager.SteamworksServerPeer = this;
-        SocketManager = socketManager;
-    }
-
-    private PeerSocketManager PeerSocketManager { get; }
-    private SocketManager SocketManager { get; }
-
-    private int TargetPeer { set; get; }
+    private PeerSocketManager PeerSocketManager { set; get; }
+    private SocketManager SocketManager { set; get; }
     private SteamMessage? LastPacket { set; get; }
+    private int TargetPeer { set; get; }
 
     /// <summary>
     /// 创建服务端
@@ -32,9 +24,11 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
     {
         try
         {
-            var peerSocketManager = new PeerSocketManager();
+            var steamworksPeer = new SteamworksServerPeer();
+            var peerSocketManager = new PeerSocketManager(steamworksPeer);
             var socketManager = SteamNetworkingSockets.CreateRelaySocket(port, peerSocketManager);
-            var steamworksPeer = new SteamworksServerPeer(peerSocketManager, socketManager);
+            steamworksPeer.PeerSocketManager = peerSocketManager;
+            steamworksPeer.SocketManager = socketManager;
             return steamworksPeer;
         }
         catch (Exception e)
@@ -46,6 +40,12 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
 
     public override void _Close()
     {
+        foreach (var connection in PeerSocketManager.Connections.Keys)
+        {
+            connection.Close();
+        }
+
+        PeerSocketManager.PacketQueue.Clear();
         SocketManager.Close();
     }
 
@@ -56,35 +56,11 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
     }
 
     public override int _GetAvailablePacketCount() => PeerSocketManager.PacketQueue.Count;
-
     public override ConnectionStatus _GetConnectionStatus() => PeerSocketManager.ConnectionStatus;
-
-    public override int _GetMaxPacketSize() => 52 * 1024;
-
-    public override int _GetPacketChannel()
-    {
-        if (PeerSocketManager.PacketQueue.TryPeek(out var packet))
-        {
-            return packet.TransferChannel;
-        }
-
-        return default;
-    }
-
-    public override TransferModeEnum _GetPacketMode()
-    {
-        return default;
-    }
-
-    public override int _GetPacketPeer()
-    {
-        if (PeerSocketManager.PacketQueue.TryPeek(out var packet))
-        {
-            return packet.PeerId;
-        }
-
-        return default;
-    }
+    public override int _GetMaxPacketSize() => 512 * 1024;
+    public override int _GetPacketChannel() => LastPacket?.TransferChannel ?? 0;
+    public override TransferModeEnum _GetPacketMode() => TransferModeEnum.Reliable;
+    public override int _GetPacketPeer() => LastPacket?.PeerId ?? 0;
 
     public override byte[] _GetPacketScript()
     {
@@ -98,27 +74,14 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
     }
 
     public override int _GetTransferChannel() => TransferChannel;
-
     public override TransferModeEnum _GetTransferMode() => TransferMode;
-
-    public override int _GetUniqueId()
-    {
-        return 1;
-    }
-
+    public override int _GetUniqueId() => (int)SteamClient.SteamId.AccountId;
     public override bool _IsRefusingNewConnections() => RefuseNewConnections;
-
     public override bool _IsServer() => true;
 
-    public override bool _IsServerRelaySupported()
-    {
-        return true;
-    }
-
-    public override void _Poll()
-    {
-        SocketManager.Receive();
-    }
+    // TODO 中继
+    public override bool _IsServerRelaySupported() => false;
+    public override void _Poll() => SocketManager.Receive();
 
     public override Error _PutPacketScript(byte[] pBuffer)
     {
@@ -131,29 +94,28 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
                 TransferModeEnum.UnreliableOrdered => SendType.NoNagle,
                 _ => SendType.Reliable
             };
-            var connections = PeerSocketManager.Connections;
             if (TargetPeer == 0)
             {
-                foreach (var connection in connections.Keys)
+                foreach (var connection in PeerSocketManager.Connections.Keys)
                 {
                     connection.SendMessage(pBuffer, sendType, (ushort)TransferChannel);
                 }
             }
-            else if (TargetPeer > 1)
+            else if (TargetPeer < 0)
             {
-                foreach (var (connection, steamId) in connections)
+                foreach (var (connection, steamId) in PeerSocketManager.Connections)
                 {
-                    if (steamId.AccountId == TargetPeer)
+                    if (steamId.AccountId != Mathf.Abs(TargetPeer))
                     {
                         connection.SendMessage(pBuffer, sendType, (ushort)TransferChannel);
                     }
                 }
             }
-            else if (TargetPeer < 0)
+            else
             {
-                foreach (var (connection, steamId) in connections)
+                foreach (var (connection, steamId) in PeerSocketManager.Connections)
                 {
-                    if (steamId.AccountId != -TargetPeer)
+                    if (steamId.AccountId == TargetPeer)
                     {
                         connection.SendMessage(pBuffer, sendType, (ushort)TransferChannel);
                     }
@@ -170,14 +132,7 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
     }
 
     public override void _SetRefuseNewConnections(bool pEnable) => RefuseNewConnections = pEnable;
-
-    public override void _SetTargetPeer(int pPeer)
-    {
-        TargetPeer = pPeer;
-        SetTargetPeer(pPeer);
-    }
-
+    public override void _SetTargetPeer(int pPeer) => TargetPeer = pPeer;
     public override void _SetTransferChannel(int pChannel) => TransferChannel = pChannel;
-
     public override void _SetTransferMode(TransferModeEnum pMode) => TransferMode = pMode;
 }

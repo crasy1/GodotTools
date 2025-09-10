@@ -5,12 +5,11 @@ using Steamworks.Data;
 
 namespace Godot;
 
-public class PeerSocketManager : ISocketManager
+public class PeerSocketManager(SteamworksServerPeer steamworksServerPeer) : ISocketManager
 {
     public readonly Dictionary<Connection, SteamId> Connections = new();
 
     public readonly Queue<SteamMessage> PacketQueue = new();
-    public SteamworksServerPeer SteamworksServerPeer { set; get; }
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connected;
@@ -18,14 +17,21 @@ public class PeerSocketManager : ISocketManager
 
     public void OnConnecting(Connection connection, ConnectionInfo info)
     {
-        Log.Info( $"{info.Identity.SteamId} 正在连接");
-        connection.Accept();
+        Log.Info($"{info.Identity.SteamId} 正在连接");
+        if (!steamworksServerPeer.RefuseNewConnections)
+        {
+            connection.Accept();
+        }
+        else
+        {
+            connection.Close();
+        }
     }
 
     public void OnConnected(Connection connection, ConnectionInfo info)
     {
-        Log.Info( $"{info.Identity.SteamId} 已经连接");
-        SteamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, (int)info.Identity.SteamId.AccountId);
+        Log.Info($"{info.Identity.SteamId} 已经连接");
+        steamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, (int)info.Identity.SteamId.AccountId);
         if (info.Identity.IsSteamId)
         {
             Connections.TryAdd(connection, info.Identity.SteamId);
@@ -34,8 +40,9 @@ public class PeerSocketManager : ISocketManager
 
     public void OnDisconnected(Connection connection, ConnectionInfo info)
     {
-        SteamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerDisconnected, (int)info.Identity.SteamId.AccountId);
-        Log.Info( $"{info.Identity.SteamId} 断开连接");
+        steamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerDisconnected,
+            (int)info.Identity.SteamId.AccountId);
+        Log.Info($"{info.Identity.SteamId} 断开连接");
         if (info.Identity.IsSteamId)
         {
             Connections.Remove(connection);
@@ -46,13 +53,13 @@ public class PeerSocketManager : ISocketManager
         long recvTime,
         int channel)
     {
-        Log.Info( $"从 {identity.SteamId} 收到消息");
+        Log.Debug($"从 {identity.SteamId} 收到消息");
         if (identity.IsSteamId && Connections.TryGetValue(connection, out var steamId))
         {
             var span = new Span<byte>((byte*)data.ToPointer(), size);
             var steamMessage = new SteamMessage
             {
-                PeerId = (int)steamId.AccountId,
+                SteamId = steamId,
                 Data = span.ToArray(),
                 TransferChannel = channel
             };
