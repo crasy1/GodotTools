@@ -116,8 +116,30 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
     public override void _SetTargetPeer(int pPeer)
     {
         Log.Debug("servet ", nameof(_SetTargetPeer));
-        TargetPeer = pPeer;
     }
+
+    public override void _SetTransferChannel(int pChannel)
+    {
+        Log.Debug("server ", nameof(_SetTransferChannel));
+    }
+
+    public override void _SetTransferMode(TransferModeEnum pMode)
+    {
+        Log.Debug("server ", nameof(_SetTransferMode));
+    }
+
+    public override int _GetTransferChannel()
+    {
+        Log.Debug("server ", nameof(_GetTransferChannel));
+        return base._GetTransferChannel();
+    }
+
+    public override TransferModeEnum _GetTransferMode()
+    {
+        Log.Debug("server ", nameof(_GetTransferMode));
+        return base._GetTransferMode();
+    }
+
 
     public override void _Poll() => SocketManager.Receive();
 

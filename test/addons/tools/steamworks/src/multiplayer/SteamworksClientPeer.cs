@@ -113,6 +113,30 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
         TargetPeer = pPeer;
     }
 
+    public override void _SetTransferChannel(int pChannel)
+    {
+        Log.Debug("client ", nameof(_SetTransferChannel));
+        TransferChannel = pChannel;
+    }
+
+    public override void _SetTransferMode(TransferModeEnum pMode)
+    {
+        Log.Debug("client ", nameof(_SetTransferMode));
+    }
+
+    public override int _GetTransferChannel()
+    {
+        Log.Debug("client ", nameof(_GetTransferChannel));
+        return base._GetTransferChannel();
+    }
+
+    public override TransferModeEnum _GetTransferMode()
+    {
+        Log.Debug("client ", nameof(_GetTransferMode));
+        return base._GetTransferMode();
+    }
+
+
     public override void _Poll() => ConnectionManager.Receive();
 
     public override byte[] _GetPacketScript()

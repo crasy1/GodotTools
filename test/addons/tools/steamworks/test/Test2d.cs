@@ -67,10 +67,12 @@ public partial class Test2d : Node2D
 
     private void OnPeerDisconnected(long id)
     {
+        Log.Info(nameof(OnPeerDisconnected),id);
     }
 
     private void OnPeerConnected(long id)
     {
+        Log.Info(nameof(OnPeerConnected),id);
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer,
