@@ -9,7 +9,7 @@ public class PeerConnectionManager(SteamworksClientPeer steamworksClientPeer) : 
 {
     public SteamId SteamId { private set; get; }
 
-    public readonly Queue<SteamMessage> PacketQueue = new();
+    public readonly Queue<SteamworksMessagePacket> PacketQueue = new();
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connecting;
@@ -42,7 +42,7 @@ public class PeerConnectionManager(SteamworksClientPeer steamworksClientPeer) : 
     {
         Log.Debug($"从 {SteamId} 收到消息");
         var span = new Span<byte>((byte*)data.ToPointer(), size);
-        var steamMessage = new SteamMessage
+        var steamMessage = new SteamworksMessagePacket
         {
             SteamId = SteamId,
             Data = span.ToArray(),

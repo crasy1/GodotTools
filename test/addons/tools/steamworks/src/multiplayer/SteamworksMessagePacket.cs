@@ -2,7 +2,7 @@ using Steamworks;
 
 namespace Godot;
 
-public struct SteamMessage
+public struct SteamworksMessagePacket
 {
     public int TransferChannel { init; get; }
     public byte[] Data { init; get; }

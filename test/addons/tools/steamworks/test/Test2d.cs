@@ -1,60 +1,36 @@
 using Godot;
-using System;
-using System.Reflection;
 using Steamworks;
-using Steamworks.Data;
 
 [SceneTree]
 public partial class Test2d : Node2D
 {
     private bool IsServer { set; get; }
-    public Test2dPlayer LocalPlayer { set; get; }
-    public Test2dPlayer OtherPlayer { set; get; }
 
-    private Friend ChooseFriend { set; get; }
+    private Friend? ChooseFriend { set; get; }
+    private int Port { set; get; } = 5000;
 
     public override void _Ready()
     {
         var multiplayerApi = GetTree().GetMultiplayer();
+        multiplayerApi.PeerConnected += OnPeerConnected;
+        multiplayerApi.PeerDisconnected += OnPeerDisconnected;
         Create.Pressed += () =>
         {
-            multiplayerApi.PeerConnected += (id) =>
-            {
-                Log.Info($"[服务端]已连接：{id}");
-                OtherPlayer = Test2dPlayer.Instantiate();
-                OtherPlayer.IsLocal = false;
-                AddChild(OtherPlayer);
-                OtherPlayer.Position = new Vector2(750, 300);
-            };
-            multiplayerApi.PeerDisconnected += (id) => { Log.Info($"[服务端]已断开：{id}"); };
-            multiplayerApi.SetMultiplayerPeer(SteamworksServerPeer.CreateServer(5000));
-            LocalPlayer = Test2dPlayer.Instantiate();
-            LocalPlayer.IsLocal = true;
-            AddChild(LocalPlayer);
-            LocalPlayer.Position = new Vector2(150, 300);
             IsServer = true;
-            Menu.Hide();
+            multiplayerApi.MultiplayerPeer=SteamworksServerPeer.CreateServer(Port);
+            // Menu.Hide();
         };
-        Search.Pressed += () => { };
+        Search.Pressed += () =>
+        {
+            multiplayerApi.MultiplayerPeer.Close();
+            multiplayerApi.MultiplayerPeer = null;
+        };
         Join.Pressed += () =>
         {
-            multiplayerApi.PeerConnected += (id) =>
+            if (ChooseFriend != null)
             {
-                Log.Info($"[客户端]已连接：{id}");
-                OtherPlayer = Test2dPlayer.Instantiate();
-                OtherPlayer.IsLocal = false;
-                AddChild(OtherPlayer);
-                OtherPlayer.Position = new Vector2(150, 300);
-
-                LocalPlayer = Test2dPlayer.Instantiate();
-                LocalPlayer.IsLocal = true;
-                AddChild(LocalPlayer);
-                LocalPlayer.Position = new Vector2(750, 300);
-                IsServer = false;
-                Menu.Hide();
-            };
-            multiplayerApi.PeerDisconnected += (id) => { Log.Info($"[客户端]已断开：{id}"); };
-            multiplayerApi.SetMultiplayerPeer(SteamworksClientPeer.CreateClient(ChooseFriend.Id, 5000));
+                multiplayerApi.MultiplayerPeer=SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
+            }
         };
         foreach (var (steamId, friend) in SFriends.Friends)
         {
@@ -74,19 +50,41 @@ public partial class Test2d : Node2D
         }
     }
 
-    private void OnReceiveMessage(ulong steamId, GodotObject msg)
+    public override void _Input(InputEvent @event)
     {
-        var protoBufMsg = msg as ProtoBufMsg;
-        if (protoBufMsg.Type == typeof(TestMsg))
+        if (@event is InputEventKey { Pressed: true } eventKey)
         {
-            var testMsg = protoBufMsg.Deserialize<TestMsg>();
-            OtherPlayer.TestMsg = testMsg;
+            switch (eventKey.Keycode)
+            {
+                case Key.Key1: Rpc(MethodName.AnyPeerCallRemoteAndLocal, "1"); break;
+                case Key.Key2: Rpc(MethodName.AnyPeerCallRemote, "2"); break;
+            }
         }
     }
 
-
-    public void Send(ProtoBufMsg msg, SendType sendType = SendType.Reliable)
+    private void OnPeerDisconnected(long id)
     {
-      
+    }
+
+    private void OnPeerConnected(long id)
+    {
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer,
+        CallLocal = true,
+        TransferMode = MultiplayerPeer.TransferModeEnum.Reliable,
+        TransferChannel = 0)]
+    public void AnyPeerCallRemoteAndLocal(string message)
+    {
+        Log.Info(nameof(AnyPeerCallRemoteAndLocal), message);
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer,
+        CallLocal = false,
+        TransferMode = MultiplayerPeer.TransferModeEnum.Reliable,
+        TransferChannel = 1)]
+    public void AnyPeerCallRemote(string message)
+    {
+        Log.Info(nameof(AnyPeerCallRemote), message);
     }
 }

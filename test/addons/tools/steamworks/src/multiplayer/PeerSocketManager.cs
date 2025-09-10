@@ -9,7 +9,7 @@ public class PeerSocketManager(SteamworksServerPeer steamworksServerPeer) : ISoc
 {
     public readonly Dictionary<Connection, SteamId> Connections = new();
 
-    public readonly Queue<SteamMessage> PacketQueue = new();
+    public readonly Queue<SteamworksMessagePacket> PacketQueue = new();
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connected;
@@ -57,7 +57,7 @@ public class PeerSocketManager(SteamworksServerPeer steamworksServerPeer) : ISoc
         if (identity.IsSteamId && Connections.TryGetValue(connection, out var steamId))
         {
             var span = new Span<byte>((byte*)data.ToPointer(), size);
-            var steamMessage = new SteamMessage
+            var steamMessage = new SteamworksMessagePacket
             {
                 SteamId = steamId,
                 Data = span.ToArray(),

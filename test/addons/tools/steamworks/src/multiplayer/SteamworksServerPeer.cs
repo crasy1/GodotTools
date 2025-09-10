@@ -12,7 +12,7 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
 {
     private PeerSocketManager PeerSocketManager { set; get; }
     private SocketManager SocketManager { set; get; }
-    private SteamMessage? LastPacket { set; get; }
+    private SteamworksMessagePacket? LastPacket { set; get; }
     private int TargetPeer { set; get; }
 
     /// <summary>
@@ -29,6 +29,7 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
             var socketManager = SteamNetworkingSockets.CreateRelaySocket(port, peerSocketManager);
             steamworksPeer.PeerSocketManager = peerSocketManager;
             steamworksPeer.SocketManager = socketManager;
+            SteamManager.AddBeforeGameQuitAction(steamworksPeer.Close);
             return steamworksPeer;
         }
         catch (Exception e)
