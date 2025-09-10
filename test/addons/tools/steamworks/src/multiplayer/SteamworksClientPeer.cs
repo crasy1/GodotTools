@@ -68,10 +68,7 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
         return [];
     }
 
-    public override int _GetTransferChannel() => TransferChannel;
-    public override TransferModeEnum _GetTransferMode() => TransferMode;
     public override int _GetUniqueId() => (int)SteamClient.SteamId.AccountId;
-    public override bool _IsRefusingNewConnections() => RefuseNewConnections;
     public override bool _IsServer() => false;
     public override bool _IsServerRelaySupported() => false;
     public override void _Poll() => ConnectionManager.Receive();
@@ -101,8 +98,5 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
         }
     }
 
-    public override void _SetRefuseNewConnections(bool pEnable) => RefuseNewConnections = pEnable;
     public override void _SetTargetPeer(int pPeer) => TargetPeer = pPeer;
-    public override void _SetTransferChannel(int pChannel) => TransferChannel = pChannel;
-    public override void _SetTransferMode(TransferModeEnum pMode) => TransferMode = pMode;
 }
