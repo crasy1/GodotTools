@@ -22,6 +22,9 @@ public partial class Test2d : Node2D
         };
         Search.Pressed += () =>
         {
+        };
+        Exit.Pressed += () =>
+        {
             multiplayerApi.MultiplayerPeer.Close();
             multiplayerApi.MultiplayerPeer = null;
         };
