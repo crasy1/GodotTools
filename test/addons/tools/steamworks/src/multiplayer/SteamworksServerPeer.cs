@@ -56,15 +56,74 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
         connection.Close();
     }
 
-    public override int _GetAvailablePacketCount() => PeerSocketManager.PacketQueue.Count;
-    public override ConnectionStatus _GetConnectionStatus() => PeerSocketManager.ConnectionStatus;
-    public override int _GetMaxPacketSize() => 512 * 1024;
-    public override int _GetPacketChannel() => LastPacket?.TransferChannel ?? 0;
-    public override TransferModeEnum _GetPacketMode() => TransferModeEnum.Reliable;
-    public override int _GetPacketPeer() => LastPacket?.PeerId ?? 0;
+    public override int _GetAvailablePacketCount()
+    {
+        Log.Debug("servet ", nameof(_GetAvailablePacketCount));
+        return PeerSocketManager.PacketQueue.Count;
+    }
+
+    public override ConnectionStatus _GetConnectionStatus()
+    {
+        Log.Debug("servet ", nameof(_GetConnectionStatus));
+        return PeerSocketManager.ConnectionStatus;
+    }
+
+    public override int _GetMaxPacketSize()
+    {
+        Log.Debug("servet ", nameof(_GetMaxPacketSize));
+        return 512 * 1024;
+    }
+
+    public override int _GetPacketChannel()
+
+    {
+        Log.Debug("servet ", nameof(_GetPacketChannel));
+        return LastPacket?.TransferChannel ?? 0;
+    }
+
+    public override TransferModeEnum _GetPacketMode()
+    {
+        Log.Debug("servet ", nameof(_GetPacketMode));
+        return TransferModeEnum.Reliable;
+    }
+
+    public override int _GetPacketPeer()
+    {
+        Log.Debug("servet ", nameof(_GetPacketPeer));
+        return LastPacket?.PeerId ?? 0;
+    }
+
+
+    public override int _GetUniqueId()
+    {
+        Log.Debug("servet ", nameof(_GetUniqueId));
+        return (int)SteamClient.SteamId.AccountId;
+    }
+
+    public override bool _IsServer()
+    {
+        Log.Debug("servet ", nameof(_IsServer));
+        return true;
+    }
+
+    // TODO 中继
+    public override bool _IsServerRelaySupported()
+    {
+        Log.Debug("servet ", nameof(_IsServerRelaySupported));
+        return false;
+    }
+
+    public override void _SetTargetPeer(int pPeer)
+    {
+        Log.Debug("servet ", nameof(_SetTargetPeer));
+        TargetPeer = pPeer;
+    }
+
+    public override void _Poll() => SocketManager.Receive();
 
     public override byte[] _GetPacketScript()
     {
+        Log.Debug("servet ", nameof(_GetPacketScript));
         if (PeerSocketManager.PacketQueue.TryDequeue(out var packet))
         {
             LastPacket = packet;
@@ -74,15 +133,9 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
         return [];
     }
 
-    public override int _GetUniqueId() => (int)SteamClient.SteamId.AccountId;
-    public override bool _IsServer() => true;
-
-    // TODO 中继
-    public override bool _IsServerRelaySupported() => false;
-    public override void _Poll() => SocketManager.Receive();
-
     public override Error _PutPacketScript(byte[] pBuffer)
     {
+        Log.Debug("servet ", nameof(_PutPacketScript));
         try
         {
             var sendType = TransferMode switch
@@ -128,6 +181,4 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
             return Error.Failed;
         }
     }
-
-    public override void _SetTargetPeer(int pPeer) => TargetPeer = pPeer;
 }
