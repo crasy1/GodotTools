@@ -14,15 +14,17 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 {
     private int TargetPeer { set; get; }
     private const string HandShakeSend = "[HANDSHAKE_SEND]";
+    private const string HandShakeReply = "[HANDSHAKE_REPLY]";
+    private const string Disconnect = "[DISCONNECT]";
 
     private readonly Queue<SteamworksMessagePacket> PacketQueue = new();
     private readonly Dictionary<int, SteamId> Connected = new();
 
     public SteamworksP2PPeer()
     {
-        SNetworking.Instance.UserConnected += OnUserConnected;
+        // SNetworking.Instance.UserConnected += OnUserConnected;
         SNetworking.Instance.UserConnectFailed += OnUserConnectFailed;
-        SNetworking.Instance.UserDisconnected += OnUserDisconnected;
+        // SNetworking.Instance.UserDisconnected += OnUserDisconnected;
         SNetworking.Instance.ReceiveData += OnReceiveData;
         Log.Info($"创建 {nameof(SteamworksP2PPeer)}");
         SteamManager.AddBeforeGameQuitAction(Close);
@@ -30,6 +32,36 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 
     private void OnReceiveData(ulong steamId, int channel, byte[] data)
     {
+        if (channel == (int)Channel.Handshake)
+        {
+            var msg = Encoding.UTF8.GetString(data);
+            if (HandShakeSend == msg)
+            {
+                ConnectReply(steamId);
+                if (Connected.Values.All(i => steamId != i))
+                {
+                    OnUserConnected(steamId);
+                }
+            }
+            else if (HandShakeReply == msg)
+            {
+                if (Connected.Values.All(i => steamId != i))
+                {
+                    OnUserConnected(steamId);
+                }
+            }
+            else if (Disconnect == msg)
+            {
+                if (Connected.Values.All(i => steamId != i))
+                {
+                    OnUserDisconnected(steamId);
+                }
+            }
+
+            Log.Debug($"{nameof(SteamworksP2PPeer)} handshake {msg}");
+            return;
+        }
+
         var p2Packet = new SteamworksMessagePacket()
         {
             SteamId = steamId,
@@ -64,11 +96,17 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
         SNetworking.SendP2P(steamId, HandShakeSend, Channel.Handshake);
     }
 
+    public void ConnectReply(SteamId steamId)
+    {
+        SNetworking.SendP2P(steamId, HandShakeReply, Channel.Handshake);
+    }
+
     public override void _Close()
     {
         foreach (var steamId in Connected.Values)
         {
             SNetworking.Instance.Disconnect(steamId);
+            SNetworking.SendP2P(steamId, Disconnect, Channel.Handshake);
         }
 
         PacketQueue.Clear();
@@ -79,6 +117,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
         if (Connected.TryGetValue(pPeer, out var steamId))
         {
             SNetworking.Instance.Disconnect(steamId);
+            SNetworking.SendP2P(steamId, Disconnect, Channel.Handshake);
         }
     }
 
