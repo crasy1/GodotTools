@@ -27,6 +27,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
         SNetworking.Instance.UserDisconnected += OnUserDisconnected;
         SNetworking.Instance.ReceiveData += OnReceiveData;
         Log.Info($"创建 {nameof(SteamworksP2PPeer)}");
+        SteamManager.AddBeforeGameQuitAction(Close);
     }
 
     private void OnReceiveData(ulong steamId, int channel, byte[] data)
