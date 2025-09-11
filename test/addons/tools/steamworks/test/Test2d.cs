@@ -14,15 +14,16 @@ public partial class Test2d : Node2D
         var multiplayerApi = GetTree().GetMultiplayer();
         multiplayerApi.PeerConnected += OnPeerConnected;
         multiplayerApi.PeerDisconnected += OnPeerDisconnected;
+        multiplayerApi.ConnectedToServer += OnConnectedToServer;
+        multiplayerApi.ConnectionFailed += OnConnectionFailed;
+        multiplayerApi.ServerDisconnected += OnServerDisconnected;
         Create.Pressed += () =>
         {
             IsServer = true;
-            multiplayerApi.MultiplayerPeer=SteamworksServerPeer.CreateServer(Port);
+            multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
             // Menu.Hide();
         };
-        Search.Pressed += () =>
-        {
-        };
+        Search.Pressed += () => { };
         Exit.Pressed += () =>
         {
             multiplayerApi.MultiplayerPeer.Close();
@@ -32,7 +33,7 @@ public partial class Test2d : Node2D
         {
             if (ChooseFriend != null)
             {
-                multiplayerApi.MultiplayerPeer=SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
+                multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
             }
         };
         foreach (var (steamId, friend) in SFriends.Friends)
@@ -67,12 +68,27 @@ public partial class Test2d : Node2D
 
     private void OnPeerDisconnected(long id)
     {
-        Log.Info(nameof(OnPeerDisconnected),id);
+        Log.Debug($"peer {id} 断开连接");
     }
 
     private void OnPeerConnected(long id)
     {
-        Log.Info(nameof(OnPeerConnected),id);
+        Log.Debug($"peer {id} 连接");
+    }
+
+    private void OnConnectedToServer()
+    {
+        Log.Debug($"连接到服务器");
+    }
+
+    private void OnConnectionFailed()
+    {
+        Log.Debug($"连接服务器失败");
+    }
+
+    private void OnServerDisconnected()
+    {
+        Log.Debug($"与服务器断开连接");
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer,

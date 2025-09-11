@@ -23,19 +23,19 @@ public class PeerConnectionManager(SteamworksClientPeer steamworksClientPeer) : 
     public void OnConnected(ConnectionInfo info)
     {
         ConnectionStatus = MultiplayerPeer.ConnectionStatus.Connected;
-        steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, 1);
         Log.Info($"{info.Identity.SteamId} 已连接");
         if (info.Identity.IsSteamId)
         {
             SteamId = info.Identity.SteamId;
         }
+        steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, (int)SteamId.AccountId);
     }
 
     public void OnDisconnected(ConnectionInfo info)
     {
         ConnectionStatus = MultiplayerPeer.ConnectionStatus.Disconnected;
-        steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerDisconnected, 1);
         Log.Info($"{info.Identity.SteamId} 断开连接");
+        steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerDisconnected, (int)SteamId.AccountId);
     }
 
     public unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)
