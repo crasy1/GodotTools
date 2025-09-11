@@ -76,12 +76,13 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
         var peerId = (int)((SteamId)steamId).AccountId;
         Connected.TryAdd(peerId, steamId);
         EmitSignalPeerConnected(peerId);
-        Connect(steamId);
     }
 
     private void OnUserConnectFailed(ulong steamId)
     {
-        Connected.Remove((int)((SteamId)steamId).AccountId);
+        var peerId = (int)((SteamId)steamId).AccountId;
+        Connected.Remove(peerId);
+        EmitSignalPeerConnected(peerId);
     }
 
     private void OnUserDisconnected(ulong steamId)
