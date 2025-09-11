@@ -1,3 +1,4 @@
+using System.Text;
 using ProtoBuf.Meta;
 using Steamworks;
 
@@ -15,10 +16,10 @@ public partial class SteamTest : Node2D
     public override void _Ready()
     {
         base._Ready();
-        SNetworking.Instance.ReceiveMessage += (steamId, data) =>
+        SNetworking.Instance.ReceiveData += (steamId,channel, data) =>
         {
             Log.Info($"从 {steamId} 收到P2P消息 {data}");
-            P2PReceiveText.AppendText(data);
+            P2PReceiveText.AppendText(Encoding.UTF8.GetString(data));
         };
 
         ShowFriend.Pressed += () => { ShowFriends(); };
@@ -29,7 +30,7 @@ public partial class SteamTest : Node2D
                 return;
             }
 
-            SNetworking.Instance.SendP2P(SteamUserInfo.Friend.Id, P2PText.Text, Channel.Msg);
+            SNetworking.SendP2P(SteamUserInfo.Friend.Id, P2PText.Text, Channel.Msg);
         };
         DisconnectP2P.Pressed += () =>
         {

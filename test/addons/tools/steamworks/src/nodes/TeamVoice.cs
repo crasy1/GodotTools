@@ -26,7 +26,7 @@ public partial class TeamVoice : Node
         SetProcessMode(ProcessModeEnum.Always);
         SetProcess(false);
         SetPhysicsProcess(false);
-        SNetworking.Instance.ReceiveVoice += OnReceiveVoice;
+        SNetworking.Instance.ReceiveData += OnReceiveVoice;
         SUser.Instance.RecordVoiceData += OnRecordVoiceData;
     }
 
@@ -159,15 +159,15 @@ public partial class TeamVoice : Node
     {
         foreach (var memberId in _teamMembers.Keys)
         {
-            SNetworking.Instance.SendP2P(memberId, compressData, Channel.Voice, P2PSend.UnreliableNoDelay);
+            SNetworking.SendP2P(memberId, compressData, Channel.Voice, P2PSend.UnreliableNoDelay);
         }
     }
 
 
     // 接收其他玩家录音,根据id使用不同的播放器播放
-    private void OnReceiveVoice(ulong steamId, byte[] data)
+    private void OnReceiveVoice(ulong steamId, int channel, byte[] data)
     {
-        if (_teamMembers.TryGetValue(steamId, out var voiceStreamPlayer))
+        if (channel == (int)Channel.Voice && _teamMembers.TryGetValue(steamId, out var voiceStreamPlayer))
         {
             voiceStreamPlayer.ReceiveRecordVoiceData(steamId, data);
         }

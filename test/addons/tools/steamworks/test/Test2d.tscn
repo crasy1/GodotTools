@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bhslj14rdsk7p"]
 
-[ext_resource type="Script" uid="uid://c7a6sgyyb7hdm" path="res://addons/tools/steamworks/test/Test2d.cs" id="1_linxh"]
+[ext_resource type="Script" uid="uid://mx77o12gq54u" path="res://addons/tools/steamworks/test/Test2d.cs" id="1_linxh"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_linxh"]
 size = Vector2(600, 100)

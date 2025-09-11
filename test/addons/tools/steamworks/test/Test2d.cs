@@ -20,7 +20,8 @@ public partial class Test2d : Node2D
         Create.Pressed += () =>
         {
             IsServer = true;
-            multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
+            // multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
+            multiplayerApi.MultiplayerPeer = new SteamworksP2PPeer();
             // Menu.Hide();
         };
         Search.Pressed += () => { };
@@ -33,7 +34,10 @@ public partial class Test2d : Node2D
         {
             if (ChooseFriend != null)
             {
-                multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
+                // multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
+                var p2PPeer = new SteamworksP2PPeer();
+                multiplayerApi.MultiplayerPeer = p2PPeer;
+                p2PPeer.Connect(ChooseFriend.Value.Id);
             }
         };
         foreach (var (steamId, friend) in SFriends.Friends)
