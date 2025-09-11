@@ -11,7 +11,6 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
 {
     private PeerConnectionManager PeerConnectionManager { set; get; }
     private ConnectionManager ConnectionManager { set; get; }
-    private SteamworksMessagePacket? LastPacket { set; get; }
     private int TargetPeer { set; get; }
 
     /// <summary>
@@ -68,7 +67,7 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
 
     public override int _GetPacketChannel()
     {
-        return LastPacket?.TransferChannel ?? 0;
+        return PeerConnectionManager.PacketQueue.TryPeek(out var packet) ? packet.TransferChannel : 0;
     }
 
     public override TransferModeEnum _GetPacketMode()
@@ -78,7 +77,7 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
 
     public override int _GetPacketPeer()
     {
-        return LastPacket?.PeerId ?? 0;
+        return PeerConnectionManager.PacketQueue.TryPeek(out var packet) ? packet.PeerId : 0;
     }
 
 
@@ -127,7 +126,6 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
     {
         if (PeerConnectionManager.PacketQueue.TryDequeue(out var packet))
         {
-            LastPacket = packet;
             return packet.Data;
         }
 

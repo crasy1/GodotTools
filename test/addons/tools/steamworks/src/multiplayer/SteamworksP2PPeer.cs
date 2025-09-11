@@ -14,10 +14,8 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 {
     private int TargetPeer { set; get; }
     private const string HandShakeSend = "[HANDSHAKE_SEND]";
-    private const string HandShakeReply = "[HANDSHAKE_REPLY]";
 
     private readonly Queue<SteamworksMessagePacket> PacketQueue = new();
-    private SteamworksMessagePacket? LastPacket { set; get; }
     private readonly Dictionary<int, SteamId> Connected = new();
 
     public SteamworksP2PPeer()
@@ -32,29 +30,6 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 
     private void OnReceiveData(ulong steamId, int channel, byte[] data)
     {
-        // if (channel == (int)Channel.Handshake)
-        // {
-        //     var msg = Encoding.UTF8.GetString(data);
-        //     if (HandShakeSend == msg)
-        //     {
-        //         ConnectReply(steamId);
-        //         if (Connected.Values.All(i => steamId != i))
-        //         {
-        //             OnUserConnected(steamId);
-        //         }
-        //     }
-        //     else if (HandShakeReply == msg)
-        //     {
-        //         if (Connected.Values.All(i => steamId != i))
-        //         {
-        //             OnUserConnected(steamId);
-        //         }
-        //     }
-        //
-        //     Log.Debug($"{nameof(SteamworksP2PPeer)} 握手 {msg}");
-        //     return;
-        // }
-
         var p2Packet = new SteamworksMessagePacket()
         {
             SteamId = steamId,
@@ -69,6 +44,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
         var peerId = (int)((SteamId)steamId).AccountId;
         Connected.TryAdd(peerId, steamId);
         EmitSignalPeerConnected(peerId);
+        Connect(steamId);
     }
 
     private void OnUserConnectFailed(ulong steamId)
@@ -86,11 +62,6 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
     public void Connect(SteamId steamId)
     {
         SNetworking.SendP2P(steamId, HandShakeSend, Channel.Handshake);
-    }
-
-    public void ConnectReply(SteamId steamId)
-    {
-        SNetworking.SendP2P(steamId, HandShakeReply, Channel.Handshake);
     }
 
     public override void _Close()
@@ -128,7 +99,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 
     public override int _GetPacketChannel()
     {
-        return LastPacket?.TransferChannel ?? 0;
+        return PacketQueue.TryPeek(out var packet) ? packet.TransferChannel : 0;
     }
 
     public override TransferModeEnum _GetPacketMode()
@@ -138,7 +109,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 
     public override int _GetPacketPeer()
     {
-        return LastPacket?.PeerId ?? 0;
+        return PacketQueue.TryPeek(out var packet) ? packet.PeerId : 0;
     }
 
 
@@ -152,7 +123,6 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
         return false;
     }
 
-    // TODO 中继
     public override bool _IsServerRelaySupported()
     {
         return false;
@@ -190,7 +160,6 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
     {
         if (PacketQueue.TryDequeue(out var packet))
         {
-            LastPacket = packet;
             return packet.Data;
         }
 
