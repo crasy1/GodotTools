@@ -24,7 +24,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
     {
         // SNetworking.Instance.UserConnected += OnUserConnected;
         SNetworking.Instance.UserConnectFailed += OnUserConnectFailed;
-        // SNetworking.Instance.UserDisconnected += OnUserDisconnected;
+        SNetworking.Instance.UserDisconnected += OnUserDisconnected;
         SNetworking.Instance.ReceiveData += OnReceiveData;
         Log.Info($"创建 {nameof(SteamworksP2PPeer)}");
         SteamManager.AddBeforeGameQuitAction(Close);
@@ -37,24 +37,24 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
             var msg = Encoding.UTF8.GetString(data);
             if (HandShakeSend == msg)
             {
-                ConnectReply(steamId);
-                if (Connected.Values.All(i => steamId != i))
+                if (!Connected.Values.Contains(steamId))
                 {
                     OnUserConnected(steamId);
+                    ConnectReply(steamId);
                 }
             }
             else if (HandShakeReply == msg)
             {
-                if (Connected.Values.All(i => steamId != i))
+                if (!Connected.Values.Contains(steamId))
                 {
                     OnUserConnected(steamId);
                 }
             }
             else if (Disconnect == msg)
             {
-                if (Connected.Values.All(i => steamId != i))
+                if (Connected.Values.Contains(steamId))
                 {
-                    OnUserDisconnected(steamId);
+                    SNetworking.Instance.Disconnect(steamId);
                 }
             }
 
@@ -105,8 +105,8 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
     {
         foreach (var steamId in Connected.Values)
         {
-            SNetworking.Instance.Disconnect(steamId);
             SNetworking.SendP2P(steamId, Disconnect, Channel.Handshake);
+            SNetworking.Instance.Disconnect(steamId);
         }
 
         PacketQueue.Clear();
@@ -116,8 +116,8 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
     {
         if (Connected.TryGetValue(pPeer, out var steamId))
         {
-            SNetworking.Instance.Disconnect(steamId);
             SNetworking.SendP2P(steamId, Disconnect, Channel.Handshake);
+            SNetworking.Instance.Disconnect(steamId);
         }
     }
 
