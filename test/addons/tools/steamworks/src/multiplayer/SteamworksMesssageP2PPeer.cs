@@ -39,29 +39,18 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
             Data = span.ToArray(),
             TransferChannel = channel
         };
+        if (channel == (int)Channel.Handshake)
+        {
+            var msg = Encoding.UTF8.GetString(steamMessage.Data);
+            if (HandShakeReply == msg)
+            {
+                OnUserConnected(steamId);
+            }
+
+            return;
+        }
+
         PacketQueue.Enqueue(steamMessage);
-        // if (channel == (int)Channel.Handshake)
-        // {
-        //     var msg = Encoding.UTF8.GetString(steamMessage.Data);
-        //     if (HandShakeSend == msg)
-        //     {
-        //         if (!Connected.Values.Contains(steamId))
-        //         {
-        //             OnUserConnected(steamId);
-        //             ConnectReply(steamId);
-        //         }
-        //     }
-        //     else if (HandShakeReply == msg)
-        //     {
-        //         if (!Connected.Values.Contains(steamId))
-        //         {
-        //             OnUserConnected(steamId);
-        //         }
-        //     }
-        //
-        //     Log.Debug($"{nameof(SteamworksMessageP2PPeer)} handshake {msg}");
-        //     return;
-        // }
     }
 
     private void OnSessionFailed(ConnectionInfo connectionInfo)
@@ -75,6 +64,7 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
         {
             SteamNetworkingMessages.AcceptSessionWithUser(ref identity);
             OnUserConnected(identity.SteamId);
+            ConnectReply(identity.SteamId);
         }
     }
 
@@ -104,7 +94,7 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
 
     public void Connect(NetIdentity steamId)
     {
-        var result = SendMsg(steamId, HandShakeSend, Channel.Handshake);
+        SendMsg(steamId, HandShakeSend, Channel.Handshake);
     }
 
     public void ConnectReply(NetIdentity steamId)
@@ -131,6 +121,7 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
         {
             var netIdentity = steamId;
             SteamNetworkingMessages.CloseSessionWithUser(ref netIdentity);
+            EmitSignalPeerDisconnected(steamId.SteamId.AccountId);
         }
 
         PacketQueue.Clear();
@@ -141,6 +132,7 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
         if (Connected.TryGetValue(pPeer, out var steamId))
         {
             SteamNetworkingMessages.CloseSessionWithUser(ref steamId);
+            EmitSignalPeerDisconnected(steamId.SteamId.AccountId);
         }
     }
 
