@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GodotTools" Version="0.0.3" />
-    <PackageReference Include="godottools.sourcegenerators" Version="0.0.3" />
+    <PackageReference Include="GodotTools" Version="0.0.4" />
+    <PackageReference Include="godottools.sourcegenerators" Version="0.0.4" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="addons\tools\common_ui\assets\button\Button_Disable_3Slides.png" />
