@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Steamworks;
 
@@ -26,6 +27,11 @@ public partial class SNetworking : SteamComponent
     public readonly List<SteamId> ConnectedIds = new();
 
     public const int MaxPacketSize = 512 * 1024;
+
+    public static readonly List<int> Channels = Enum.GetValues(typeof(Channel))
+        .Cast<Channel>()
+        .Select(c => (int)c)
+        .ToList();
 
     public override void _Ready()
     {
@@ -79,30 +85,15 @@ public partial class SNetworking : SteamComponent
 
     public override void _Process(double delta)
     {
-        if (SteamNetworking.IsP2PPacketAvailable((int)Channel.Msg))
+        foreach (var channel in Channels)
         {
-            var readP2PPacket = SteamNetworking.ReadP2PPacket((int)Channel.Msg);
-            if (readP2PPacket.HasValue)
+            if (SteamNetworking.IsP2PPacketAvailable(channel))
             {
-                EmitSignalReceiveData(readP2PPacket.Value.SteamId, (int)Channel.Msg, readP2PPacket.Value.Data);
-            }
-        }
-
-        if (SteamNetworking.IsP2PPacketAvailable((int)Channel.Voice))
-        {
-            var readP2PPacket = SteamNetworking.ReadP2PPacket((int)Channel.Voice);
-            if (readP2PPacket.HasValue)
-            {
-                EmitSignalReceiveData(readP2PPacket.Value.SteamId, (int)Channel.Voice, readP2PPacket.Value.Data);
-            }
-        }
-
-        if (SteamNetworking.IsP2PPacketAvailable((int)Channel.Handshake))
-        {
-            var readP2PPacket = SteamNetworking.ReadP2PPacket((int)Channel.Handshake);
-            if (readP2PPacket.HasValue)
-            {
-                EmitSignalReceiveData(readP2PPacket.Value.SteamId, (int)Channel.Handshake, readP2PPacket.Value.Data);
+                var readP2PPacket = SteamNetworking.ReadP2PPacket(channel);
+                if (readP2PPacket.HasValue)
+                {
+                    EmitSignalReceiveData(readP2PPacket.Value.SteamId, channel, readP2PPacket.Value.Data);
+                }
             }
         }
     }

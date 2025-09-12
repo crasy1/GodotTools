@@ -8,6 +8,7 @@ public partial class Test2d : Node2D
 
     private Friend? ChooseFriend { set; get; }
     private int Port { set; get; } = 5000;
+    private int PeerType { set; get; } = 3;
 
     public override void _Ready()
     {
@@ -20,24 +21,60 @@ public partial class Test2d : Node2D
         Create.Pressed += () =>
         {
             IsServer = true;
-            // multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
-            multiplayerApi.MultiplayerPeer = new SteamworksP2PPeer();
+            switch (PeerType)
+            {
+                case 0:
+                    multiplayerApi.MultiplayerPeer = new SteamworksP2PPeer();
+                    break;
+                case 1:
+                    multiplayerApi.MultiplayerPeer = new SteamworksMessageP2PPeer();
+                    break;
+                case 2:
+                    multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
+                    break;
+                default:
+                    var peer = new ENetMultiplayerPeer();
+                    peer.CreateServer(Port, 4);
+                    multiplayerApi.MultiplayerPeer = peer;
+                    break;
+            }
+
             // Menu.Hide();
         };
         Search.Pressed += () => { };
         Exit.Pressed += () =>
         {
-            multiplayerApi.MultiplayerPeer.Close();
-            multiplayerApi.MultiplayerPeer = null;
+            if (IsInstanceValid(multiplayerApi.MultiplayerPeer))
+            {
+                multiplayerApi.MultiplayerPeer.Close();
+                multiplayerApi.MultiplayerPeer = null;
+            }
         };
         Join.Pressed += () =>
         {
             if (ChooseFriend != null)
             {
-                // multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
-                var p2PPeer = new SteamworksP2PPeer();
-                multiplayerApi.MultiplayerPeer = p2PPeer;
-                p2PPeer.Connect(ChooseFriend.Value.Id);
+                switch (PeerType)
+                {
+                    case 0:
+                        var p2PPeer = new SteamworksP2PPeer();
+                        multiplayerApi.MultiplayerPeer = p2PPeer;
+                        p2PPeer.Connect(ChooseFriend.Value.Id);
+                        break;
+                    case 1:
+                        var msgP2PPeer = new SteamworksMessageP2PPeer();
+                        multiplayerApi.MultiplayerPeer = msgP2PPeer;
+                        msgP2PPeer.Connect(ChooseFriend.Value.Id);
+                        break;
+                    case 2:
+                        multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
+                        break;
+                    default:
+                        var peer = new ENetMultiplayerPeer();
+                        peer.CreateClient("localhost", Port);
+                        multiplayerApi.MultiplayerPeer = peer;
+                        break;
+                }
             }
         };
         foreach (var (steamId, friend) in SFriends.Friends)
