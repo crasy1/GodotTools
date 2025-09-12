@@ -45,6 +45,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "退出服务器"
 
+[node name="Send" type="Button" parent="CanvasLayer/Menu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "发送消息"
+
 [node name="Friends" type="VBoxContainer" parent="CanvasLayer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)

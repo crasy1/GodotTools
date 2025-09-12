@@ -1,3 +1,4 @@
+using System.Text;
 using Godot;
 using Steamworks;
 
@@ -75,6 +76,35 @@ public partial class Test2d : Node2D
                         multiplayerApi.MultiplayerPeer = peer;
                         break;
                 }
+            }
+        };
+        Send.Pressed += () =>
+        {
+            var content = Encoding.Unicode.GetBytes($"hello {Time.GetDateStringFromSystem()}");
+            switch (PeerType)
+            {
+                case 0:
+                    var p2PPeer = (SteamworksP2PPeer)multiplayerApi.MultiplayerPeer;
+                    break;
+                case 1:
+                    var msgP2PPeer = (SteamworksMessageP2PPeer)multiplayerApi.MultiplayerPeer;
+                    break;
+                case 2:
+                    if (IsServer)
+                    {
+                        var serverPeer = (SteamworksServerPeer)multiplayerApi.MultiplayerPeer;
+                    }
+                    else
+                    {
+                        var clientPeer = (SteamworksClientPeer)multiplayerApi.MultiplayerPeer;
+                    }
+
+                    break;
+                default:
+                    var enetPeer = (ENetMultiplayerPeer)multiplayerApi.MultiplayerPeer;
+                    // 貌似不行，只能用在场景同步
+                    // enetPeer.Host.Broadcast(0, content, (int)MultiplayerPeer.TransferModeEnum.Reliable);
+                    break;
             }
         };
         foreach (var (steamId, friend) in SFriends.Friends)
