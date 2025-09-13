@@ -46,7 +46,9 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
             switch (msg)
             {
                 case P2PHandShake:
-                    OnUserConnected(steamId); break;
+                    ConnectReply(steamId);
+                    OnUserConnected(steamId);
+                    break;
                 case P2PHandShakeReply:
                     OnUserConnected(steamId); break;
                 case P2PDisconnect:
@@ -69,7 +71,6 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
         if (!RefuseNewConnections)
         {
             SteamNetworkingMessages.AcceptSessionWithUser(ref identity);
-            ConnectReply(identity.SteamId);
         }
     }
 
@@ -77,16 +78,20 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
     {
         var sid = (SteamId)steamId;
         var peerId = (int)sid.AccountId;
-        Connected.TryAdd(peerId, sid);
-        EmitSignalPeerConnected(peerId);
+        if (Connected.TryAdd(peerId, sid))
+        {
+            EmitSignalPeerConnected(peerId);
+        }
     }
 
     private void OnUserConnectFailed(ulong steamId)
     {
         var sid = (SteamId)steamId;
         var peerId = (int)sid.AccountId;
-        Connected.Remove(peerId);
-        EmitSignalPeerDisconnected(peerId);
+        if (Connected.Remove(peerId))
+        {
+            EmitSignalPeerDisconnected(peerId);
+        }
     }
 
     private void OnUserDisconnected(ulong steamId)
@@ -94,9 +99,11 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
         var sid = (SteamId)steamId;
         var netIdentity = (NetIdentity)sid;
         var peerId = (int)sid.AccountId;
-        Connected.Remove(peerId);
-        SteamNetworkingMessages.CloseSessionWithUser(ref netIdentity);
-        EmitSignalPeerDisconnected(peerId);
+        if (Connected.Remove(peerId))
+        {
+            SteamNetworkingMessages.CloseSessionWithUser(ref netIdentity);
+            EmitSignalPeerDisconnected(peerId);
+        }
     }
 
     public void Connect(NetIdentity steamId)
@@ -137,8 +144,8 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
         if (Connected.Remove(pPeer, out var steamId))
         {
             SendMsg(steamId, P2PDisconnect, Channel.Handshake);
-            EmitSignalPeerDisconnected(steamId.SteamId.AccountId);
-            SteamNetworkingMessages.CloseSessionWithUser(ref steamId);
+            EmitSignalPeerDisconnected(pPeer);
+            // SteamNetworkingMessages.CloseSessionWithUser(ref steamId);
         }
     }
 
