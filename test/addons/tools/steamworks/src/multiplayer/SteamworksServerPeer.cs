@@ -89,7 +89,7 @@ public partial class SteamworksServerPeer : MultiplayerPeerExtension
 
     public override int _GetUniqueId()
     {
-        return (int)SteamClient.SteamId.AccountId;
+        return 1;
     }
 
     public override bool _IsServer()

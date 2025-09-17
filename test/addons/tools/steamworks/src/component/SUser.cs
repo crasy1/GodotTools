@@ -48,11 +48,12 @@ public partial class SUser : SteamComponent
         {
             Log.Info($"用户验证授权 {steamId} {steamId2} {authResponse}");
         };
-        SClient.Instance.SteamClientConnected += () =>
+        SClient.Instance.SteamClientConnected += async () =>
         {
-            SetProcess(true);
             // SteamUser.SampleRate = SteamUser.OptimalSampleRate;
             SteamUser.SampleRate = (uint)SteamConfig.SampleRate;
+            await GetTree().ToSignal(GetTree().CreateTimer(1), SceneTreeTimer.SignalName.Timeout);
+            SetProcess(true);
             Log.Info($"设置音频采样率 {SteamUser.SampleRate}");
         };
     }
