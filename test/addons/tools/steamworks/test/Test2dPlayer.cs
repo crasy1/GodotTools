@@ -1,6 +1,4 @@
 using Godot;
-using System;
-using Steamworks.Data;
 
 [SceneTree]
 public partial class Test2dPlayer : CharacterBody2D
@@ -12,14 +10,18 @@ public partial class Test2dPlayer : CharacterBody2D
     [Export(PropertyHint.Range, "0,0.2,0.02")]
     public double UpdateRate { set; get; } = 0.1;
 
-    public bool IsLocal { set; get; }
     private double LastUpdateTime { set; get; }
 
     public TestMsg TestMsg { set; get; }
 
+    public override void _EnterTree()
+    {
+        SetMultiplayerAuthority(int.Parse(Name));
+    }
+
     public override void _Ready()
     {
-        if (IsLocal)
+        if (IsMultiplayerAuthority())
         {
             PlayerCamera.MakeCurrent();
         }
@@ -27,7 +29,7 @@ public partial class Test2dPlayer : CharacterBody2D
 
     public override void _PhysicsProcess(double delta)
     {
-        if (IsLocal)
+        if (IsMultiplayerAuthority())
         {
             Vector2 velocity = Velocity;
 
@@ -58,5 +60,11 @@ public partial class Test2dPlayer : CharacterBody2D
             Velocity = velocity;
             MoveAndSlide();
         }
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void AsyncPosition(Vector2 position)
+    {
+        Position = position;
     }
 }

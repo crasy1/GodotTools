@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://bhslj14rdsk7p"]
+[gd_scene load_steps=4 format=3 uid="uid://bhslj14rdsk7p"]
 
 [ext_resource type="Script" uid="uid://mx77o12gq54u" path="res://addons/tools/steamworks/test/Test2d.cs" id="1_linxh"]
+[ext_resource type="Texture2D" uid="uid://c7j4otde0c7ro" path="res://icon.svg" id="2_qf28k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_linxh"]
 size = Vector2(600, 100)
@@ -62,6 +63,11 @@ grow_vertical = 2
 position = Vector2(648, 768)
 metadata/_edit_group_ = true
 
+[node name="Icon" type="Sprite2D" parent="StaticBody2D"]
+position = Vector2(2.4999924, 1.0000229)
+scale = Vector2(4.6953125, 0.79687536)
+texture = ExtResource("2_qf28k")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 shape = SubResource("RectangleShape2D_linxh")
 
@@ -69,6 +75,18 @@ shape = SubResource("RectangleShape2D_linxh")
 position = Vector2(1285, 764)
 metadata/_edit_group_ = true
 
+[node name="Icon2" type="Sprite2D" parent="StaticBody2D2"]
+scale = Vector2(4.6953125, 0.79687536)
+texture = ExtResource("2_qf28k")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D2"]
 shape = SubResource("RectangleShape2D_linxh")
 metadata/_edit_group_ = true
+
+[node name="Spawner" type="MultiplayerSpawner" parent="."]
+unique_name_in_owner = true
+_spawnable_scenes = PackedStringArray("uid://q5vydp6ufsn2")
+spawn_path = NodePath("../Players")
+
+[node name="Players" type="Node2D" parent="."]
+unique_name_in_owner = true

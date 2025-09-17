@@ -9,7 +9,7 @@ public partial class Test2d : Node2D
 
     private Friend? ChooseFriend { set; get; }
     private int Port { set; get; } = 5000;
-    private int PeerType { set; get; } = 1;
+    private int PeerType { set; get; } = 11;
 
     public override void _Ready()
     {
@@ -40,7 +40,9 @@ public partial class Test2d : Node2D
                     break;
             }
 
-            // Menu.Hide();
+            Menu.Hide();
+            var test2dPlayer = AddPlayer(Multiplayer.GetUniqueId());
+            test2dPlayer.Position = new Vector2(500, 500);
         };
         Search.Pressed += () => { };
         Exit.Pressed += () =>
@@ -53,30 +55,44 @@ public partial class Test2d : Node2D
         };
         Join.Pressed += () =>
         {
-            if (ChooseFriend != null)
+            switch (PeerType)
             {
-                switch (PeerType)
-                {
-                    case 0:
-                        var p2PPeer = new SteamworksP2PPeer();
-                        multiplayerApi.MultiplayerPeer = p2PPeer;
-                        p2PPeer.Connect(ChooseFriend.Value.Id);
+                case 0:
+                    if (ChooseFriend == null)
+                    {
                         break;
-                    case 1:
-                        var msgP2PPeer = new SteamworksMessageP2PPeer();
-                        multiplayerApi.MultiplayerPeer = msgP2PPeer;
-                        msgP2PPeer.Connect(ChooseFriend.Value.Id);
+                    }
+
+                    var p2PPeer = new SteamworksP2PPeer();
+                    multiplayerApi.MultiplayerPeer = p2PPeer;
+                    p2PPeer.Connect(ChooseFriend.Value.Id);
+                    break;
+                case 1:
+                    if (ChooseFriend == null)
+                    {
                         break;
-                    case 2:
-                        multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
+                    }
+
+                    var msgP2PPeer = new SteamworksMessageP2PPeer();
+                    multiplayerApi.MultiplayerPeer = msgP2PPeer;
+                    msgP2PPeer.Connect(ChooseFriend.Value.Id);
+                    break;
+                case 2:
+                    if (ChooseFriend == null)
+                    {
                         break;
-                    default:
-                        var peer = new ENetMultiplayerPeer();
-                        peer.CreateClient("localhost", Port);
-                        multiplayerApi.MultiplayerPeer = peer;
-                        break;
-                }
+                    }
+
+                    multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
+                    break;
+                default:
+                    var peer = new ENetMultiplayerPeer();
+                    peer.CreateClient("localhost", Port);
+                    multiplayerApi.MultiplayerPeer = peer;
+                    break;
             }
+
+            Menu.Hide();
         };
         Send.Pressed += () =>
         {
@@ -107,6 +123,8 @@ public partial class Test2d : Node2D
                     break;
             }
         };
+        Spawner.Spawned += (node) => { Log.Info(node, " Spawned"); };
+        Spawner.Despawned += (node) => { Log.Info(node, " Despawned"); };
         foreach (var (steamId, friend) in SFriends.Friends)
         {
             if (friend.IsOnline)
@@ -118,11 +136,19 @@ public partial class Test2d : Node2D
                     if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true })
                     {
                         ChooseFriend = friend;
-                        Log.Info(friend.Id);
+                        Log.Info($"选择 {friend.Id}");
                     }
                 };
             }
         }
+    }
+
+    public Test2dPlayer AddPlayer(int peerId)
+    {
+        var test2dPlayer = Test2dPlayer.Instantiate();
+        test2dPlayer.Name = $"{peerId}";
+        Players.AddChild(test2dPlayer);
+        return test2dPlayer;
     }
 
     public override void _Input(InputEvent @event)
@@ -145,7 +171,13 @@ public partial class Test2d : Node2D
     private void OnPeerConnected(long id)
     {
         Log.Debug($"peer {id} 连接");
+        if (Multiplayer.IsServer())
+        {
+            var test2dPlayer = AddPlayer((int)id);
+            test2dPlayer.Rpc(Test2dPlayer.MethodName.AsyncPosition, new Vector2(1000, 500));
+        }
     }
+
 
     private void OnConnectedToServer()
     {
