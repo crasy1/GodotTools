@@ -42,7 +42,6 @@ public partial class Test2d : Node2D
                     break;
             }
 
-            Menu.Hide();
             var test2dPlayer = AddPlayer(Multiplayer.GetUniqueId());
             test2dPlayer.Position = new Vector2(500, 500);
         };
@@ -94,7 +93,6 @@ public partial class Test2d : Node2D
                     break;
             }
 
-            Menu.Hide();
         };
         Send.Pressed += () =>
         {
