@@ -23,6 +23,11 @@ public partial class Test2d : Node2D
         Spawner.AddSpawnableScene(Test2dPlayer.TscnFilePath);
         Create.Pressed += () =>
         {
+            if (multiplayerApi.MultiplayerPeer != null)
+            {
+                return;
+            }
+
             IsServer = true;
             switch (PeerType)
             {
@@ -56,6 +61,11 @@ public partial class Test2d : Node2D
         };
         Join.Pressed += () =>
         {
+            if (multiplayerApi.MultiplayerPeer != null)
+            {
+                return;
+            }
+
             switch (PeerType)
             {
                 case 0:
@@ -92,10 +102,14 @@ public partial class Test2d : Node2D
                     multiplayerApi.MultiplayerPeer = peer;
                     break;
             }
-
         };
         Send.Pressed += () =>
         {
+            if (multiplayerApi.MultiplayerPeer == null)
+            {
+                return;
+            }
+
             var content = Encoding.Unicode.GetBytes($"hello {Time.GetDateStringFromSystem()}");
             switch (PeerType)
             {
