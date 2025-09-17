@@ -61,7 +61,8 @@ public class PeerSocketManager(SteamworksServerPeer steamworksServerPeer) : ISoc
             {
                 SteamId = steamId,
                 Data = span.ToArray(),
-                TransferChannel = channel
+                TransferChannel = channel,
+                PeerId = (int)steamId.AccountId
             };
             PacketQueue.Enqueue(steamMessage);
         }

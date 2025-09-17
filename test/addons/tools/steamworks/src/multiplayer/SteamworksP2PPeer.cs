@@ -52,7 +52,8 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
         {
             SteamId = steamId,
             Data = data,
-            TransferChannel = channel
+            TransferChannel = channel,
+            PeerId = (int)((SteamId)steamId).AccountId
         };
         PacketQueue.Enqueue(p2Packet);
     }

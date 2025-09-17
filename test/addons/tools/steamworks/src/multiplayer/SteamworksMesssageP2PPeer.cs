@@ -38,7 +38,8 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
         {
             SteamId = steamId,
             Data = span.ToArray(),
-            TransferChannel = channel
+            TransferChannel = channel,
+            PeerId= (int)steamId.AccountId
         };
         if (channel == (int)Channel.Handshake)
         {
