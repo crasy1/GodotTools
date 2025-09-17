@@ -19,6 +19,8 @@ public partial class Test2d : Node2D
         multiplayerApi.ConnectedToServer += OnConnectedToServer;
         multiplayerApi.ConnectionFailed += OnConnectionFailed;
         multiplayerApi.ServerDisconnected += OnServerDisconnected;
+        // 只有把场景加到列表中才会被同步，不在列表中的场景不会被同步
+        Spawner.AddSpawnableScene(Test2dPlayer.TscnFilePath);
         Create.Pressed += () =>
         {
             IsServer = true;
@@ -123,8 +125,8 @@ public partial class Test2d : Node2D
                     break;
             }
         };
-        Spawner.Spawned += (node) => { Log.Info(node, " Spawned"); };
-        Spawner.Despawned += (node) => { Log.Info(node, " Despawned"); };
+        Spawner.Spawned += (node) => { Log.Info($"{node} Spawned on {Multiplayer.GetUniqueId()}"); };
+        Spawner.Despawned += (node) => { Log.Info($"{node} Despawned on {Multiplayer.GetUniqueId()}"); };
         foreach (var (steamId, friend) in SFriends.Friends)
         {
             if (friend.IsOnline)
