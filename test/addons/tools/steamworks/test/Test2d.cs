@@ -23,7 +23,7 @@ public partial class Test2d : Node2D
         Spawner.AddSpawnableScene(Test2dPlayer.TscnFilePath);
         Create.Pressed += () =>
         {
-            if (multiplayerApi.MultiplayerPeer != null)
+            if (multiplayerApi.MultiplayerPeer is not OfflineMultiplayerPeer)
             {
                 return;
             }
@@ -53,15 +53,17 @@ public partial class Test2d : Node2D
         Search.Pressed += () => { };
         Exit.Pressed += () =>
         {
-            if (IsInstanceValid(multiplayerApi.MultiplayerPeer))
+            if (multiplayerApi.MultiplayerPeer is OfflineMultiplayerPeer)
             {
-                multiplayerApi.MultiplayerPeer.Close();
-                multiplayerApi.MultiplayerPeer = null;
+                return;
             }
+
+            multiplayerApi.MultiplayerPeer.Close();
+            multiplayerApi.MultiplayerPeer = new OfflineMultiplayerPeer();
         };
         Join.Pressed += () =>
         {
-            if (multiplayerApi.MultiplayerPeer != null)
+            if (multiplayerApi.MultiplayerPeer is not OfflineMultiplayerPeer)
             {
                 return;
             }
@@ -105,7 +107,7 @@ public partial class Test2d : Node2D
         };
         Send.Pressed += () =>
         {
-            if (multiplayerApi.MultiplayerPeer == null)
+            if (multiplayerApi.MultiplayerPeer is OfflineMultiplayerPeer)
             {
                 return;
             }
