@@ -12,6 +12,7 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
     private PeerConnectionManager PeerConnectionManager { set; get; }
     public ConnectionManager ConnectionManager { set; get; }
     private int TargetPeer { set; get; }
+    private int PeerId { set; get; }
 
     /// <summary>
     /// 创建客户端
@@ -30,6 +31,7 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
             steamworksPeer.ConnectionManager = connectionManager;
             SteamManager.AddBeforeGameQuitAction(steamworksPeer.Close);
             Log.Info($"创建 {nameof(SteamworksClientPeer)}");
+            steamworksPeer.PeerId = (int)steamworksPeer.GenerateUniqueId();
             return steamworksPeer;
         }
         catch (Exception e)
@@ -83,7 +85,7 @@ public partial class SteamworksClientPeer : MultiplayerPeerExtension
 
     public override int _GetUniqueId()
     {
-        return (int)SteamClient.SteamId.AccountId;
+        return PeerId;
     }
 
     public override bool _IsServer()
