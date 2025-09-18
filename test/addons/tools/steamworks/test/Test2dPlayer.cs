@@ -16,6 +16,7 @@ public partial class Test2dPlayer : CharacterBody2D
 
     public override void _EnterTree()
     {
+        Log.Info($"peerId:{Multiplayer.GetUniqueId()} ,playername :",Name);
         SetMultiplayerAuthority(int.Parse(Name));
     }
 

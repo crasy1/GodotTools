@@ -9,7 +9,7 @@ public partial class Test2d : Node2D
 
     private Friend? ChooseFriend { set; get; }
     private int Port { set; get; } = 5000;
-    private int PeerType { set; get; } = 3;
+    private int PeerType { set; get; } = 2;
 
     public override void _Ready()
     {

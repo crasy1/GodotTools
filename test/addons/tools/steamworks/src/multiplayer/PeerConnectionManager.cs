@@ -19,33 +19,38 @@ public class PeerConnectionManager(MultiplayerPeerExtension steamworksClientPeer
     public void OnConnecting(ConnectionInfo info)
     {
         ConnectionStatus = MultiplayerPeer.ConnectionStatus.Connecting;
-        Log.Info($"{info.Identity.SteamId} 正在连接");
+        Log.Info($"{steamworksClientPeer.GetUniqueId()} 与服务器{info.Identity.SteamId} 正在连接");
     }
 
     public void OnConnected(ConnectionInfo info)
     {
         SteamId = info.Identity.SteamId;
         ConnectionStatus = MultiplayerPeer.ConnectionStatus.Connected;
-        Log.Info($"{SteamId} 已连接");
+        Log.Info($"{steamworksClientPeer.GetUniqueId()} 与服务器{SteamId} 已连接");
         steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, 1);
         if (steamworksClientPeer is NormalClientPeer normalClientPeer)
         {
             normalClientPeer.ConnectionManager.Connection.UserData = 1;
             normalClientPeer.ConnectionManager.Connection.SendMessage(
-                Encoding.UTF8.GetBytes($"{P2PHandShake}{normalClientPeer.GetUniqueId()}"));
+                Encoding.UTF8.GetBytes($"{P2PHandShake}{steamworksClientPeer.GetUniqueId()}"));
+        }if (steamworksClientPeer is SteamworksClientPeer relayClientPeer)
+        {
+            relayClientPeer.ConnectionManager.Connection.UserData = 1;
+            relayClientPeer.ConnectionManager.Connection.SendMessage(
+                Encoding.UTF8.GetBytes($"{P2PHandShake}{steamworksClientPeer.GetUniqueId()}"));
         }
     }
 
     public void OnDisconnected(ConnectionInfo info)
     {
         ConnectionStatus = MultiplayerPeer.ConnectionStatus.Disconnected;
-        Log.Info($"{info.Identity.SteamId} 断开连接");
+        Log.Info($"{steamworksClientPeer.GetUniqueId()} 与服务器{info.Identity.SteamId} 断开连接");
         steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerDisconnected, 1);
     }
 
     public unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)
     {
-        // Log.Debug($"从 {SteamId} 收到消息");
+        Log.Debug($"{steamworksClientPeer.GetUniqueId()} 从服务器 {SteamId} 收到消息");
         var span = new Span<byte>((byte*)data.ToPointer(), size);
         var steamMessage = new SteamworksMessagePacket
         {

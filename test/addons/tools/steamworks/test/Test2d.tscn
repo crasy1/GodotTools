@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bhslj14rdsk7p"]
 
-[ext_resource type="Script" uid="uid://mx77o12gq54u" path="res://addons/tools/steamworks/test/Test2d.cs" id="1_linxh"]
+[ext_resource type="Script" uid="uid://c7a6sgyyb7hdm" path="res://addons/tools/steamworks/test/Test2d.cs" id="1_linxh"]
 [ext_resource type="Texture2D" uid="uid://c7j4otde0c7ro" path="res://icon.svg" id="2_qf28k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_linxh"]

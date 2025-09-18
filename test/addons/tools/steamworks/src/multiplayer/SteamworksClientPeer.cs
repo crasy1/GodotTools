@@ -10,7 +10,7 @@ namespace Godot;
 public partial class SteamworksClientPeer : MultiplayerPeerExtension
 {
     private PeerConnectionManager PeerConnectionManager { set; get; }
-    private ConnectionManager ConnectionManager { set; get; }
+    public ConnectionManager ConnectionManager { set; get; }
     private int TargetPeer { set; get; }
 
     /// <summary>

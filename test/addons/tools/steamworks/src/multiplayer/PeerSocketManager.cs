@@ -55,7 +55,7 @@ public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : 
         long recvTime,
         int channel)
     {
-        // Log.Debug($"从 {identity.SteamId} 收到消息");
+        Log.Debug($"server 从 {identity.SteamId} 收到消息");
         if (identity.IsSteamId && Connections.TryGetValue(connection, out var steamId))
         {
             var connectionKey = Connections.Keys.First(c => c == connection);
@@ -66,7 +66,7 @@ public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : 
             {
                 var peerId = s.Replace(P2PHandShake, "").ToInt();
                 connectionKey.UserData = peerId;
-                Log.Info($"{steamId} 已经连接{peerId}");
+                Log.Info($"服务器{steamId} 已经连接 {peerId}");
 
                 steamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, peerId);
 
