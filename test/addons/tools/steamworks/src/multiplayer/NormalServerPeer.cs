@@ -53,7 +53,7 @@ public partial class NormalServerPeer : MultiplayerPeerExtension
 
     public override void _DisconnectPeer(int pPeer, bool pForce)
     {
-        var connection = PeerSocketManager.Connections.FirstOrDefault(kv => (uint)pPeer == kv.Value.AccountId).Key;
+        var connection = PeerSocketManager.Connections.FirstOrDefault(kv => (uint)pPeer == kv.Key.UserData).Key;
         connection.Close();
     }
 
@@ -98,10 +98,9 @@ public partial class NormalServerPeer : MultiplayerPeerExtension
         return true;
     }
 
-    // TODO 中继
     public override bool _IsServerRelaySupported()
     {
-        return false;
+        return true;
     }
 
     public override void _SetTargetPeer(int pPeer)

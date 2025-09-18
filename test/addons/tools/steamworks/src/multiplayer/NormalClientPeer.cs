@@ -10,8 +10,9 @@ namespace Godot;
 public partial class NormalClientPeer : MultiplayerPeerExtension
 {
     private PeerConnectionManager PeerConnectionManager { set; get; }
-    private ConnectionManager ConnectionManager { set; get; }
+    public ConnectionManager ConnectionManager { set; get; }
     private int TargetPeer { set; get; }
+    private int PeerId { set; get; }
 
     /// <summary>
     /// 创建客户端
@@ -31,6 +32,7 @@ public partial class NormalClientPeer : MultiplayerPeerExtension
             normalPeer.ConnectionManager = connectionManager;
             SteamManager.AddBeforeGameQuitAction(normalPeer.Close);
             Log.Info($"创建 {nameof(NormalClientPeer)}");
+            normalPeer.PeerId = (int)normalPeer.GenerateUniqueId();
             return normalPeer;
         }
         catch (Exception e)
@@ -84,7 +86,7 @@ public partial class NormalClientPeer : MultiplayerPeerExtension
 
     public override int _GetUniqueId()
     {
-        return (int)SteamClient.SteamId.AccountId;
+        return PeerId;
     }
 
     public override bool _IsServer()
@@ -94,7 +96,7 @@ public partial class NormalClientPeer : MultiplayerPeerExtension
 
     public override bool _IsServerRelaySupported()
     {
-        return false;
+        return true;
     }
 
     public override void _SetTargetPeer(int pPeer)

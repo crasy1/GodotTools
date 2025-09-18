@@ -203,12 +203,12 @@ public partial class Test2d : Node2D
 
     private void OnPeerDisconnected(long id)
     {
-        Log.Debug($"peer {id} 断开连接");
+        Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 断开连接");
     }
 
     private void OnPeerConnected(long id)
     {
-        Log.Debug($"peer {id} 连接");
+        Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 连接");
         if (Multiplayer.IsServer())
         {
             var test2dPlayer = AddPlayer((int)id);

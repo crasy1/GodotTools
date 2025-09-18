@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Steamworks;
 using Steamworks.Data;
 
@@ -10,6 +11,7 @@ public class PeerConnectionManager(MultiplayerPeerExtension steamworksClientPeer
     public SteamId SteamId { private set; get; }
 
     public readonly Queue<SteamworksMessagePacket> PacketQueue = new();
+    private const string P2PHandShake = "[P2P_HANDSHAKE]";
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connecting;
@@ -22,14 +24,16 @@ public class PeerConnectionManager(MultiplayerPeerExtension steamworksClientPeer
 
     public void OnConnected(ConnectionInfo info)
     {
+        SteamId = info.Identity.SteamId;
         ConnectionStatus = MultiplayerPeer.ConnectionStatus.Connected;
-        Log.Info($"{info.Identity.SteamId} 已连接");
-        if (info.Identity.IsSteamId)
-        {
-            SteamId = info.Identity.SteamId;
-        }
-
+        Log.Info($"{SteamId} 已连接");
         steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, 1);
+        if (steamworksClientPeer is NormalClientPeer normalClientPeer)
+        {
+            normalClientPeer.ConnectionManager.Connection.UserData = 1;
+            normalClientPeer.ConnectionManager.Connection.SendMessage(
+                Encoding.UTF8.GetBytes($"{P2PHandShake}{normalClientPeer.GetUniqueId()}"));
+        }
     }
 
     public void OnDisconnected(ConnectionInfo info)
@@ -41,15 +45,16 @@ public class PeerConnectionManager(MultiplayerPeerExtension steamworksClientPeer
 
     public unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)
     {
-        Log.Debug($"从 {SteamId} 收到消息");
+        // Log.Debug($"从 {SteamId} 收到消息");
         var span = new Span<byte>((byte*)data.ToPointer(), size);
         var steamMessage = new SteamworksMessagePacket
         {
             SteamId = SteamId,
-            Data = span.ToArray(),
+            Data =  span.ToArray(),
             TransferChannel = channel,
             PeerId = 1
         };
+
         PacketQueue.Enqueue(steamMessage);
     }
 }
