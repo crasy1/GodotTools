@@ -1,3 +1,4 @@
+#if TOOLS
 namespace Godot;
 
 [Tool]
@@ -18,3 +19,4 @@ public partial class ManagerPlugin : EditorPlugin
 
     public override string _GetPluginName() => PluginName;
 }
+#endif

@@ -9,7 +9,7 @@ public partial class Test2d : Node2D
 
     private Friend? ChooseFriend { set; get; }
     private int Port { set; get; } = 5000;
-    private int PeerType { set; get; } = 2;
+    private int PeerType { set; get; } = 3;
 
     public override void _Ready()
     {
@@ -39,6 +39,9 @@ public partial class Test2d : Node2D
                     break;
                 case 2:
                     multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
+                    break;
+                case 3:
+                    multiplayerApi.MultiplayerPeer = NormalServerPeer.CreateServer(Port);
                     break;
                 default:
                     var peer = new ENetMultiplayerPeer();
@@ -98,6 +101,14 @@ public partial class Test2d : Node2D
 
                     multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
                     break;
+                case 3:
+                    if (ChooseFriend == null)
+                    {
+                        break;
+                    }
+
+                    multiplayerApi.MultiplayerPeer = NormalClientPeer.CreateClient("127.0.0.1", Port);
+                    break;
                 default:
                     var peer = new ENetMultiplayerPeer();
                     peer.CreateClient("localhost", Port);
@@ -129,6 +140,17 @@ public partial class Test2d : Node2D
                     else
                     {
                         var clientPeer = (SteamworksClientPeer)multiplayerApi.MultiplayerPeer;
+                    }
+
+                    break;
+                case 3:
+                    if (IsServer)
+                    {
+                        var serverPeer = (NormalServerPeer)multiplayerApi.MultiplayerPeer;
+                    }
+                    else
+                    {
+                        var clientPeer = (NormalClientPeer)multiplayerApi.MultiplayerPeer;
                     }
 
                     break;

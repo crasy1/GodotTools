@@ -5,7 +5,7 @@ using Steamworks.Data;
 
 namespace Godot;
 
-public class PeerConnectionManager(SteamworksClientPeer steamworksClientPeer) : IConnectionManager
+public class PeerConnectionManager(MultiplayerPeerExtension steamworksClientPeer) : IConnectionManager
 {
     public SteamId SteamId { private set; get; }
 
@@ -28,6 +28,7 @@ public class PeerConnectionManager(SteamworksClientPeer steamworksClientPeer) : 
         {
             SteamId = info.Identity.SteamId;
         }
+
         steamworksClientPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, 1);
     }
 

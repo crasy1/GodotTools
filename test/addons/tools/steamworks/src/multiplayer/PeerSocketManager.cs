@@ -5,7 +5,7 @@ using Steamworks.Data;
 
 namespace Godot;
 
-public class PeerSocketManager(SteamworksServerPeer steamworksServerPeer) : ISocketManager
+public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : ISocketManager
 {
     public readonly Dictionary<Connection, SteamId> Connections = new();
 
