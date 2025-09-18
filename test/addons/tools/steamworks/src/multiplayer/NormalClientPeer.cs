@@ -78,7 +78,7 @@ public partial class NormalClientPeer : MultiplayerPeerExtension
 
     public override int _GetPacketPeer()
     {
-        return PeerConnectionManager.PacketQueue.TryPeek(out var packet) ? packet.PeerId : 0;
+        return PeerConnectionManager.PacketQueue.TryPeek(out var packet) ? packet.PeerId : 1;
     }
 
 

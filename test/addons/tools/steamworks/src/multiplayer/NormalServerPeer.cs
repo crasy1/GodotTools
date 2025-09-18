@@ -25,7 +25,8 @@ public partial class NormalServerPeer : MultiplayerPeerExtension
         {
             var normalPeer = new NormalServerPeer();
             var peerSocketManager = new PeerSocketManager(normalPeer);
-            var socketManager = SteamNetworkingSockets.CreateNormalSocket(NetAddress.AnyIp((ushort)port), peerSocketManager);
+            var socketManager =
+                SteamNetworkingSockets.CreateNormalSocket(NetAddress.AnyIp((ushort)port), peerSocketManager);
             normalPeer.PeerSocketManager = peerSocketManager;
             normalPeer.SocketManager = socketManager;
             SteamManager.AddBeforeGameQuitAction(normalPeer.Close);
