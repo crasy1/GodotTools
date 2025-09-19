@@ -197,6 +197,7 @@ public partial class Test2d : Node2D
             {
                 case Key.Key1: Rpc(MethodName.AnyPeerCallRemoteAndLocal, "1"); break;
                 case Key.Key2: Rpc(MethodName.AnyPeerCallRemote, "2"); break;
+                case Key.Key3: Create.EmitSignal(BaseButton.SignalName.Pressed); break;
             }
         }
     }
@@ -204,11 +205,13 @@ public partial class Test2d : Node2D
     private void OnPeerDisconnected(long id)
     {
         Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 断开连接");
+        Log.Debug($"{Multiplayer.GetUniqueId()} peers :{Multiplayer.GetPeers()}");
     }
 
     private void OnPeerConnected(long id)
     {
         Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 连接");
+        Log.Debug($"{Multiplayer.GetUniqueId()} peers :{Multiplayer.GetPeers()}");
         if (Multiplayer.IsServer())
         {
             var test2dPlayer = AddPlayer((int)id);
@@ -219,17 +222,17 @@ public partial class Test2d : Node2D
 
     private void OnConnectedToServer()
     {
-        Log.Debug($"连接到服务器");
+        Log.Debug($"{Multiplayer.GetUniqueId()} 连接到服务器");
     }
 
     private void OnConnectionFailed()
     {
-        Log.Debug($"连接服务器失败");
+        Log.Debug($"{Multiplayer.GetUniqueId()} 连接服务器失败");
     }
 
     private void OnServerDisconnected()
     {
-        Log.Debug($"与服务器断开连接");
+        Log.Debug($"{Multiplayer.GetUniqueId()} 与服务器断开连接");
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer,
@@ -238,7 +241,7 @@ public partial class Test2d : Node2D
         TransferChannel = 0)]
     public void AnyPeerCallRemoteAndLocal(string message)
     {
-        Log.Info(nameof(AnyPeerCallRemoteAndLocal), message);
+        Log.Info($"peerId:{Multiplayer.GetUniqueId()} {nameof(AnyPeerCallRemoteAndLocal)} {message}");
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer,
@@ -247,6 +250,6 @@ public partial class Test2d : Node2D
         TransferChannel = 1)]
     public void AnyPeerCallRemote(string message)
     {
-        Log.Info(nameof(AnyPeerCallRemote), message);
+        Log.Info($"peerId:{Multiplayer.GetUniqueId()} {nameof(AnyPeerCallRemote)} {message}");
     }
 }

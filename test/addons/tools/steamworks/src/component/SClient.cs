@@ -31,7 +31,6 @@ public partial class SClient : SteamComponent
     public void Connect()
     {
         var appId = SteamConfig.AppId;
-        Log.Info($"appId:{appId}");
         try
         {
             if (OS.IsDebugBuild())

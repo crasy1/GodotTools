@@ -14,9 +14,6 @@ namespace Godot;
 public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
 {
     private int TargetPeer { set; get; }
-    private const string P2PHandShake = "[P2P_HANDSHAKE]";
-    private const string P2PHandShakeReply = "[P2P_HANDSHAKE_REPLY]";
-    private const string P2PDisconnect = "[P2P_DISCONNECT]";
 
     private readonly Queue<SteamworksMessagePacket> PacketQueue = new();
     private readonly Dictionary<int, NetIdentity> Connected = new();
@@ -46,13 +43,13 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
             var msg = Encoding.UTF8.GetString(steamMessage.Data);
             switch (msg)
             {
-                case P2PHandShake:
+                case Consts.SocketHandShake:
                     ConnectReply(steamId);
                     OnUserConnected(steamId);
                     break;
-                case P2PHandShakeReply:
+                case Consts.SocketHandShakeReply:
                     OnUserConnected(steamId); break;
-                case P2PDisconnect:
+                case Consts.SocketDisconnect:
                     OnUserDisconnected(steamId); break;
             }
 
@@ -109,12 +106,12 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
 
     public void Connect(NetIdentity steamId)
     {
-        SendMsg(steamId, P2PHandShake, Channel.Handshake);
+        SendMsg(steamId, Consts.SocketHandShake, Channel.Handshake);
     }
 
     public void ConnectReply(NetIdentity steamId)
     {
-        SendMsg(steamId, P2PHandShakeReply, Channel.Handshake);
+        SendMsg(steamId, Consts.SocketHandShakeReply, Channel.Handshake);
     }
 
     public Result SendMsg(NetIdentity steamId, string data, Channel channel = Channel.Msg,
@@ -144,7 +141,7 @@ public partial class SteamworksMessageP2PPeer : MultiplayerPeerExtension
     {
         if (Connected.Remove(pPeer, out var steamId))
         {
-            SendMsg(steamId, P2PDisconnect, Channel.Handshake);
+            SendMsg(steamId, Consts.SocketDisconnect, Channel.Handshake);
             EmitSignalPeerDisconnected(pPeer);
             // SteamNetworkingMessages.CloseSessionWithUser(ref steamId);
         }

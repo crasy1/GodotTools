@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Steamworks;
-using Steamworks.ServerList;
 
 namespace Godot;
 
@@ -27,7 +25,7 @@ public partial class SteamManager : CanvasLayer
     public override void _Ready()
     {
         GetTree().AutoAcceptQuit = false;
-        SteamUtil.InitEnvironment();
+        SteamUtil.InitEnvironment(SteamConfig.AppId);
         Log.FileLogLevel = SteamConfig.FileLogLevel;
         Log.GdLogLevel = SteamConfig.GdLogLevel;
         SetVisible(SteamConfig.Debug);

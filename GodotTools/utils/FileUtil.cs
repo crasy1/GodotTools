@@ -10,7 +10,7 @@ public static class FileUtil
     public static List<string> GetDirsRecursive(string path)
     {
         var dirAccesses = new List<string>();
-        var dirAccess = DirAccess.Open(path);
+        using var dirAccess = DirAccess.Open(path);
         if (dirAccess is not null)
         {
             dirAccesses.Add(path);
@@ -23,6 +23,7 @@ public static class FileUtil
 
         return dirAccesses;
     }
+
     public static List<T> InstanceScenesInPath<T>(string dirPath) where T : Node
     {
         if (dirPath[^1] != '/')
@@ -113,15 +114,44 @@ public static class FileUtil
         return results;
     }
 
+    public static bool FileExists(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+
+        if (path.StartsWith(Consts.ResDirPrefix) || path.StartsWith(Consts.UserDirPrefix))
+        {
+            return FileAccess.FileExists(path);
+        }
+        else
+        {
+            return File.Exists(path);
+        }
+    }
+
     public static byte[]? GetFileBytes(string path)
     {
-        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-        return file?.GetBuffer((long)file.GetLength());
+        if (path.StartsWith(Consts.ResDirPrefix) || path.StartsWith(Consts.UserDirPrefix))
+        {
+            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            return file?.GetBuffer((long)file.GetLength());
+        }
+
+        return File.ReadAllBytes(path);
     }
 
     public static void WriteFileBytes(string path, byte[] bytes)
     {
-        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
-        file?.StoreBuffer(bytes);
+        if (path.StartsWith(Consts.ResDirPrefix) || path.StartsWith(Consts.UserDirPrefix))
+        {
+            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+            file?.StoreBuffer(bytes);
+        }
+        else
+        {
+            File.WriteAllBytes(path, bytes);
+        }
     }
 }

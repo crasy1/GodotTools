@@ -13,9 +13,6 @@ namespace Godot;
 public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 {
     private int TargetPeer { set; get; }
-    private const string P2PHandShake = "[P2P_HANDSHAKE]";
-    private const string P2PHandShakeReply = "[P2P_HANDSHAKE_REPLY]";
-    private const string P2PDisconnect = "[P2P_DISCONNECT]";
 
     private readonly Queue<SteamworksMessagePacket> PacketQueue = new();
     private readonly Dictionary<int, SteamId> Connected = new();
@@ -36,12 +33,12 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
             var msg = Encoding.UTF8.GetString(data);
             switch (msg)
             {
-                case P2PHandShake:
+                case Consts.SocketHandShake:
                     ConnectReply(steamId);
                     OnUserConnected(steamId); break;
-                case P2PHandShakeReply:
+                case Consts.SocketHandShakeReply:
                     OnUserConnected(steamId); break;
-                case P2PDisconnect:
+                case Consts.SocketDisconnect:
                     OnUserDisconnected(steamId); break;
             }
 
@@ -88,12 +85,12 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 
     public void Connect(SteamId steamId)
     {
-        SNetworking.SendP2P(steamId, P2PHandShake, Channel.Handshake);
+        SNetworking.SendP2P(steamId, Consts.SocketHandShake, Channel.Handshake);
     }
 
     public void ConnectReply(SteamId steamId)
     {
-        SNetworking.SendP2P(steamId, P2PHandShakeReply, Channel.Handshake);
+        SNetworking.SendP2P(steamId, Consts.SocketHandShakeReply, Channel.Handshake);
     }
 
     public override void _Close()
@@ -110,7 +107,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
     {
         if (Connected.TryGetValue(pPeer, out var steamId))
         {
-            SNetworking.SendP2P(steamId, P2PDisconnect, Channel.Handshake);
+            SNetworking.SendP2P(steamId, Consts.SocketDisconnect, Channel.Handshake);
             EmitSignalPeerDisconnected(pPeer);
         }
     }

@@ -12,7 +12,6 @@ public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : 
     public readonly Dictionary<Connection, SteamId> Connections = new();
 
     public readonly Queue<SteamworksMessagePacket> PacketQueue = new();
-    private const string P2PHandShake = "[P2P_HANDSHAKE]";
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connected;
@@ -62,9 +61,9 @@ public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : 
             var span = new Span<byte>((byte*)data.ToPointer(), size);
             var bytes = span.ToArray();
             var s = Encoding.UTF8.GetString(bytes);
-            if (s.StartsWith(P2PHandShake))
+            if (s.StartsWith(Consts.SocketHandShake))
             {
-                var peerId = s.Replace(P2PHandShake, "").ToInt();
+                var peerId = s.Replace(Consts.SocketHandShake, "").ToInt();
                 connectionKey.UserData = peerId;
                 Log.Info($"服务器{steamId} 已经连接 {peerId}");
 

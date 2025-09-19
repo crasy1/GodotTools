@@ -11,7 +11,6 @@ public class PeerConnectionManager(MultiplayerPeerExtension steamworksClientPeer
     public SteamId SteamId { private set; get; }
 
     public readonly Queue<SteamworksMessagePacket> PacketQueue = new();
-    private const string P2PHandShake = "[P2P_HANDSHAKE]";
 
     public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
         MultiplayerPeer.ConnectionStatus.Connecting;
@@ -32,12 +31,12 @@ public class PeerConnectionManager(MultiplayerPeerExtension steamworksClientPeer
         {
             normalClientPeer.ConnectionManager.Connection.UserData = 1;
             normalClientPeer.ConnectionManager.Connection.SendMessage(
-                Encoding.UTF8.GetBytes($"{P2PHandShake}{steamworksClientPeer.GetUniqueId()}"));
+                Encoding.UTF8.GetBytes($"{Consts.SocketHandShake}{steamworksClientPeer.GetUniqueId()}"));
         }if (steamworksClientPeer is SteamworksClientPeer relayClientPeer)
         {
             relayClientPeer.ConnectionManager.Connection.UserData = 1;
             relayClientPeer.ConnectionManager.Connection.SendMessage(
-                Encoding.UTF8.GetBytes($"{P2PHandShake}{steamworksClientPeer.GetUniqueId()}"));
+                Encoding.UTF8.GetBytes($"{Consts.SocketHandShake}{steamworksClientPeer.GetUniqueId()}"));
         }
     }
 
