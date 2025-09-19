@@ -19,7 +19,7 @@ public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : 
 
     public void OnConnecting(Connection connection, ConnectionInfo info)
     {
-        Log.Info($"{info.Identity.SteamId} 正在连接");
+        Log.Info($"{info.Identity.SteamId} 正在连接 {(steamworksServerPeer.RefuseNewConnections ? "拒绝" : "接受")}");
         if (!steamworksServerPeer.RefuseNewConnections)
         {
             connection.Accept();
