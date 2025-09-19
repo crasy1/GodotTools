@@ -179,8 +179,8 @@ public partial class Test2d : Node2D
                     break;
             }
         };
-        Spawner.Spawned += (node) => { Log.Info($"{node} Spawned on {Multiplayer.GetUniqueId()}"); };
-        Spawner.Despawned += (node) => { Log.Info($"{node} Despawned on {Multiplayer.GetUniqueId()}"); };
+        Spawner.Spawned += (node) => { Log.Info($"{node},{node.Name} Spawned on {Multiplayer.GetUniqueId()}"); };
+        Spawner.Despawned += (node) => { Log.Info($"{node},{node.Name} Despawned on {Multiplayer.GetUniqueId()}"); };
     }
 
     public Test2dPlayer AddPlayer(int peerId)
