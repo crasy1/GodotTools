@@ -32,7 +32,7 @@ public partial class Test2d : Node2D
             switch (PeerType)
             {
                 case 0:
-                    multiplayerApi.MultiplayerPeer = new SteamworksP2PPeer();
+                    multiplayerApi.MultiplayerPeer = SteamworksP2PPeer.CreateServer();
                     break;
                 case 1:
                     multiplayerApi.MultiplayerPeer = new SteamworksMessageP2PPeer();
@@ -98,9 +98,8 @@ public partial class Test2d : Node2D
                         break;
                     }
 
-                    var p2PPeer = new SteamworksP2PPeer();
+                    var p2PPeer = SteamworksP2PPeer.CreateClient(ChooseFriend.Value.Id);
                     multiplayerApi.MultiplayerPeer = p2PPeer;
-                    p2PPeer.Connect(ChooseFriend.Value.Id);
                     break;
                 case 1:
                     if (ChooseFriend == null)

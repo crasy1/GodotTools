@@ -13,69 +13,98 @@ namespace Godot;
 public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 {
     private int TargetPeer { set; get; }
+    private int PeerId { set; get; }
 
     private readonly Queue<SteamworksMessagePacket> PacketQueue = new();
     private readonly Dictionary<int, SteamId> Connected = new();
 
-    public SteamworksP2PPeer()
+    private SteamworksP2PPeer()
     {
-        SNetworking.Instance.UserConnectFailed += OnUserConnectFailed;
-        SNetworking.Instance.UserDisconnected += OnUserDisconnected;
+        SNetworking.Instance.UserConnectFailed += (steamId) =>
+        {
+            var peerId = Connected.FirstOrDefault(kv => kv.Value == steamId).Key;
+            OnUserConnectFailed(peerId, steamId);
+        };
+        SNetworking.Instance.UserDisconnected += (steamId) =>
+        {
+            var peerId = Connected.FirstOrDefault(kv => kv.Value == steamId).Key;
+            OnUserDisconnected(peerId, steamId);
+        };
         SNetworking.Instance.ReceiveData += OnReceiveData;
         Log.Info($"创建 {nameof(SteamworksP2PPeer)}");
         SteamManager.AddBeforeGameQuitAction(Close);
     }
 
+    public static SteamworksP2PPeer CreateServer()
+    {
+        var server = new SteamworksP2PPeer();
+        server.PeerId = 1;
+        return server;
+    }
+
+    public static SteamworksP2PPeer CreateClient(SteamId steamId)
+    {
+        var client = new SteamworksP2PPeer();
+        client.PeerId = (int)client.GenerateUniqueId();
+        client.Connect(steamId);
+        return client;
+    }
+
     private void OnReceiveData(ulong steamId, int channel, byte[] data)
     {
+        int peerId;
         if (channel == (int)Channel.Handshake)
         {
             var msg = Encoding.UTF8.GetString(data);
-            switch (msg)
+            if (msg.StartsWith(Consts.SocketHandShake))
             {
-                case Consts.SocketHandShake:
-                    ConnectReply(steamId);
-                    OnUserConnected(steamId); break;
-                case Consts.SocketHandShakeReply:
-                    OnUserConnected(steamId); break;
-                case Consts.SocketDisconnect:
-                    OnUserDisconnected(steamId); break;
+                peerId = int.Parse(msg.Replace(Consts.SocketHandShake, ""));
+                ConnectReply(steamId);
+                OnUserConnected(peerId, steamId);
+            }
+            else if (msg.StartsWith(Consts.SocketHandShakeReply))
+            {
+                peerId = int.Parse(msg.Replace(Consts.SocketHandShakeReply, ""));
+                OnUserConnected(peerId, steamId);
+            }
+            else if (msg.StartsWith(Consts.SocketDisconnect))
+            {
+                peerId = int.Parse(msg.Replace(Consts.SocketDisconnect, ""));
+                OnUserDisconnected(peerId, steamId);
             }
 
             return;
         }
 
+        peerId = Connected.FirstOrDefault(kv => kv.Value == steamId).Key;
         var p2Packet = new SteamworksMessagePacket()
         {
             SteamId = steamId,
             Data = data,
             TransferChannel = channel,
-            PeerId = (int)((SteamId)steamId).AccountId
+            PeerId = peerId
         };
         PacketQueue.Enqueue(p2Packet);
     }
 
-    private void OnUserConnected(ulong steamId)
+    private void OnUserConnected(int peerId, SteamId steamId)
     {
-        var peerId = (int)((SteamId)steamId).AccountId;
         if (Connected.TryAdd(peerId, steamId))
         {
             EmitSignalPeerConnected(peerId);
         }
     }
 
-    private void OnUserConnectFailed(ulong steamId)
+    private void OnUserConnectFailed(int peerId, SteamId steamId)
     {
-        var peerId = (int)((SteamId)steamId).AccountId;
         if (Connected.Remove(peerId))
         {
             EmitSignalPeerDisconnected(peerId);
         }
     }
 
-    private void OnUserDisconnected(ulong steamId)
+    private void OnUserDisconnected(int peerId, SteamId steamId)
     {
-        var peerId = (int)((SteamId)steamId).AccountId;
         if (Connected.Remove(peerId))
         {
             SteamNetworking.CloseP2PSessionWithUser(steamId);
@@ -85,12 +114,12 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 
     public void Connect(SteamId steamId)
     {
-        SNetworking.SendP2P(steamId, Consts.SocketHandShake, Channel.Handshake);
+        SNetworking.SendP2P(steamId, Consts.SocketHandShake + PeerId, Channel.Handshake);
     }
 
     public void ConnectReply(SteamId steamId)
     {
-        SNetworking.SendP2P(steamId, Consts.SocketHandShakeReply, Channel.Handshake);
+        SNetworking.SendP2P(steamId, Consts.SocketHandShakeReply + PeerId, Channel.Handshake);
     }
 
     public override void _Close()
@@ -107,7 +136,7 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
     {
         if (Connected.TryGetValue(pPeer, out var steamId))
         {
-            SNetworking.SendP2P(steamId, Consts.SocketDisconnect, Channel.Handshake);
+            SNetworking.SendP2P(steamId, Consts.SocketDisconnect + PeerId, Channel.Handshake);
             EmitSignalPeerDisconnected(pPeer);
         }
     }
@@ -145,17 +174,17 @@ public partial class SteamworksP2PPeer : MultiplayerPeerExtension
 
     public override int _GetUniqueId()
     {
-        return (int)SteamClient.SteamId.AccountId;
+        return PeerId;
     }
 
     public override bool _IsServer()
     {
-        return false;
+        return PeerId == 1;
     }
 
     public override bool _IsServerRelaySupported()
     {
-        return false;
+        return true;
     }
 
     public override void _SetTargetPeer(int pPeer)
