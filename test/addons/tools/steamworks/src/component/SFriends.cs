@@ -12,7 +12,8 @@ namespace Godot;
 [Singleton]
 public partial class SFriends : SteamComponent
 {
-    public static readonly Dictionary<SteamId, Friend> Friends = new();
+    private static readonly Dictionary<SteamId, Friend> _friends = new();
+    public static Dictionary<SteamId, Friend> Friends => UpdateFriends();
     private static readonly Dictionary<(SteamId, AvatarSize), Image> Avatars = new();
     public static Friend Me { private set; get; }
 
@@ -27,23 +28,19 @@ public partial class SFriends : SteamComponent
         SteamFriends.OnGameRichPresenceJoinRequested += (friend, s) => { Log.Info($"steam 游戏状态加入请求 {friend} {s}"); };
         SteamFriends.OnGameServerChangeRequested += (s1, s2) => { Log.Info($"steam 游戏服务器改变请求 {s1} {s2}"); };
         SteamFriends.OnOverlayBrowserProtocol += (s) => { Log.Info($"steam 覆盖界面浏览器协议 {s}"); };
-        SteamFriends.OnPersonaStateChange += (friend) =>
+        SteamFriends.OnPersonaStateChange += (friend) => { };
+    }
+
+    public static Dictionary<SteamId, Friend> UpdateFriends()
+    {
+        Me = new(SteamClient.SteamId);
+        _friends[SteamClient.SteamId] = Me;
+        foreach (var friend in SteamFriends.GetFriends())
         {
-            // if (friend.IsMe)
-            // {
-            //     Me = friend;
-            //     Friends.TryAdd(friend.Id, Me);
-            // }
-        };
-        SClient.Instance.SteamClientConnected += () =>
-        {
-            Me = new(SteamClient.SteamId);
-            Friends.TryAdd(SteamClient.SteamId, Me);
-            foreach (var friend in SteamFriends.GetFriends())
-            {
-                Friends.Add(friend.Id, friend);
-            }
-        };
+            _friends[friend.Id] = friend;
+        }
+
+        return _friends;
     }
 
 

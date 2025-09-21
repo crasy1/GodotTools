@@ -10,8 +10,7 @@ namespace Godot;
 [Singleton]
 public partial class SMatchmaking : SteamComponent
 {
-    public int MaxUser { set; get; } = 4;
-    public Lobby? Lobby { get; private set; }
+    public static Lobby? Lobby { get; private set; }
 
     public const string KickMsg = "KICK:";
 
@@ -116,12 +115,30 @@ public partial class SMatchmaking : SteamComponent
         };
     }
 
-    public void CreateLobby()
+    /// <summary>
+    /// 创建大厅
+    /// </summary>
+    /// <param name="maxUser"></param>
+    /// <returns></returns>
+    public static async Task<Lobby?> CreateLobbyAsync(int maxUser = 4)
     {
-        SteamMatchmaking.CreateLobbyAsync(MaxUser);
+        return await SteamMatchmaking.CreateLobbyAsync(maxUser);
     }
 
-    public void LeaveLobby()
+    /// <summary>
+    /// 加入房间
+    /// </summary>
+    /// <param name="lobby"></param>
+    /// <returns></returns>
+    public static async Task<bool> JoinLobbyAsync(Lobby lobby)
+    {
+        return await lobby.Join() == RoomEnter.Success;
+    }
+
+    /// <summary>
+    /// 离开大厅
+    /// </summary>
+    public static void LeaveLobby()
     {
         Lobby?.Leave();
         Lobby = null;
@@ -144,24 +161,34 @@ public partial class SMatchmaking : SteamComponent
         return lobbies == null ? [] : lobbies.ToList();
     }
 
-    public void Invite(SteamId steamId)
+    /// <summary>
+    /// 邀请玩家
+    /// </summary>
+    /// <param name="steamId"></param>
+    public static void Invite(SteamId steamId)
     {
         Lobby?.InviteFriend(steamId);
     }
 
-    public void Kick(SteamId steamId)
+    /// <summary>
+    /// 踢掉玩家
+    /// </summary>
+    /// <param name="steamId"></param>
+    public static void Kick(SteamId steamId)
     {
-        if (Lobby.HasValue)
+        if (!Lobby.HasValue)
         {
-            var lobby = Lobby.Value;
-            if (lobby.IsOwnedBy(SteamClient.SteamId))
+            return;
+        }
+
+        var lobby = Lobby.Value;
+        if (lobby.IsOwnedBy(SteamClient.SteamId))
+        {
+            foreach (var member in lobby.Members)
             {
-                foreach (var member in lobby.Members)
+                if (member.Id == steamId)
                 {
-                    if (member.Id == steamId)
-                    {
-                        lobby.SendChatString($"{KickMsg}{steamId}");
-                    }
+                    lobby.SendChatString($"{KickMsg}{steamId}");
                 }
             }
         }

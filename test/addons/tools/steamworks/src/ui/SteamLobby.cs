@@ -119,7 +119,7 @@ public partial class SteamLobby : Control
             }
         };
 
-        CreateLobby.Pressed += () => { Create(); };
+        CreateLobby.Pressed += () => { SMatchmaking.CreateLobbyAsync((int)MaxLobbyUser.Value); };
         Invite.Pressed += () =>
         {
             if (Lobby.HasValue)
@@ -153,7 +153,7 @@ public partial class SteamLobby : Control
         };
         Exit.Pressed += () =>
         {
-            SMatchmaking.Instance.LeaveLobby();
+            SMatchmaking.LeaveLobby();
             Lobby = new Lobby();
             UpdateLobbyData();
             CreateLobby.Disabled = false;
@@ -161,7 +161,7 @@ public partial class SteamLobby : Control
         };
         Kick.Pressed += () =>
         {
-            SMatchmaking.Instance.Kick(SteamManager.Friend.Id);
+            SMatchmaking.Kick(SteamManager.Friend.Id);
             Log.Info($"踢出玩家 {SteamManager.Friend.Name}");
         };
         ConnectServer.Pressed += () => { Lobby?.SetGameServer(SteamManager.ServerId); };
@@ -169,10 +169,6 @@ public partial class SteamLobby : Control
         MaxUserLabel.Hide();
     }
 
-    public void Create()
-    {
-        SteamMatchmaking.CreateLobbyAsync((int)MaxLobbyUser.Value);
-    }
 
     public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10,
         Dictionary<string, string>? lobbyData = null)

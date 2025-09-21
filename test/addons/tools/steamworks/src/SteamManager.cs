@@ -180,6 +180,7 @@ public partial class SteamManager : CanvasLayer
         components.AddChild(SInput.Instance);
         components.AddChild(SInventory.Instance);
         components.AddChild(SMatchmaking.Instance);
+        components.AddChild(SNetworkingSocketMessages.Instance);
         components.AddChild(SMusic.Instance);
         components.AddChild(SNetworking.Instance);
         components.AddChild(SNetworkingSockets.Instance);

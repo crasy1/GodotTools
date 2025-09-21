@@ -21,7 +21,7 @@ public partial class Test2d : Node2D
         multiplayerApi.ServerDisconnected += OnServerDisconnected;
         // 只有把场景加到列表中才会被同步，不在列表中的场景不会被同步
         Spawner.AddSpawnableScene(Test2dPlayer.TscnFilePath);
-        Create.Pressed += () =>
+        Create.Pressed += async () =>
         {
             if (multiplayerApi.MultiplayerPeer is not OfflineMultiplayerPeer)
             {
@@ -35,7 +35,7 @@ public partial class Test2d : Node2D
                     multiplayerApi.MultiplayerPeer = SteamworksP2PPeer.CreateServer();
                     break;
                 case 1:
-                    multiplayerApi.MultiplayerPeer = new SteamworksMessageP2PPeer();
+                    multiplayerApi.MultiplayerPeer = await SteamworksMessageP2PPeer.CreateServer();
                     break;
                 case 2:
                     multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
@@ -53,12 +53,12 @@ public partial class Test2d : Node2D
             var test2dPlayer = AddPlayer(Multiplayer.GetUniqueId());
             test2dPlayer.Position = new Vector2(500, 500);
         };
-        Search.Pressed += () =>
+        Search.Pressed += async () =>
         {
             Friends.ClearAndFreeChildren();
             foreach (var (steamId, friend) in SFriends.Friends)
             {
-                if (friend.IsOnline)
+                if (friend.IsOnline && friend.IsPlayingThisGame)
                 {
                     var steamUserInfo = SteamUserInfo.Instantiate(friend);
                     Friends.AddChild(steamUserInfo);
@@ -83,7 +83,7 @@ public partial class Test2d : Node2D
             multiplayerApi.MultiplayerPeer.Close();
             multiplayerApi.MultiplayerPeer = new OfflineMultiplayerPeer();
         };
-        Join.Pressed += () =>
+        Join.Pressed += async () =>
         {
             if (multiplayerApi.MultiplayerPeer is not OfflineMultiplayerPeer)
             {
@@ -102,14 +102,13 @@ public partial class Test2d : Node2D
                     multiplayerApi.MultiplayerPeer = p2PPeer;
                     break;
                 case 1:
-                    if (ChooseFriend == null)
+                    if (ChooseFriend?.GameInfo?.Lobby == null)
                     {
                         break;
                     }
 
-                    var msgP2PPeer = new SteamworksMessageP2PPeer();
+                    var msgP2PPeer = await SteamworksMessageP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
                     multiplayerApi.MultiplayerPeer = msgP2PPeer;
-                    msgP2PPeer.Connect(ChooseFriend.Value.Id);
                     break;
                 case 2:
                     if (ChooseFriend == null)
@@ -206,13 +205,17 @@ public partial class Test2d : Node2D
 
     private void OnPeerDisconnected(long id)
     {
-        Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 断开连接");
+        Log.Info($"[Api]{Multiplayer.GetUniqueId()} peer {id} 断开");
+
+        // Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 断开连接");
         Log.Debug($"{Multiplayer.GetUniqueId()} peers :{Multiplayer.GetPeers().Join()}");
     }
 
     private void OnPeerConnected(long id)
     {
-        Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 连接");
+        Log.Info($"[Api]{Multiplayer.GetUniqueId()} peer {id} 连接");
+
+        // Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 连接");
         Log.Debug($"{Multiplayer.GetUniqueId()} peers :{Multiplayer.GetPeers().Join()}");
         if (Multiplayer.IsServer())
         {

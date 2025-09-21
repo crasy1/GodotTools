@@ -34,11 +34,11 @@ public partial class SteamUserInfo : Control
             }
         });
         InviteGame.Pressed += () => { Friend.InviteToGame("来"); };
-        InviteLobby.Pressed += () => { SMatchmaking.Instance.Invite(Friend.Id); };
+        InviteLobby.Pressed += () => { SMatchmaking.Invite(Friend.Id); };
         RemotePlay.Pressed += () => { SRemotePlay.Invite(Friend.Id); };
         TeamVoice.Instance.MemberJoin += (teamMemberId) =>
         {
-            if (teamMemberId == Friend.Id)
+            if (teamMemberId == Friend.Id && IsInstanceValid(Voice) && IsInstanceValid(VoiceStreamPlayer))
             {
                 Voice.Show();
                 VoiceStreamPlayer = TeamVoice.Instance.GetTeamMember(Friend.Id) as VoiceStreamPlayer;
@@ -48,13 +48,17 @@ public partial class SteamUserInfo : Control
         };
         TeamVoice.Instance.MemberLeave += (teamMemberId) =>
         {
-            if (teamMemberId == Friend.Id)
+            if (teamMemberId == Friend.Id && IsInstanceValid(Voice))
             {
                 Voice.Hide();
             }
         };
         Voice.Pressed += () =>
         {
+            if (!IsInstanceValid(AnimationPlayer))
+            {
+                return;
+            }
             if (TeamVoice.Instance.IsPlaying(Friend.Id))
             {
                 AnimationPlayer.Play(Mute);
