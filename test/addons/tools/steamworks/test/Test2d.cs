@@ -45,7 +45,7 @@ public partial class Test2d : Node2D
                     break;
                 default:
                     var peer = new ENetMultiplayerPeer();
-                    peer.CreateServer(Port, 4);
+                    peer.CreateServer(Port, 1);
                     multiplayerApi.MultiplayerPeer = peer;
                     break;
             }
@@ -80,6 +80,17 @@ public partial class Test2d : Node2D
                 return;
             }
 
+            if (Multiplayer.IsServer())
+            {
+                foreach (var child in Players.GetChildren())
+                {
+                    if (child.Name == "1")
+                    {
+                        child.RemoveAndQueueFree();
+                    }
+                }
+            }
+
             multiplayerApi.MultiplayerPeer.Close();
             multiplayerApi.MultiplayerPeer = new OfflineMultiplayerPeer();
         };
@@ -107,7 +118,7 @@ public partial class Test2d : Node2D
                         break;
                     }
 
-                    var msgP2PPeer = await SteamworksMessageP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
+                    var msgP2PPeer = SteamworksMessageP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
                     multiplayerApi.MultiplayerPeer = msgP2PPeer;
                     break;
                 case 2:
@@ -205,22 +216,26 @@ public partial class Test2d : Node2D
 
     private void OnPeerDisconnected(long id)
     {
-        Log.Info($"[Api]{Multiplayer.GetUniqueId()} peer {id} 断开");
-
-        // Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 断开连接");
-        Log.Debug($"{Multiplayer.GetUniqueId()} peers :{Multiplayer.GetPeers().Join()}");
+        Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 断开,peers :{Multiplayer.GetPeers().Join()}");
+        if (Multiplayer.IsServer())
+        {
+            foreach (var child in Players.GetChildren())
+            {
+                if (child.Name == id.ToString())
+                {
+                    Players.RemoveAndQueueFreeChild(child);
+                }
+            }
+        }
     }
 
-    private void OnPeerConnected(long id)
+    private async void  OnPeerConnected(long id)
     {
-        Log.Info($"[Api]{Multiplayer.GetUniqueId()} peer {id} 连接");
-
-        // Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 连接");
-        Log.Debug($"{Multiplayer.GetUniqueId()} peers :{Multiplayer.GetPeers().Join()}");
+        Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 连接,peers :{Multiplayer.GetPeers().Join()}");
         if (Multiplayer.IsServer())
         {
             var test2dPlayer = AddPlayer((int)id);
-            test2dPlayer.Rpc(Test2dPlayer.MethodName.AsyncPosition, new Vector2(1000, 500));
+            test2dPlayer.Rpc(Test2dPlayer.MethodName.AsyncPosition, new Vector2(500 + Multiplayer.GetPeers().Length * 200, 500));
         }
     }
 
