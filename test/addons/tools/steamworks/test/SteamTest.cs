@@ -1,6 +1,7 @@
 using System.Text;
 using ProtoBuf.Meta;
 using Steamworks;
+using Steamworks.Data;
 
 namespace Godot;
 
@@ -16,7 +17,7 @@ public partial class SteamTest : Node2D
     public override void _Ready()
     {
         base._Ready();
-        SNetworking.Instance.ReceiveData += (steamId,channel, data) =>
+        SNetworking.Instance.ReceiveData += (steamId, channel, data) =>
         {
             Log.Info($"从 {steamId} 收到P2P消息 {data}");
             P2PReceiveText.AppendText(Encoding.UTF8.GetString(data));

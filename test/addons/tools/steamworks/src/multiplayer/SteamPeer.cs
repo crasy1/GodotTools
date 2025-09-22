@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,133 +9,94 @@ using Steamworks.Data;
 namespace Godot;
 
 /// <summary>
-/// steamworks peer 
+/// steamworks 的godot MultiplayerPeer 基类
 /// </summary>
 public abstract partial class SteamPeer : MultiplayerPeerExtension
 {
-    protected int TargetPeer { set; get; }
+    public const int ServerPeerId = 1;
+    private int TargetPeer { set; get; }
     protected int PeerId { set; get; }
-    protected ConnectionStatus ConnectionStatus { set; get; } = ConnectionStatus.Connecting;
-    protected Lobby? Lobby { set; get; }
-    protected Friend? LobbyOwner { set; get; }
+    public ConnectionStatus ConnectionStatus { set; get; } = ConnectionStatus.Connecting;
+    private Lobby? Lobby { set; get; }
+    private Friend? LobbyOwner { set; get; }
 
-    protected readonly Queue<SteamworksMessagePacket> PacketQueue = new();
+    private readonly Queue<SteamPacket> PacketQueue = new();
 
     /// <summary>
     /// 大厅中的peer
     /// </summary>
-    protected readonly Dictionary<int, Friend> ConnectedPeers = new();
-
-    /// <summary>
-    /// 通信没有握手的玩家，握手成功后才去掉
-    /// 如果在大厅中，但是未握手，场景同步时则会异常，所以确保都握手，server再创建玩家节点
-    /// </summary>
-    protected readonly Dictionary<int, SteamId> NotHandShakeSteamIds = new();
-
-    /**
-     * 服务器新的peer,和其他玩家未握手的玩家
-     */
-    protected readonly Dictionary<int, SteamId> ServerNewMemberPeers = new();
-
-    protected const string NotHandShakeIds = "NOT_HANDSHAKE_IDS";
+    private readonly Dictionary<int, SteamId> ConnectedPeers = new();
 
     protected SteamPeer()
     {
+        Log.Info($"创建 {GetType().Name}");
         SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
         SteamMatchmaking.OnLobbyMemberJoined += OnLobbyMemberJoined;
         SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeave;
-        SteamMatchmaking.OnLobbyMemberDataChanged += OnLobbyMemberDataChanged;
-        Log.Info($"创建 {nameof(SteamPeer)}");
+        OnCreate();
     }
 
-    private void OnLobbyMemberDataChanged(Lobby lobby, Friend friend)
-    {
-        if (_IsServer())
-        {
-            Dictionary<SteamId, List<int>> lobbyMemberData = new();
-            foreach (var lobbyMember in lobby.Members)
-            {
-                var notHandShakeSteamIds = lobby.GetMemberData(lobbyMember, NotHandShakeIds);
-                if (string.IsNullOrWhiteSpace(notHandShakeSteamIds))
-                {
-                    continue;
-                }
+    /// <summary>
+    /// 初始化时操作，子类的信号连接等
+    /// </summary>
+    protected abstract void OnCreate();
 
-                lobbyMemberData[lobbyMember.Id] = notHandShakeSteamIds.Split(",").Select(id => int.Parse(id)).ToList();
-            }
+    /// <summary>
+    /// 关闭时操作，子类的信号断开等
+    /// </summary>
+    protected abstract void OnClose();
 
-            // 检测其他客户端有没有握手新的成员
-            foreach (var newPeerId in ServerNewMemberPeers.Keys.ToList())
-            {
-                // 其他客户端都连接 newPeerIds 且 服务器也连接了
-                var otherAllShakeHand = lobbyMemberData.Values.All(ids => !ids.Contains(newPeerId));
-                if (otherAllShakeHand && NotHandShakeSteamIds.ContainsKey(newPeerId))
-                {
-                    ServerNewMemberPeers.Remove(newPeerId);
-                    EmitSignalPeerConnected(newPeerId);
-                    Log.Info($"[连接情况] 所有端都连接了{newPeerId} ，服务端同步]");
-                }
-            }
-        }
-    }
-
-    protected void OnLobbyMemberLeave(Lobby lobby, Friend friend)
-    {
-        // 房主离开后会自动换新的房主
-        var isLobbyOwner = friend.Id == LobbyOwner?.Id;
-        var peerId = isLobbyOwner ? 1 : (int)friend.Id.AccountId;
-        if (ConnectedPeers.Remove(peerId))
-        {
-            DisconnectPeer(peerId);
-            EmitSignalPeerDisconnected(peerId);
-        }
-
-        if (_IsServer())
-        {
-            ServerNewMemberPeers.Remove(peerId);
-        }
-    }
-
-    protected void OnLobbyMemberJoined(Lobby lobby, Friend friend)
-    {
-        var peerId = (int)friend.Id.AccountId;
-        if (ConnectedPeers.TryAdd(peerId, friend))
-        {
-            HandShake(friend.Id);
-        }
-
-        NotHandShakeSteamIds[peerId] = friend.Id;
-        if (_IsServer())
-        {
-            ServerNewMemberPeers[peerId] = friend.Id;
-        }
-    }
-
-    protected void OnLobbyEntered(Lobby lobby)
+    private void OnLobbyEntered(Lobby lobby)
     {
         ConnectionStatus = ConnectionStatus.Connected;
         Lobby = lobby;
         LobbyOwner = lobby.Owner;
-        var members = lobby.Members.Where(f => !f.IsMe).ToList();
-        foreach (var friend in members)
+        if (!_IsServer())
         {
-            var peerId = lobby.IsOwnedBy(friend.Id) ? 1 : (int)friend.Id.AccountId;
-            ConnectedPeers.TryAdd(peerId, friend);
-            NotHandShakeSteamIds[peerId] = friend.Id;
-            if (_IsServer())
-            {
-                ServerNewMemberPeers.Remove(peerId);
-            }
+            // 给服务器发送握手包
+            HandShake(lobby.Owner.Id);
         }
+    }
 
-        lobby.SetMemberData(NotHandShakeIds, string.Join(",", NotHandShakeSteamIds.Keys));
-        foreach (var friend in members)
+    protected void OnHandShakeFailed(ulong steamId)
+    {
+        HandShake(steamId);
+    }
+
+    private void OnLobbyMemberJoined(Lobby lobby, Friend friend)
+    {
+        // 服务器给新加入的peer发送握手包
+        if (_IsServer())
         {
             HandShake(friend.Id);
         }
     }
 
-    protected void ReceiveData(ulong steamId, int channel, byte[] data)
+    private void OnLobbyMemberLeave(Lobby lobby, Friend friend)
+    {
+        // 房主离开后会自动换新的房主
+        var isLobbyOwnerLeave = friend.Id == LobbyOwner?.Id;
+        var peerId = isLobbyOwnerLeave ? ServerPeerId : (int)friend.Id.AccountId;
+        if (_IsServer())
+        {
+            // 服务器移除离开的成员
+            ConnectedPeers.Remove(peerId);
+            DisconnectPeer(peerId);
+            EmitSignalPeerDisconnected(peerId);
+        }
+        else
+        {
+            if (isLobbyOwnerLeave)
+            {
+                // 客户端移除服务器
+                ConnectedPeers.Remove(peerId);
+                DisconnectPeer(peerId);
+                EmitSignalPeerDisconnected(peerId);
+            }
+        }
+    }
+
+    public void ReceiveData(ulong steamId, int channel, byte[] data)
     {
         // 没有加入大厅，忽略信息
         if (!Lobby.HasValue)
@@ -144,22 +104,19 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
             return;
         }
 
-        var peerId = Lobby.Value.IsOwnedBy(steamId) ? 1 : (int)((SteamId)steamId).AccountId;
+        var peerId = Lobby.Value.IsOwnedBy(steamId) ? ServerPeerId : (int)((SteamId)steamId).AccountId;
         // 过滤掉握手包
         if (channel == (int)Channel.Handshake)
         {
-            NotHandShakeSteamIds.Remove(peerId);
-            // 如果不是服务器则认为已连接，服务器需要所有其他节点连接之后再连接
-            if (!_IsServer())
+            if (ConnectedPeers.TryAdd(peerId, steamId))
             {
                 EmitSignalPeerConnected(peerId);
             }
-            Lobby.Value.SetMemberData(NotHandShakeIds, string.Join(",", NotHandShakeSteamIds.Keys));
 
             return;
         }
 
-        var steamMessage = new SteamworksMessagePacket
+        var steamMessage = new SteamPacket
         {
             SteamId = steamId,
             Data = data,
@@ -169,40 +126,49 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         PacketQueue.Enqueue(steamMessage);
     }
 
-    public async Task Connect(Lobby? lobby)
+    protected async Task<Lobby> CreateLobby(int maxUser)
+    {
+        var lobby = await SMatchmaking.CreateLobbyAsync(maxUser);
+        if (!lobby.HasValue)
+        {
+            throw new Exception("创建大厅失败");
+        }
+
+        return lobby.Value;
+    }
+
+    protected async Task JoinLobby(Lobby? lobby)
     {
         if (!lobby.HasValue)
         {
-            Log.Error("未找到大厅");
-            return;
+            throw new Exception("未找到大厅");
         }
 
         if (_IsServer())
         {
-            Log.Error("作为服务器不需要加入其他大厅");
-            return;
+            throw new Exception("作为服务器不需要加入其他大厅");
         }
 
         var result = await SMatchmaking.JoinLobbyAsync(lobby.Value);
         if (!result)
         {
             ConnectionStatus = ConnectionStatus.Disconnected;
-            Log.Error("加入大厅失败");
+            throw new Exception("加入大厅失败");
         }
     }
 
-    public void HandShake(NetIdentity steamId)
+    public void HandShake(SteamId steamId)
     {
         SendMsg(steamId, Consts.SocketHandShake, Channel.Handshake);
     }
 
-    public bool SendMsg(SteamId steamId, string data, Channel channel = Channel.Msg,
+    private bool SendMsg(SteamId steamId, string data, Channel channel = Channel.Msg,
         SendType sendType = SendType.Reliable)
     {
         return SendMsg(steamId, Encoding.UTF8.GetBytes(data), channel, sendType);
     }
 
-    public abstract bool SendMsg(SteamId steamId, byte[] data, Channel channel = Channel.Msg,
+    protected abstract bool SendMsg(SteamId steamId, byte[] data, Channel channel = Channel.Msg,
         SendType sendType = SendType.Reliable);
 
 
@@ -214,22 +180,26 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
             DisconnectPeer(peerId);
         }
 
+        Lobby = null;
+        LobbyOwner = null;
+        ConnectionStatus = ConnectionStatus.Disconnected;
         PacketQueue.Clear();
+        ConnectedPeers.Clear();
         SteamMatchmaking.OnLobbyEntered -= OnLobbyEntered;
         SteamMatchmaking.OnLobbyMemberJoined -= OnLobbyMemberJoined;
         SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeave;
-        SteamMatchmaking.OnLobbyMemberDataChanged -= OnLobbyMemberDataChanged;
+        OnClose();
     }
 
     public override void _DisconnectPeer(int pPeer, bool pForce)
     {
-        if (ConnectedPeers.Remove(pPeer, out var friend))
+        if (ConnectedPeers.Remove(pPeer, out var steamId))
         {
-            DisconnectPeer(friend);
+            DisconnectPeer(steamId);
         }
     }
 
-    public abstract void DisconnectPeer(Friend friend);
+    protected abstract void DisconnectPeer(SteamId steamId);
 
     public override int _GetAvailablePacketCount()
     {
@@ -258,7 +228,7 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
 
     public override int _GetPacketPeer()
     {
-        return PacketQueue.TryPeek(out var packet) ? packet.PeerId : 1;
+        return PacketQueue.TryPeek(out var packet) ? packet.PeerId : ServerPeerId;
     }
 
 
@@ -269,15 +239,20 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
 
     public override bool _IsServer()
     {
-        return PeerId == 1;
+        return PeerId == ServerPeerId;
     }
+
 
     public override bool _IsServerRelaySupported()
     {
         return ServerRelaySupported();
     }
 
-    public abstract bool ServerRelaySupported();
+    /// <summary>
+    /// 如果支持中继，那么客户端的流量会先发给服务器，然后由服务器转发
+    /// </summary>
+    /// <returns></returns>
+    protected abstract bool ServerRelaySupported();
 
     public override void _SetTargetPeer(int pPeer)
     {
@@ -307,16 +282,11 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         Receive();
     }
 
-    public abstract void Receive();
+    protected abstract void Receive();
 
     public override byte[] _GetPacketScript()
     {
-        if (PacketQueue.TryDequeue(out var packet))
-        {
-            return packet.Data;
-        }
-
-        return [];
+        return PacketQueue.TryDequeue(out var packet) ? packet.Data : [];
     }
 
     public override Error _PutPacketScript(byte[] pBuffer)
@@ -329,37 +299,42 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
                 _ => SendType.Reliable
             };
             var channel = (Channel)TransferChannel;
-            var sortedSet = ConnectedPeers.Keys.OrderBy(i=>i);
-            if (TargetPeer == 0)
+            if (_IsServer())
             {
-                foreach (var peerId in sortedSet)
+                switch (TargetPeer)
                 {
-                    
-                    SendMsg(ConnectedPeers[peerId].Id, pBuffer, channel, sendType);
-                }
-                foreach (var friend in ConnectedPeers.Values)
-                {
-                }
-            }
-            else if (TargetPeer < 0)
-            {
-                foreach (var peerId in sortedSet)
-                {
-                    if (peerId != Mathf.Abs(TargetPeer))
+                    case 0:
                     {
-                        SendMsg(ConnectedPeers[peerId].Id, pBuffer, channel, sendType);
+                        foreach (var peerId in ConnectedPeers.Keys)
+                        {
+                            SendMsg(ConnectedPeers[peerId], pBuffer, channel, sendType);
+                        }
+
+                        break;
+                    }
+                    case < 0:
+                    {
+                        foreach (var peerId in ConnectedPeers.Keys.Where(peerId => peerId != Mathf.Abs(TargetPeer)))
+                        {
+                            SendMsg(ConnectedPeers[peerId], pBuffer, channel, sendType);
+                        }
+
+                        break;
+                    }
+                    default:
+                    {
+                        foreach (var peerId in ConnectedPeers.Keys.Where(peerId => peerId == TargetPeer))
+                        {
+                            SendMsg(ConnectedPeers[peerId], pBuffer, channel, sendType);
+                        }
+
+                        break;
                     }
                 }
             }
             else
             {
-                foreach (var peerId in sortedSet)
-                {
-                    if (peerId == TargetPeer)
-                    {
-                        SendMsg(ConnectedPeers[peerId].Id, pBuffer, channel, sendType);
-                    }
-                }
+                SendMsg(ConnectedPeers[ServerPeerId], pBuffer, channel, sendType);
             }
 
             return Error.Ok;

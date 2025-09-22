@@ -1,26 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Steamworks;
 using Steamworks.Data;
 
 namespace Godot;
 
-public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : ISocketManager
+public class PeerSocketManager(SteamPeer steamPeer) : ISocketManager
 {
-    public readonly Dictionary<Connection, SteamId> Connections = new();
-
-    public readonly Queue<SteamworksMessagePacket> PacketQueue = new();
-
-    public MultiplayerPeer.ConnectionStatus ConnectionStatus { private set; get; } =
-        MultiplayerPeer.ConnectionStatus.Connected;
-
+    public readonly Dictionary<Connection, SteamId> ConnectionDict = new();
+    public readonly Dictionary<SteamId, Connection> SteamIdDict = new();
 
     public void OnConnecting(Connection connection, ConnectionInfo info)
     {
-        Log.Info($"{info.Identity.SteamId} 正在连接 {(steamworksServerPeer.RefuseNewConnections ? "拒绝" : "接受")}");
-        if (!steamworksServerPeer.RefuseNewConnections)
+        Log.Info($"{info.Identity.SteamId} 正在连接 {(steamPeer.RefuseNewConnections ? "拒绝" : "接受")}");
+        if (!steamPeer.RefuseNewConnections)
         {
             connection.Accept();
         }
@@ -32,54 +25,26 @@ public class PeerSocketManager(MultiplayerPeerExtension steamworksServerPeer) : 
 
     public void OnConnected(Connection connection, ConnectionInfo info)
     {
-        if (info.Identity.IsSteamId)
-        {
-            Connections.TryAdd(connection, info.Identity.SteamId);
-        }
+        ConnectionDict.TryAdd(connection, info.Identity.SteamId);
+        SteamIdDict.TryAdd(info.Identity.SteamId, connection);
     }
 
     public void OnDisconnected(Connection connection, ConnectionInfo info)
     {
         Log.Info($"{info.Identity.SteamId} 断开连接");
-        if (info.Identity.IsSteamId)
-        {
-            Connections.Remove(connection);
-        }
-
-        steamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerDisconnected,
-            (int)info.Identity.SteamId.AccountId);
+        ConnectionDict.Remove(connection);
+        SteamIdDict.Remove(info.Identity.SteamId);
+        steamPeer.Close();
     }
 
     public unsafe void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum,
         long recvTime,
         int channel)
     {
-        Log.Debug($"server 从 {identity.SteamId} 收到消息");
-        if (identity.IsSteamId && Connections.TryGetValue(connection, out var steamId))
+        if (ConnectionDict.TryGetValue(connection, out var steamId))
         {
-            var connectionKey = Connections.Keys.First(c => c == connection);
             var span = new Span<byte>((byte*)data.ToPointer(), size);
-            var bytes = span.ToArray();
-            var s = Encoding.UTF8.GetString(bytes);
-            if (s.StartsWith(Consts.SocketHandShake))
-            {
-                var peerId = s.Replace(Consts.SocketHandShake, "").ToInt();
-                connectionKey.UserData = peerId;
-                Log.Info($"服务器{steamId} 已经连接 {peerId}");
-
-                steamworksServerPeer.EmitSignal(MultiplayerPeer.SignalName.PeerConnected, peerId);
-
-                return;
-            }
-
-            var steamMessage = new SteamworksMessagePacket
-            {
-                SteamId = steamId,
-                Data = span.ToArray(),
-                TransferChannel = channel,
-                PeerId = (int)connectionKey.UserData
-            };
-            PacketQueue.Enqueue(steamMessage);
+            steamPeer.ReceiveData(steamId, channel, span.ToArray());
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using Godot;
 using Steamworks;
@@ -32,13 +33,37 @@ public partial class Test2d : Node2D
             switch (PeerType)
             {
                 case 0:
-                    multiplayerApi.MultiplayerPeer = SteamworksP2PPeer.CreateServer();
+                    try
+                    {
+                        multiplayerApi.MultiplayerPeer = await SteamP2PPeer.CreateServer();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
+                    }
+
                     break;
                 case 1:
-                    multiplayerApi.MultiplayerPeer = await SteamworksMessageP2PPeer.CreateServer();
+                    try
+                    {
+                        multiplayerApi.MultiplayerPeer = await SteamMessageP2PPeer.CreateServer();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
+                    }
+
                     break;
                 case 2:
-                    multiplayerApi.MultiplayerPeer = SteamworksServerPeer.CreateServer(Port);
+                    try
+                    {
+                        multiplayerApi.MultiplayerPeer = await SteamSocketPeer.CreateServer(Port);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
+                    }
+
                     break;
                 case 3:
                     multiplayerApi.MultiplayerPeer = NormalServerPeer.CreateServer(Port);
@@ -53,7 +78,7 @@ public partial class Test2d : Node2D
             var test2dPlayer = AddPlayer(Multiplayer.GetUniqueId());
             test2dPlayer.Position = new Vector2(500, 500);
         };
-        Search.Pressed += async () =>
+        Search.Pressed += () =>
         {
             Friends.ClearAndFreeChildren();
             foreach (var (steamId, friend) in SFriends.Friends)
@@ -82,13 +107,7 @@ public partial class Test2d : Node2D
 
             if (Multiplayer.IsServer())
             {
-                foreach (var child in Players.GetChildren())
-                {
-                    if (child.Name == "1")
-                    {
-                        child.RemoveAndQueueFree();
-                    }
-                }
+                Players.ClearAndFreeChildren();
             }
 
             multiplayerApi.MultiplayerPeer.Close();
@@ -101,33 +120,46 @@ public partial class Test2d : Node2D
                 return;
             }
 
+            if (ChooseFriend?.GameInfo?.Lobby == null)
+            {
+                return;
+            }
+
             switch (PeerType)
             {
                 case 0:
-                    if (ChooseFriend == null)
+                    try
                     {
-                        break;
+                        multiplayerApi.MultiplayerPeer = await SteamP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
                     }
 
-                    var p2PPeer = SteamworksP2PPeer.CreateClient(ChooseFriend.Value.Id);
-                    multiplayerApi.MultiplayerPeer = p2PPeer;
                     break;
                 case 1:
-                    if (ChooseFriend?.GameInfo?.Lobby == null)
+                    try
                     {
-                        break;
+                        multiplayerApi.MultiplayerPeer =
+                            await SteamMessageP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
                     }
 
-                    var msgP2PPeer = SteamworksMessageP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
-                    multiplayerApi.MultiplayerPeer = msgP2PPeer;
                     break;
                 case 2:
-                    if (ChooseFriend == null)
+                    try
                     {
-                        break;
+                        multiplayerApi.MultiplayerPeer = await SteamP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
                     }
 
-                    multiplayerApi.MultiplayerPeer = SteamworksClientPeer.CreateClient(ChooseFriend.Value.Id, Port);
                     break;
                 case 3:
                     if (ChooseFriend == null)
@@ -155,20 +187,13 @@ public partial class Test2d : Node2D
             switch (PeerType)
             {
                 case 0:
-                    var p2PPeer = (SteamworksP2PPeer)multiplayerApi.MultiplayerPeer;
+                    var p2PPeer = (SteamP2PPeer)multiplayerApi.MultiplayerPeer;
                     break;
                 case 1:
-                    var msgP2PPeer = (SteamworksMessageP2PPeer)multiplayerApi.MultiplayerPeer;
+                    var msgP2PPeer = (SteamMessageP2PPeer)multiplayerApi.MultiplayerPeer;
                     break;
                 case 2:
-                    if (IsServer)
-                    {
-                        var serverPeer = (SteamworksServerPeer)multiplayerApi.MultiplayerPeer;
-                    }
-                    else
-                    {
-                        var clientPeer = (SteamworksClientPeer)multiplayerApi.MultiplayerPeer;
-                    }
+                    var relayPeer = (SteamSocketPeer)multiplayerApi.MultiplayerPeer;
 
                     break;
                 case 3:
@@ -229,13 +254,14 @@ public partial class Test2d : Node2D
         }
     }
 
-    private async void  OnPeerConnected(long id)
+    private async void OnPeerConnected(long id)
     {
         Log.Debug($"{Multiplayer.GetUniqueId()} peer {id} 连接,peers :{Multiplayer.GetPeers().Join()}");
         if (Multiplayer.IsServer())
         {
             var test2dPlayer = AddPlayer((int)id);
-            test2dPlayer.Rpc(Test2dPlayer.MethodName.AsyncPosition, new Vector2(500 + Multiplayer.GetPeers().Length * 200, 500));
+            test2dPlayer.Rpc(Test2dPlayer.MethodName.AsyncPosition,
+                new Vector2(500 + Multiplayer.GetPeers().Length * 200, 500));
         }
     }
 

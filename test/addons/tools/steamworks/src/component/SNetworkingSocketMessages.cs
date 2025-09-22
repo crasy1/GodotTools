@@ -51,10 +51,7 @@ public partial class SNetworkingSocketMessages : SteamComponent
             var steamId = connectionInfo.Identity.SteamId;
             Log.Info($"p2p msg:与 {steamId} 连接失败");
             EmitSignalUserConnectFailed(steamId);
-            if (ConnectedIds.Contains(steamId))
-            {
-                ConnectedIds.Remove(steamId);
-            }
+            ConnectedIds.Remove(steamId);
         };
         SteamNetworkingMessages.OnMessage += (identity, data, size, channel) =>
         {
@@ -88,8 +85,10 @@ public partial class SNetworkingSocketMessages : SteamComponent
         if (result)
         {
             Log.Info($"p2p msg:与 {steamId} 断开连接");
-            ConnectedIds.Remove(steamId);
-            EmitSignalUserDisconnected(steamId);
+            if (ConnectedIds.Remove(steamId))
+            {
+                EmitSignalUserDisconnected(steamId);
+            }
         }
 
         return result;

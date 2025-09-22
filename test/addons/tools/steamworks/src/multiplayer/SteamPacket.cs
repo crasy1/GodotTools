@@ -1,8 +1,10 @@
 using Steamworks;
 
 namespace Godot;
-
-public struct SteamworksMessagePacket
+/// <summary>
+/// steam 消息包
+/// </summary>
+public struct SteamPacket
 {
     public int TransferChannel { init; get; }
     public byte[] Data { init; get; }

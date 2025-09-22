@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Steamworks;
+using Steamworks.Data;
 
 namespace Godot;
 
@@ -159,7 +160,7 @@ public partial class TeamVoice : Node
     {
         foreach (var memberId in _teamMembers.Keys)
         {
-            SNetworking.SendP2P(memberId, compressData, Channel.Voice, P2PSend.UnreliableNoDelay);
+            SNetworking.SendP2P(memberId, compressData, Channel.Voice,SendType.NoDelay);
         }
     }
 

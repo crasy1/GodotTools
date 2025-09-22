@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Steamworks;
+using Steamworks.Data;
 
 namespace Godot;
 
@@ -98,13 +99,21 @@ public partial class SNetworking : SteamComponent
         }
     }
 
-    public static bool SendP2P(SteamId steamId, string content, Channel channel, P2PSend sendType = P2PSend.Reliable)
+    public static bool SendP2P(SteamId steamId, string content, Channel channel, SendType sendType = SendType.Reliable)
     {
         return SendP2P(steamId, Encoding.UTF8.GetBytes(content), channel, sendType);
     }
 
-    public static bool SendP2P(SteamId steamId, byte[] data, Channel channel, P2PSend sendType = P2PSend.Reliable)
+    public static bool SendP2P(SteamId steamId, byte[] data, Channel channel, SendType sendType = SendType.Reliable)
     {
-        return SteamNetworking.SendP2PPacket(steamId, data, data.Length, (int)channel, sendType);
+        var p2PSend = sendType switch
+        {
+            SendType.Unreliable => P2PSend.Unreliable,
+            SendType.NoNagle => P2PSend.Unreliable,
+            SendType.NoDelay => P2PSend.UnreliableNoDelay,
+            SendType.Reliable => P2PSend.Reliable,
+            _ => P2PSend.Unreliable
+        };
+        return SteamNetworking.SendP2PPacket(steamId, data, data.Length, (int)channel, p2PSend);
     }
 }
