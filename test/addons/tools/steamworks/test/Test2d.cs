@@ -57,7 +57,7 @@ public partial class Test2d : Node2D
                 case 2:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = await SteamSocketPeer.CreateServer(Port);
+                        multiplayerApi.MultiplayerPeer = await SteamSocketPeer.CreateRelayServer(Port);
                     }
                     catch (Exception e)
                     {
@@ -66,7 +66,15 @@ public partial class Test2d : Node2D
 
                     break;
                 case 3:
-                    multiplayerApi.MultiplayerPeer = NormalServerPeer.CreateServer(Port);
+                    try
+                    {
+                        multiplayerApi.MultiplayerPeer = await SteamSocketPeer.CreateNormalServer(Port);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
+                    }
+
                     break;
                 default:
                     var peer = new ENetMultiplayerPeer();
@@ -153,7 +161,8 @@ public partial class Test2d : Node2D
                 case 2:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = await SteamP2PPeer.CreateClient(ChooseFriend?.GameInfo?.Lobby);
+                        multiplayerApi.MultiplayerPeer =
+                            await SteamSocketPeer.CreateRelayClient(ChooseFriend?.GameInfo?.Lobby);
                     }
                     catch (Exception e)
                     {
@@ -162,12 +171,16 @@ public partial class Test2d : Node2D
 
                     break;
                 case 3:
-                    if (ChooseFriend == null)
+                    try
                     {
-                        break;
+                        multiplayerApi.MultiplayerPeer =
+                            await SteamSocketPeer.CreateNormalClient(Host.Text, ChooseFriend?.GameInfo?.Lobby);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.Message);
                     }
 
-                    multiplayerApi.MultiplayerPeer = NormalClientPeer.CreateClient(Host.Text, Port);
                     break;
                 default:
                     var peer = new ENetMultiplayerPeer();
@@ -194,18 +207,9 @@ public partial class Test2d : Node2D
                     break;
                 case 2:
                     var relayPeer = (SteamSocketPeer)multiplayerApi.MultiplayerPeer;
-
                     break;
                 case 3:
-                    if (IsServer)
-                    {
-                        var serverPeer = (NormalServerPeer)multiplayerApi.MultiplayerPeer;
-                    }
-                    else
-                    {
-                        var clientPeer = (NormalClientPeer)multiplayerApi.MultiplayerPeer;
-                    }
-
+                    var normalPeer = (SteamSocketPeer)multiplayerApi.MultiplayerPeer;
                     break;
                 default:
                     var enetPeer = (ENetMultiplayerPeer)multiplayerApi.MultiplayerPeer;

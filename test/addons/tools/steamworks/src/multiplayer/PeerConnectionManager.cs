@@ -19,13 +19,13 @@ public class PeerConnectionManager(SteamPeer steamPeer) : IConnectionManager
     {
         SteamId = info.Identity.SteamId;
         steamPeer.ConnectionStatus = MultiplayerPeer.ConnectionStatus.Connected;
-        steamPeer.HandShake(SteamId);
+        steamPeer.OnSocketConnected(SteamId);
     }
 
     public void OnDisconnected(ConnectionInfo info)
     {
         steamPeer.ConnectionStatus = MultiplayerPeer.ConnectionStatus.Disconnected;
-        // steamPeer.DisconnectPeer(SteamPeer.ServerPeerId);
+        steamPeer.OnSocketDisconnected(SteamId);
     }
 
     public unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)

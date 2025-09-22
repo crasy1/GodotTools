@@ -25,16 +25,17 @@ public class PeerSocketManager(SteamPeer steamPeer) : ISocketManager
 
     public void OnConnected(Connection connection, ConnectionInfo info)
     {
-        ConnectionDict.TryAdd(connection, info.Identity.SteamId);
-        SteamIdDict.TryAdd(info.Identity.SteamId, connection);
+        var steamId = info.Identity.SteamId;
+        ConnectionDict.TryAdd(connection, steamId);
+        SteamIdDict.TryAdd(steamId, connection);
+        steamPeer.OnSocketConnected(steamId);
     }
 
     public void OnDisconnected(Connection connection, ConnectionInfo info)
-    {
-        Log.Info($"{info.Identity.SteamId} 断开连接");
+    {var steamId = info.Identity.SteamId;
         ConnectionDict.Remove(connection);
-        SteamIdDict.Remove(info.Identity.SteamId);
-        steamPeer.Close();
+        SteamIdDict.Remove(steamId);
+        steamPeer.OnSocketDisconnected(steamId);
     }
 
     public unsafe void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum,

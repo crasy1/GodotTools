@@ -37,13 +37,35 @@ public partial class SteamMessageP2PPeer : SteamPeer
         SNetworkingSocketMessages.Instance.UserConnectFailed -= OnHandShakeFailed;
     }
 
+    private void OnHandShakeFailed(ulong steamId)
+    {
+        HandShake(steamId);
+    }
+
+    public override void ReceiveData(ulong steamId, int channel, byte[] data)
+    {
+        var peerId = Lobby!.Value.IsOwnedBy(steamId) ? ServerPeerId : (int)((SteamId)steamId).AccountId;
+        // 过滤掉握手包
+        if (channel == (int)Channel.Handshake)
+        {
+            if (ConnectedPeers.TryAdd(peerId, steamId))
+            {
+                EmitSignalPeerConnected(peerId);
+            }
+
+            return;
+        }
+
+        ProcessData(peerId, steamId, channel, data);
+    }
+
     protected override bool SendMsg(SteamId steamId, byte[] data, Channel channel = Channel.Msg,
         SendType sendType = SendType.Reliable)
     {
         return SNetworkingSocketMessages.SendP2P(steamId, data, channel, sendType);
     }
 
-    protected override void DisconnectPeer(SteamId steamId)
+    protected override void OnPeerDisconnect(SteamId steamId)
     {
         SNetworkingSocketMessages.Instance.Disconnect(steamId);
     }
