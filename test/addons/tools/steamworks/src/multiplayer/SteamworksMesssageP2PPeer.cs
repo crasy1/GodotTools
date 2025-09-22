@@ -59,7 +59,7 @@ public partial class SteamworksMessageP2PPeer : SteamPeer
 
     public override bool ServerRelaySupported()
     {
-        return false;
+        return true;
     }
 
 

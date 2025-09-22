@@ -218,6 +218,7 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         SteamMatchmaking.OnLobbyEntered -= OnLobbyEntered;
         SteamMatchmaking.OnLobbyMemberJoined -= OnLobbyMemberJoined;
         SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeave;
+        SteamMatchmaking.OnLobbyMemberDataChanged -= OnLobbyMemberDataChanged;
     }
 
     public override void _DisconnectPeer(int pPeer, bool pForce)
