@@ -14,6 +14,7 @@ public partial class Test2d : Node2D
 
     public override void _Ready()
     {
+        GetTree().SetMultiplayer(new SteamMultiPlayer());
         var multiplayerApi = GetTree().GetMultiplayer();
         multiplayerApi.PeerConnected += OnPeerConnected;
         multiplayerApi.PeerDisconnected += OnPeerDisconnected;

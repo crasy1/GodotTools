@@ -49,7 +49,10 @@ public partial class SteamP2PPeer : SteamPeer
 
     private void OnHandShakeFailed(ulong steamId)
     {
-        HandShake(steamId);
+        if (!_IsServer())
+        {
+            ConnectionStatus = ConnectionStatus.Disconnected;
+        }
     }
 
     private void HandShake(SteamId steamId)

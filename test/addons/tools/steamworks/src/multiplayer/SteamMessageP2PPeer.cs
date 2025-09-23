@@ -61,7 +61,10 @@ public partial class SteamMessageP2PPeer : SteamPeer
 
     private void OnHandShakeFailed(ulong steamId)
     {
-        HandShake(steamId);
+        if (!_IsServer())
+        {
+            ConnectionStatus = ConnectionStatus.Disconnected;
+        }
     }
 
     public override void ReceiveData(ulong steamId, int channel, byte[] data)

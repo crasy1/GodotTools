@@ -96,6 +96,7 @@ public partial class SteamSocketPeer : SteamPeer
         }
         catch (Exception e)
         {
+            peer.ConnectionStatus = ConnectionStatus.Disconnected;
             Log.Error($"创建 relay peer 客户端异常, {e.Message}");
             peer.Lobby?.Leave();
             throw;
@@ -117,8 +118,10 @@ public partial class SteamSocketPeer : SteamPeer
         }
         catch (Exception e)
         {
+            peer.ConnectionStatus = ConnectionStatus.Disconnected;
             Log.Error($"创建 normal peer 客户端异常, {e.Message}");
             peer.Lobby?.Leave();
+
             throw;
         }
     }
