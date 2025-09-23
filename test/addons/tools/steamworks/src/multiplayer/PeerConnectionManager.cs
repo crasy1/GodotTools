@@ -25,7 +25,7 @@ public class PeerConnectionManager(SteamPeer steamPeer) : IConnectionManager
     public void OnDisconnected(ConnectionInfo info)
     {
         steamPeer.ConnectionStatus = MultiplayerPeer.ConnectionStatus.Disconnected;
-        steamPeer.OnSocketDisconnected(SteamId);
+        steamPeer.OnSocketDisconnected(info.Identity.SteamId);
     }
 
     public unsafe void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)

@@ -15,9 +15,10 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
 {
     public const int ServerPeerId = 1;
     private int TargetPeer { set; get; }
-    protected int PeerId { set; get; }
+    private int PeerId { get; }
+    private SteamSocketType SteamSocketType { get; }
     public ConnectionStatus ConnectionStatus { set; get; } = ConnectionStatus.Connecting;
-    protected Lobby? Lobby { set; get; }
+    protected Lobby? Lobby { private set; get; }
     private Friend? LobbyOwner { set; get; }
 
     private readonly Queue<SteamPacket> PacketQueue = new();
@@ -25,12 +26,14 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
     /// <summary>
     /// 大厅中的peer
     /// </summary>
-    public readonly Dictionary<int, SteamId> ConnectedPeers = new();
+    private readonly Dictionary<int, SteamId> ConnectedPeers = new();
 
     private string Type { set; get; }
 
-    protected SteamPeer()
+    protected SteamPeer(int peerId, SteamSocketType socketType)
     {
+        PeerId = peerId;
+        SteamSocketType = socketType;
         Type = GetType().Name;
         Log.Info($"创建 {Type}");
         SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
@@ -49,28 +52,46 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
     /// </summary>
     protected abstract void OnClose();
 
-    private void OnLobbyEntered(Lobby lobby)
+    public void OnSocketConnected(SteamId steamId)
     {
-        ConnectionStatus = ConnectionStatus.Connected;
+        var peerId = LobbyOwner?.Id == steamId ? ServerPeerId : (int)steamId.AccountId;
+        if (ConnectedPeers.TryAdd(peerId, steamId))
+        {
+            if (!_IsServer() && peerId == ServerPeerId)
+            {
+                ConnectionStatus = ConnectionStatus.Connected;
+            }
+
+            EmitSignalPeerConnected(peerId);
+        }
+    }
+
+    public void OnSocketDisconnected(SteamId steamId)
+    {
+        var peerId = LobbyOwner?.Id == steamId ? ServerPeerId : (int)steamId.AccountId;
+        if (!_IsServer() && peerId == ServerPeerId)
+        {
+            ConnectionStatus = ConnectionStatus.Disconnected;
+        }
+
+        DisconnectPeer(peerId);
+    }
+
+    protected virtual void OnLobbyEntered(Lobby lobby)
+    {
         Lobby = lobby;
         LobbyOwner = lobby.Owner;
-        if (!_IsServer())
-        {
-            // 给服务器发送握手包
-            HandShake(lobby.Owner.Id);
-        }
-    }
-
-    private void OnLobbyMemberJoined(Lobby lobby, Friend friend)
-    {
-        // 服务器给新加入的peer发送握手包
         if (_IsServer())
         {
-            HandShake(friend.Id);
+            ConnectionStatus = ConnectionStatus.Connected;
         }
     }
 
-    private void OnLobbyMemberLeave(Lobby lobby, Friend friend)
+    protected virtual void OnLobbyMemberJoined(Lobby lobby, Friend friend)
+    {
+    }
+
+    protected void OnLobbyMemberLeave(Lobby lobby, Friend friend)
     {
         // 房主离开后会自动换新的房主
         var isLobbyOwnerLeave = friend.Id == LobbyOwner?.Id;
@@ -117,7 +138,7 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         PacketQueue.Enqueue(steamMessage);
     }
 
-    protected async Task<Lobby> CreateLobby(int maxUser)
+    protected static async Task<Lobby> CreateLobby(int maxUser)
     {
         var lobby = await SMatchmaking.CreateLobbyAsync(maxUser);
         if (!lobby.HasValue)
@@ -128,32 +149,16 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         return lobby.Value;
     }
 
-    protected async Task JoinLobby(Lobby? lobby)
+    protected static async Task JoinLobby(Lobby lobby)
     {
-        if (!lobby.HasValue)
-        {
-            throw new Exception("未找到大厅");
-        }
-
-        if (_IsServer())
-        {
-            throw new Exception("作为服务器不需要加入其他大厅");
-        }
-
-        var result = await SMatchmaking.JoinLobbyAsync(lobby.Value);
+        var result = await SMatchmaking.JoinLobbyAsync(lobby);
         if (!result)
         {
-            ConnectionStatus = ConnectionStatus.Disconnected;
             throw new Exception("加入大厅失败");
         }
     }
 
-    public void HandShake(SteamId steamId)
-    {
-        SendMsg(steamId, Consts.SocketHandShake, Channel.Handshake);
-    }
-
-    private bool SendMsg(SteamId steamId, string data, Channel channel = Channel.Msg,
+    protected bool SendMsg(SteamId steamId, string data, Channel channel = Channel.Msg,
         SendType sendType = SendType.Reliable)
     {
         return SendMsg(steamId, Encoding.UTF8.GetBytes(data), channel, sendType);
@@ -297,27 +302,27 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
                 {
                     case 0:
                     {
-                        foreach (var peerId in ConnectedPeers.Keys)
+                        foreach (var steamId in ConnectedPeers.Values)
                         {
-                            SendMsg(ConnectedPeers[peerId], pBuffer, channel, sendType);
+                            SendMsg(steamId, pBuffer, channel, sendType);
                         }
 
                         break;
                     }
                     case < 0:
                     {
-                        foreach (var peerId in ConnectedPeers.Keys.Where(peerId => peerId != Mathf.Abs(TargetPeer)))
+                        foreach (var (peerId, steamId) in ConnectedPeers.Where(kv => kv.Key != Mathf.Abs(TargetPeer)))
                         {
-                            SendMsg(ConnectedPeers[peerId], pBuffer, channel, sendType);
+                            SendMsg(steamId, pBuffer, channel, sendType);
                         }
 
                         break;
                     }
                     default:
                     {
-                        foreach (var peerId in ConnectedPeers.Keys.Where(peerId => peerId == TargetPeer))
+                        foreach (var (peerId, steamId) in ConnectedPeers.Where(kv => kv.Key == TargetPeer))
                         {
-                            SendMsg(ConnectedPeers[peerId], pBuffer, channel, sendType);
+                            SendMsg(steamId, pBuffer, channel, sendType);
                         }
 
                         break;
@@ -326,7 +331,10 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
             }
             else
             {
-                SendMsg(ConnectedPeers[ServerPeerId], pBuffer, channel, sendType);
+                if (ConnectedPeers.TryGetValue(ServerPeerId, out var steamId))
+                {
+                    SendMsg(steamId, pBuffer, channel, sendType);
+                }
             }
 
             return Error.Ok;
@@ -335,24 +343,6 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         {
             Log.Error($"{Type} {PeerId} 发送数据包异常, {e.Message}");
             return Error.Failed;
-        }
-    }
-
-    public void OnSocketConnected(SteamId steamId)
-    {
-        var peerId = LobbyOwner?.Id == steamId ? ServerPeerId : (int)steamId.AccountId;
-        if (ConnectedPeers.TryAdd(peerId, steamId))
-        {
-            EmitSignalPeerConnected(peerId);
-        }
-    }
-
-    public void OnSocketDisconnected(SteamId steamId)
-    {
-        var peerId = LobbyOwner?.Id == steamId ? ServerPeerId : (int)steamId.AccountId;
-        if (ConnectedPeers.Remove(peerId))
-        {
-            DisconnectPeer(peerId);
         }
     }
 }

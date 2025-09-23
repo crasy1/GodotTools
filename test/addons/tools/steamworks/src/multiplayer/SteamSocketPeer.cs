@@ -11,8 +11,10 @@ namespace Godot;
 /// </summary>
 public partial class SteamSocketPeer : SteamPeer
 {
-    // TODO 实现normal版本和优化peer信号
-    public const string HostPort = "HostPort";
+    public const int DefaultPort = 60937;
+
+    private int Port { set; get; } = DefaultPort;
+    private string Host { set; get; }
 
     /// <summary>
     /// 服务端配置
@@ -26,116 +28,107 @@ public partial class SteamSocketPeer : SteamPeer
     /// </summary>
     private PeerConnectionManager PeerConnectionManager { set; get; }
 
-    public ConnectionManager ConnectionManager { set; get; }
+    private ConnectionManager ConnectionManager { set; get; }
 
+    private SteamSocketPeer(int peerId, SteamSocketType socketType) : base(peerId, socketType)
+    {
+    }
+
+    /// <summary>
+    /// 需要创建端口
+    /// </summary>
+    /// <param name="port"></param>
+    /// <param name="maxUser"></param>
+    /// <returns></returns>
     public static async Task<SteamSocketPeer> CreateRelayServer(int port, int maxUser = 4)
     {
+        var peer = new SteamSocketPeer(ServerPeerId, SteamSocketType.Relay);
         try
         {
-            var peer = new SteamSocketPeer();
+            await CreateLobby(maxUser);
             var peerSocketManager = new PeerSocketManager(peer);
             var socketManager = SteamNetworkingSockets.CreateRelaySocket(port, peerSocketManager);
             peer.PeerSocketManager = peerSocketManager;
             peer.SocketManager = socketManager;
-            peer.PeerId = ServerPeerId;
-            var lobby = await peer.CreateLobby(maxUser);
-            lobby.SetData(HostPort, port.ToString());
             return peer;
         }
         catch (Exception e)
         {
-            Log.Error($"创建{nameof(SteamSocketPeer)} relay服务端异常, {e.Message}");
+            Log.Error($"创建 relay peer 服务端异常, {e.Message}");
+            peer.Lobby?.Leave();
             throw;
         }
     }
 
-    public static async Task<SteamSocketPeer> CreateNormalServer(int port, int maxUser = 4)
+    public static async Task<SteamSocketPeer> CreateNormalServer(ushort port, int maxUser = 4)
     {
+        var peer = new SteamSocketPeer(ServerPeerId, SteamSocketType.Normal);
         try
         {
-            var peer = new SteamSocketPeer();
+            await CreateLobby(maxUser);
             var peerSocketManager = new PeerSocketManager(peer);
-            var socketManager =
-                SteamNetworkingSockets.CreateNormalSocket(NetAddress.AnyIp((ushort)port), peerSocketManager);
+            var socketManager = SteamNetworkingSockets.CreateNormalSocket(NetAddress.AnyIp(port), peerSocketManager);
             peer.PeerSocketManager = peerSocketManager;
             peer.SocketManager = socketManager;
-            peer.PeerId = ServerPeerId;
-            var lobby = await peer.CreateLobby(maxUser);
-            lobby.SetData(HostPort, port.ToString());
             return peer;
         }
         catch (Exception e)
         {
-            Log.Error($"创建{nameof(SteamSocketPeer)} normal服务端异常, {e.Message}");
+            Log.Error($"创建 normal peer 服务端异常, {e.Message}");
+            peer.Lobby?.Leave();
             throw;
         }
     }
 
-    public static async Task<SteamSocketPeer> CreateRelayClient(Lobby? lobby)
+    public static async Task<SteamSocketPeer> CreateRelayClient(Lobby lobby, int port)
     {
+        var peer = new SteamSocketPeer((int)SteamClient.SteamId.AccountId, SteamSocketType.Relay);
         try
         {
-            if (!lobby.HasValue)
-            {
-                throw new Exception("未找到大厅");
-            }
-
-            var hostPort = lobby.Value.GetData(HostPort);
-            Log.Info($"relayserver hostPort:{hostPort}");
-            var lobbyOwner = lobby.Value.Owner;
-            var peer = new SteamSocketPeer();
+            await JoinLobby(lobby);
+            var lobbyOwner = lobby.Owner;
             var peerConnectionManager = new PeerConnectionManager(peer);
             var connectionManager =
-                SteamNetworkingSockets.ConnectRelay(lobbyOwner.Id, int.Parse(hostPort), peerConnectionManager);
+                SteamNetworkingSockets.ConnectRelay(lobbyOwner.Id, port, peerConnectionManager);
             peer.PeerConnectionManager = peerConnectionManager;
             peer.ConnectionManager = connectionManager;
-            peer.PeerId = (int)SteamClient.SteamId.AccountId;
-            await peer.JoinLobby(lobby);
             return peer;
         }
         catch (Exception e)
         {
-            Log.Error($"创建{nameof(SteamSocketPeer)}客户端异常, {e.Message}");
+            Log.Error($"创建 relay peer 客户端异常, {e.Message}");
+            peer.Lobby?.Leave();
             throw;
         }
     }
 
-    public static async Task<SteamSocketPeer> CreateNormalClient(string host, Lobby? lobby)
+    public static async Task<SteamSocketPeer> CreateNormalClient(string host, ushort port, Lobby lobby)
     {
+        var peer = new SteamSocketPeer((int)SteamClient.SteamId.AccountId, SteamSocketType.Normal);
         try
         {
-            if (!lobby.HasValue)
-            {
-                throw new Exception("未找到大厅");
-            }
-
-            var hostPort = lobby.Value.GetData(HostPort);
-            var peer = new SteamSocketPeer();
+            await JoinLobby(lobby);
             var peerConnectionManager = new PeerConnectionManager(peer);
             var connectionManager =
-                SteamNetworkingSockets.ConnectNormal(NetAddress.From(host, ushort.Parse(hostPort)),
-                    peerConnectionManager);
+                SteamNetworkingSockets.ConnectNormal(NetAddress.From(host, port), peerConnectionManager);
             peer.PeerConnectionManager = peerConnectionManager;
             peer.ConnectionManager = connectionManager;
-            peer.PeerId = (int)SteamClient.SteamId.AccountId;
-            await peer.JoinLobby(lobby);
             return peer;
         }
         catch (Exception e)
         {
-            Log.Error($"创建{nameof(SteamSocketPeer)}客户端异常, {e.Message}");
+            Log.Error($"创建 normal peer 客户端异常, {e.Message}");
+            peer.Lobby?.Leave();
             throw;
         }
     }
 
     protected override void OnCreate()
     {
-        SteamMatchmaking.OnLobbyDataChanged += OnLobbyDataChanged;
     }
 
     protected override void OnClose()
     {
-        SteamMatchmaking.OnLobbyDataChanged -= OnLobbyDataChanged;
         if (_IsServer())
         {
             foreach (var connection in PeerSocketManager.ConnectionDict.Keys)
@@ -151,11 +144,6 @@ public partial class SteamSocketPeer : SteamPeer
         }
     }
 
-    private void OnLobbyDataChanged(Lobby lobby)
-    {
-        Log.Info($"HostPort:{lobby.GetData("HostPort")}");
-    }
-
     public override void ReceiveData(ulong steamId, int channel, byte[] data)
     {
         var peerId = Lobby!.Value.IsOwnedBy(steamId) ? ServerPeerId : (int)((SteamId)steamId).AccountId;
@@ -167,7 +155,12 @@ public partial class SteamSocketPeer : SteamPeer
     {
         if (_IsServer())
         {
-            return PeerSocketManager.SteamIdDict[steamId].SendMessage(data, sendType, (ushort)channel) == Result.OK;
+            if (PeerSocketManager.SteamIdDict.TryGetValue(steamId, out var connection))
+            {
+                return connection.SendMessage(data, sendType, (ushort)channel) == Result.OK;
+            }
+
+            return false;
         }
         else
         {
@@ -179,7 +172,10 @@ public partial class SteamSocketPeer : SteamPeer
     {
         if (_IsServer())
         {
-            PeerSocketManager.SteamIdDict[steamId].Close();
+            if (PeerSocketManager.SteamIdDict.TryGetValue(steamId, out var connection))
+            {
+                connection.Close();
+            }
         }
         else
         {

@@ -32,7 +32,8 @@ public class PeerSocketManager(SteamPeer steamPeer) : ISocketManager
     }
 
     public void OnDisconnected(Connection connection, ConnectionInfo info)
-    {var steamId = info.Identity.SteamId;
+    {
+        var steamId = info.Identity.SteamId;
         ConnectionDict.Remove(connection);
         SteamIdDict.Remove(steamId);
         steamPeer.OnSocketDisconnected(steamId);

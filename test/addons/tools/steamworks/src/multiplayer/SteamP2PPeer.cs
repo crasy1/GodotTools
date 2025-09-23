@@ -9,25 +9,54 @@ namespace Godot;
 /// </summary>
 public partial class SteamP2PPeer : SteamPeer
 {
+    private SteamP2PPeer(int peerId, SteamSocketType socketType) : base(peerId, socketType)
+    {
+    }
+
     public static async Task<SteamP2PPeer> CreateServer(int maxUser = 4)
     {
-        var peer = new SteamP2PPeer();
-        peer.PeerId = ServerPeerId;
-        await peer.CreateLobby(maxUser);
+        var peer = new SteamP2PPeer(ServerPeerId, SteamSocketType.P2P);
+        await CreateLobby(maxUser);
         return peer;
     }
 
-    public static async Task<SteamP2PPeer> CreateClient(Lobby? lobby)
+    public static async Task<SteamP2PPeer> CreateClient(Lobby lobby)
     {
-        var peer = new SteamP2PPeer();
-        peer.PeerId = (int)SteamClient.SteamId.AccountId;
-        await peer.JoinLobby(lobby);
+        var peer = new SteamP2PPeer((int)SteamClient.SteamId.AccountId, SteamSocketType.P2P);
+        await JoinLobby(lobby);
         return peer;
     }
+
+    protected override void OnLobbyEntered(Lobby lobby)
+    {
+        base.OnLobbyEntered(lobby);
+        if (!_IsServer())
+        {
+            // 给服务器发送握手包
+            HandShake(lobby.Owner.Id);
+        }
+    }
+
+    protected override void OnLobbyMemberJoined(Lobby lobby, Friend friend)
+    {
+        base.OnLobbyEntered(lobby);
+        // 服务器给新加入的peer发送握手包
+        if (_IsServer())
+        {
+            HandShake(friend.Id);
+        }
+    }
+
     private void OnHandShakeFailed(ulong steamId)
     {
         HandShake(steamId);
     }
+
+    private void HandShake(SteamId steamId)
+    {
+        SendMsg(steamId, Consts.SocketHandShake, Channel.Handshake);
+    }
+
     protected override void OnCreate()
     {
         SNetworking.Instance.ReceiveData += ReceiveData;
@@ -46,11 +75,7 @@ public partial class SteamP2PPeer : SteamPeer
         // 过滤掉握手包
         if (channel == (int)Channel.Handshake)
         {
-            if (ConnectedPeers.TryAdd(peerId, steamId))
-            {
-                EmitSignalPeerConnected(peerId);
-            }
-
+            OnSocketConnected(steamId);
             return;
         }
 
