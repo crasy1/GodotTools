@@ -36,6 +36,7 @@ public partial class SUser : SteamComponent
         };
         SteamUser.OnSteamServersDisconnected += () =>
         {
+            // 无法与steam上的用户进行p2p通信
             Log.Info($"已断开Steam服务器");
             ServerConnected = false;
         };
@@ -87,11 +88,20 @@ public partial class SUser : SteamComponent
 
     public override void _Process(double delta)
     {
-        if (SteamUser.HasVoiceData)
+        try
         {
+            if (!SteamUser.HasVoiceData)
+            {
+                return;
+            }
+
             using var memoryStream = new MemoryStream();
-            var length = SteamUser.ReadVoiceData(memoryStream);
+            SteamUser.ReadVoiceData(memoryStream);
             EmitSignalRecordVoiceData(SteamClient.SteamId, memoryStream.GetBuffer());
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
     }
 

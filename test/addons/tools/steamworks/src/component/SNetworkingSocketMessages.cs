@@ -67,9 +67,16 @@ public partial class SNetworkingSocketMessages : SteamComponent
 
     public override void _Process(double delta)
     {
-        foreach (var channel in Channels)
+        try
         {
-            SteamNetworkingMessages.Receive(channel);
+            foreach (var channel in Channels)
+            {
+                SteamNetworkingMessages.Receive(channel);
+            }
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
     }
 

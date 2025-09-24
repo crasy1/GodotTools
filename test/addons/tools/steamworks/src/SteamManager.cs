@@ -173,7 +173,6 @@ public partial class SteamManager : CanvasLayer
         var components = new Node();
         components.Name = $"{nameof(SteamComponent)}s";
         AddChild(components);
-        components.AddChild(SClient.Instance);
         components.AddChild(SServer.Instance);
         components.AddChild(SApp.Instance);
         components.AddChild(SFriends.Instance);
@@ -196,6 +195,7 @@ public partial class SteamManager : CanvasLayer
         components.AddChild(SUser.Instance);
         components.AddChild(SUserStats.Instance);
         components.AddChild(SUtil.Instance);
+        components.AddChild(SClient.Instance);
     }
 
     private void OnSteamClientDisconnected()

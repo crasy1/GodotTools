@@ -156,18 +156,25 @@ public partial class SteamSocketPeer : SteamPeer
     protected override bool SendMsg(SteamId steamId, byte[] data, Channel channel = Channel.Msg,
         SendType sendType = SendType.Reliable)
     {
-        if (_IsServer())
+        try
         {
-            if (PeerSocketManager.SteamIdDict.TryGetValue(steamId, out var connection))
+            if (_IsServer())
             {
-                return connection.SendMessage(data, sendType, (ushort)channel) == Result.OK;
-            }
+                if (PeerSocketManager.SteamIdDict.TryGetValue(steamId, out var connection))
+                {
+                    return connection.SendMessage(data, sendType, (ushort)channel) == Result.OK;
+                }
 
-            return false;
+                return false;
+            }
+            else
+            {
+                return ConnectionManager.Connection.SendMessage(data, sendType, (ushort)channel) == Result.OK;
+            }
         }
-        else
+        catch (Exception e)
         {
-            return ConnectionManager.Connection.SendMessage(data, sendType, (ushort)channel) == Result.OK;
+            return false;
         }
     }
 

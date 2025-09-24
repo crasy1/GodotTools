@@ -74,9 +74,16 @@ public partial class SClient : SteamComponent
 
     public override void _Process(double delta)
     {
-        if (SteamClient.IsValid)
+        try
         {
-            SteamClient.RunCallbacks();
+            if (SteamClient.IsValid)
+            {
+                SteamClient.RunCallbacks();
+            }
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
     }
 }

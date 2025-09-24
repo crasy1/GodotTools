@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,111 +6,139 @@ using Steamworks.Data;
 
 namespace Godot;
 
+/// <summary>
+/// 由于可以创建多个大厅,规定一个用户只能在一个大厅
+/// 为了避免重复创建，这里使用单例模式,所有大厅操作通过此类进行操作
+/// </summary>
 [Singleton]
 public partial class SMatchmaking : SteamComponent
 {
+    [Signal]
+    public delegate void LobbyCreatedEventHandler(int result, ulong lobbyId);
+
+    [Signal]
+    public delegate void LobbyLeavedEventHandler(ulong lobbyId);
+
+    [Signal]
+    public delegate void LobbyEnteredEventHandler(ulong lobbyId);
+
+    [Signal]
+    public delegate void LobbyInviteEventHandler(ulong lobbyId, ulong steamId);
+
+    [Signal]
+    public delegate void LobbyMemberJoinedEventHandler(ulong lobbyId, ulong steamId);
+
+    [Signal]
+    public delegate void LobbyMemberLeaveEventHandler(ulong lobbyId, ulong steamId);
+
+    [Signal]
+    public delegate void LobbyMemberDisconnectedEventHandler(ulong lobbyId, ulong steamId);
+
+    [Signal]
+    public delegate void LobbyMemberDataChangedEventHandler(ulong lobbyId, ulong steamId);
+
+    [Signal]
+    public delegate void LobbyDataChangedEventHandler(ulong lobbyId);
+
+    [Signal]
+    public delegate void LobbyChatMessageEventHandler(ulong lobbyId, ulong steamId, string message);
+
+    [Signal]
+    public delegate void LobbyMemberKickEventHandler(ulong lobbyId, ulong steamId);
+
     public static Lobby? Lobby { get; private set; }
 
-    public const string KickMsg = "KICK:";
+    private const string KickMemberMsg = "[KICK_MEMBER]";
 
     public override void _Ready()
     {
         base._Ready();
         SteamMatchmaking.OnLobbyCreated += (result, lobby) =>
         {
-            Log.Info($"创建房间结果 {result}");
+            Log.Debug($"[matchmaking]创建大厅 {result} {lobby.Id}");
+            // 网络创建失败也会进入
             if (result == Result.OK)
             {
+                LeaveLobby();
                 Lobby = lobby;
                 // 确保只能搜到客户端版本一致的大厅
                 var update = Lobby?.SetData(nameof(Project.Version), Project.Version);
-                Log.Info($"更新lobby {nameof(Project.Version)} {Project.Version} {update}");
+                Log.Debug($"[matchmaking]更新lobby {nameof(Project.Version)} {Project.Version} {update}");
             }
-        };
-        SteamMatchmaking.OnLobbyInvite += (friend, lobby) =>
-        {
-            Log.Info($"收到房间邀请 {friend} {lobby.Id}");
-            Lobby = lobby;
+
+            EmitSignalLobbyCreated((int)result, lobby.Id);
         };
         SteamMatchmaking.OnLobbyEntered += (lobby) =>
         {
-            Log.Info($"进入房间 {lobby.Id}");
             Lobby = lobby;
-            // 添加steam状态
-            SFriends.Instance.DisplayCustom("在大厅中");
-            SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
-            // 添加队伍语音
-            foreach (var lobbyMember in lobby.Members)
-            {
-                if (!lobbyMember.IsMe)
-                {
-                    TeamVoice.Instance.AddTeamMember(lobbyMember.Id);
-                }
-            }
+            Log.Debug($"[matchmaking]进入大厅 {lobby.Id}");
+            EmitSignalLobbyEntered(lobby.Id);
         };
-        SteamMatchmaking.OnLobbyGameCreated += (lobby, i, s, steamId) =>
+        SteamMatchmaking.OnLobbyInvite += (friend, lobby) =>
         {
-            SFriends.Instance.DisplayCustom("在游戏中");
-            SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
-            Log.Info($"房间游戏已创建 {lobby.Id} {i} {s} {steamId}");
+            Log.Debug($"[matchmaking]收到大厅邀请 {friend} {lobby.Id}");
+            EmitSignalLobbyInvite(lobby.Id, friend.Id);
         };
+
+
         SteamMatchmaking.OnLobbyDataChanged += (lobby) =>
         {
-            Log.Info($"房间数据已改变 {lobby.Id}");
-            Lobby = lobby;
+            Log.Debug($"[matchmaking]大厅数据已改变 {lobby.Id}");
+            EmitSignalLobbyDataChanged(lobby.Id);
         };
         SteamMatchmaking.OnChatMessage += (lobby, friend, message) =>
         {
-            Log.Info($"房间聊天消息 {lobby.Id} {friend} {message}");
-            if (message.StartsWith(KickMsg))
+            Log.Debug($"[matchmaking]大厅聊天消息 {lobby.Id} {friend} {message}");
+            if (lobby.IsOwnedBy(friend.Id) && message.StartsWith(KickMemberMsg))
             {
-                if (message.Replace(KickMsg, "") == SteamClient.SteamId.ToString())
+                // 如果存在踢掉的玩家
+                if (ulong.TryParse(message.Replace(KickMemberMsg, ""), out var steamId) &&
+                    lobby.Members.Any(f => f.Id == steamId))
                 {
-                    Log.Info("被踢出房间");
-                    LeaveLobby();
+                    EmitSignalLobbyMemberKick(lobby.Id, steamId);
                 }
+
+                return;
             }
 
-            Lobby = lobby;
+            EmitSignalLobbyChatMessage(lobby.Id, friend.Id, message);
         };
         SteamMatchmaking.OnLobbyMemberJoined += (lobby, friend) =>
         {
-            Log.Info($"房间成员加入 {lobby.Id} {friend}");
-            Lobby = lobby;
-            // 改变steam状态
-            SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
-            // 添加队伍语音
-            TeamVoice.Instance.AddTeamMember(friend.Id);
+            Log.Debug($"[matchmaking]大厅成员加入 {lobby.Id} {friend}");
+            EmitSignalLobbyMemberJoined(lobby.Id, friend.Id);
         };
+        // 主动离开调用lobby.Leave()
         SteamMatchmaking.OnLobbyMemberLeave += (lobby, friend) =>
         {
-            Log.Info($"房间成员离开 {lobby.Id} {friend}");
-            Lobby = lobby;
-            // 改变steam状态
-            SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
-            // 移除队伍语音
-            TeamVoice.Instance.RemoveTeamMember(friend.Id);
+            Log.Debug($"[matchmaking]大厅成员离开 {lobby.Id} {friend}");
+            EmitSignalLobbyMemberLeave(lobby.Id, friend.Id);
         };
-        SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
-        {
-            Log.Info($"房间成员被禁言 {lobby.Id} {friend} {friend2}");
-        };
+
         SteamMatchmaking.OnLobbyMemberDataChanged += (lobby, friend) =>
         {
-            Log.Info($"房间成员数据改变 {lobby.Id} {friend}");
-            Lobby = lobby;
+            Log.Debug($"[matchmaking]大厅成员数据改变 {lobby.Id} {friend}");
+            EmitSignalLobbyMemberDataChanged(lobby.Id, friend.Id);
         };
+        // 意外断开，比如断网，没有调用lobby.Leave()
         SteamMatchmaking.OnLobbyMemberDisconnected += (lobby, friend) =>
         {
-            Log.Info($"房间成员断开连接 {lobby.Id} {friend}");
-            Lobby = lobby;
-            SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
+            Log.Debug($"[matchmaking]大厅成员断开连接 {lobby.Id} {friend}");
+            EmitSignalLobbyMemberDisconnected(lobby.Id, friend.Id);
+        };
+        // 暂时用不到
+        SteamMatchmaking.OnLobbyGameCreated += (lobby, i, s, steamId) =>
+        {
+            Log.Debug($"[matchmaking]大厅游戏已创建 {lobby.Id} {i} {s} {steamId}");
+        };
+        // 下面两个回调sdk中没有实现
+        SteamMatchmaking.OnLobbyMemberBanned += (lobby, friend, friend2) =>
+        {
+            Log.Debug($"[matchmaking]大厅成员被禁言 {lobby.Id} {friend} {friend2}");
         };
         SteamMatchmaking.OnLobbyMemberKicked += (lobby, friend, friend2) =>
         {
-            Log.Info($"房间成员被踢 {lobby.Id} {friend} {friend2}");
-            Lobby = lobby;
-            SFriends.Instance.ShowGroup(lobby.Id.ToString(), lobby.MemberCount);
+            Log.Debug($"[matchmaking]大厅成员被踢 {lobby.Id} {friend} {friend2}");
         };
     }
 
@@ -126,7 +153,7 @@ public partial class SMatchmaking : SteamComponent
     }
 
     /// <summary>
-    /// 加入房间
+    /// 加入大厅
     /// </summary>
     /// <param name="lobby"></param>
     /// <returns></returns>
@@ -140,14 +167,14 @@ public partial class SMatchmaking : SteamComponent
     /// </summary>
     public static void LeaveLobby()
     {
-        Lobby?.Leave();
-        Lobby = null;
-        Log.Info("退出大厅");
-        // 移除steam状态
-        SFriends.Instance.CloseDisplay();
-        SFriends.Instance.CloseGroup();
-        // 退出队伍语音
-        TeamVoice.Instance.RemoveAllTeamMember();
+        if (Lobby.HasValue)
+        {
+            Log.Debug("退出大厅");
+            var lobbyId = Lobby.Value.Id;
+            Lobby?.Leave();
+            Lobby = null;
+            Instance.EmitSignalLobbyLeaved(lobbyId);
+        }
     }
 
     public static async Task<List<Lobby>> Search(int minSlots = 1, int maxResult = 10,
@@ -171,7 +198,7 @@ public partial class SMatchmaking : SteamComponent
     }
 
     /// <summary>
-    /// 踢掉玩家
+    /// 房主才可以踢掉玩家
     /// </summary>
     /// <param name="steamId"></param>
     public static void Kick(SteamId steamId)
@@ -188,7 +215,7 @@ public partial class SMatchmaking : SteamComponent
             {
                 if (member.Id == steamId)
                 {
-                    lobby.SendChatString($"{KickMsg}{steamId}");
+                    lobby.SendChatString($"{KickMemberMsg}{steamId}");
                 }
             }
         }

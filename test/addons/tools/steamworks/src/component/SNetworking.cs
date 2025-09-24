@@ -86,16 +86,23 @@ public partial class SNetworking : SteamComponent
 
     public override void _Process(double delta)
     {
-        foreach (var channel in Channels)
+        try
         {
-            if (SteamNetworking.IsP2PPacketAvailable(channel))
+            foreach (var channel in Channels)
             {
-                var readP2PPacket = SteamNetworking.ReadP2PPacket(channel);
-                if (readP2PPacket.HasValue)
+                if (SteamNetworking.IsP2PPacketAvailable(channel))
                 {
-                    EmitSignalReceiveData(readP2PPacket.Value.SteamId, channel, readP2PPacket.Value.Data);
+                    var readP2PPacket = SteamNetworking.ReadP2PPacket(channel);
+                    if (readP2PPacket.HasValue)
+                    {
+                        EmitSignalReceiveData(readP2PPacket.Value.SteamId, channel, readP2PPacket.Value.Data);
+                    }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
     }
 

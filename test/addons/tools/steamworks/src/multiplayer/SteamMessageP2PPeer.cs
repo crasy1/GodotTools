@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
@@ -88,7 +89,14 @@ public partial class SteamMessageP2PPeer : SteamPeer
     protected override bool SendMsg(SteamId steamId, byte[] data, Channel channel = Channel.Msg,
         SendType sendType = SendType.Reliable)
     {
-        return SNetworkingSocketMessages.SendP2P(steamId, data, channel, sendType);
+        try
+        {
+            return SNetworkingSocketMessages.SendP2P(steamId, data, channel, sendType);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     protected override void OnPeerDisconnect(SteamId steamId)

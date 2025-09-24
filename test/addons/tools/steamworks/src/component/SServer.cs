@@ -91,10 +91,16 @@ public partial class SServer : SteamComponent
     }
 
     public override void _Process(double delta)
-    {
-        if (SteamServer.IsValid)
+    {try
         {
-            SteamServer.RunCallbacks();
+            if (SteamServer.IsValid)
+            {
+                SteamServer.RunCallbacks();
+            }
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
     }
 }

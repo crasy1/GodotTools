@@ -1,4 +1,7 @@
-﻿namespace Godot;
+﻿using System;
+using Steamworks.Data;
+
+namespace Godot;
 
 /// <summary>
 /// 扩展steam多人游戏 TODO 和steam lobby结合，将lobby的逻辑从peer移到这里
@@ -6,6 +9,7 @@
 public partial class SteamMultiPlayer : MultiplayerApiExtension
 {
     private SceneMultiplayer SceneMultiplayer = new();
+    private Lobby? Lobby => SMatchmaking.Lobby;
 
     public SteamMultiPlayer()
     {
@@ -14,13 +18,48 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         SceneMultiplayer.ServerDisconnected += EmitSignalServerDisconnected;
         SceneMultiplayer.ConnectedToServer += EmitSignalConnectedToServer;
         SceneMultiplayer.ConnectionFailed += EmitSignalConnectionFailed;
+
+        SMatchmaking.Instance.LobbyCreated += OnLobbyCreated;
+        SMatchmaking.Instance.LobbyLeaved += OnLobbyLeaved;
+        SMatchmaking.Instance.LobbyEntered += OnLobbyEntered;
+        SMatchmaking.Instance.LobbyInvite += OnLobbyInvite;
+        SMatchmaking.Instance.LobbyMemberJoined += OnLobbyMemberJoined;
+        SMatchmaking.Instance.LobbyMemberLeave += OnLobbyMemberLeave;
+        SMatchmaking.Instance.LobbyMemberDisconnected += OnLobbyMemberDisconnected;
+        SMatchmaking.Instance.LobbyMemberDataChanged += OnLobbyMemberDataChanged;
+        SMatchmaking.Instance.LobbyDataChanged += OnLobbyDataChanged;
+        SMatchmaking.Instance.LobbyChatMessage += OnLobbyChatMessage;
+        SMatchmaking.Instance.LobbyMemberKick += OnLobbyMemberKick;
+    }
+
+    /// <summary>
+    /// 创建一个大厅，如果失败则不允许用多人游戏
+    /// </summary>
+    /// <param name="maxUser"></param>
+    /// <exception cref="Exception"></exception>
+    public async void CreateLobbyAsync(int maxUser)
+    {
+        var lobby = await SMatchmaking.CreateLobbyAsync(maxUser);
+        if (!lobby.HasValue)
+        {
+            SceneMultiplayer.SetMultiplayerPeer(new OfflineMultiplayerPeer());
+            throw new Exception($"{nameof(SteamMultiPlayer)} 创建大厅异常");
+        }
+    }
+    public async void JoinLobbyAsync(Lobby lobby)
+    {
+         await SMatchmaking.JoinLobbyAsync(lobby);
     }
 
     public override void _SetMultiplayerPeer(MultiplayerPeer multiplayerPeer)
-        => SceneMultiplayer.SetMultiplayerPeer(multiplayerPeer);
+    {
+        SceneMultiplayer.SetMultiplayerPeer(multiplayerPeer);
+    }
 
     public override MultiplayerPeer _GetMultiplayerPeer()
-        => SceneMultiplayer.GetMultiplayerPeer();
+    {
+        return SceneMultiplayer.GetMultiplayerPeer();
+    }
 
     public override int[] _GetPeerIds()
         => SceneMultiplayer.GetPeers();
@@ -36,11 +75,11 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
     /// </summary>
     public override Error _ObjectConfigurationAdd(GodotObject obj, Variant configuration)
     {
-        if (configuration.Obj is MultiplayerSynchronizer)
+        if (configuration.Obj is MultiplayerSynchronizer synchronizer)
         {
             Log.Debug($"添加用于 {obj} 的同步配置。同步器：{configuration}");
         }
-        else if (configuration.Obj is MultiplayerSpawner)
+        else if (configuration.Obj is MultiplayerSpawner spawner)
         {
             Log.Debug($"将节点 {obj} 添加到出生列表。出生器：{configuration}");
         }
@@ -65,7 +104,10 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         return SceneMultiplayer.ObjectConfigurationRemove(obj, configuration);
     }
 
-    public override Error _Poll() => SceneMultiplayer.Poll();
+    public override Error _Poll()
+    {
+        return SceneMultiplayer.Poll();
+    }
 
     /// <summary>
     /// 记录正在进行的 RPC 并将其转发到默认的多人游戏。
