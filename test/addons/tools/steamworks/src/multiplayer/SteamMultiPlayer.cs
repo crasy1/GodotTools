@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Steamworks;
 using Steamworks.Data;
 
 namespace Godot;
@@ -9,10 +11,11 @@ namespace Godot;
 public partial class SteamMultiPlayer : MultiplayerApiExtension
 {
     private SceneMultiplayer SceneMultiplayer = new();
-    private Lobby? Lobby => SMatchmaking.Lobby;
+    private Lobby? Lobby { set; get; }
 
     public SteamMultiPlayer()
     {
+        Dispose();
         SceneMultiplayer.PeerConnected += EmitSignalPeerConnected;
         SceneMultiplayer.PeerDisconnected += EmitSignalPeerDisconnected;
         SceneMultiplayer.ServerDisconnected += EmitSignalServerDisconnected;
@@ -20,8 +23,8 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         SceneMultiplayer.ConnectionFailed += EmitSignalConnectionFailed;
 
         SMatchmaking.Instance.LobbyCreated += OnLobbyCreated;
-        SMatchmaking.Instance.LobbyLeaved += OnLobbyLeaved;
         SMatchmaking.Instance.LobbyEntered += OnLobbyEntered;
+        SMatchmaking.Instance.LobbyLeaved += OnLobbyLeaved;
         SMatchmaking.Instance.LobbyInvite += OnLobbyInvite;
         SMatchmaking.Instance.LobbyMemberJoined += OnLobbyMemberJoined;
         SMatchmaking.Instance.LobbyMemberLeave += OnLobbyMemberLeave;
@@ -32,12 +35,64 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         SMatchmaking.Instance.LobbyMemberKick += OnLobbyMemberKick;
     }
 
+    private void OnLobbyMemberKick(ulong lobbyId, ulong steamId)
+    {
+    }
+
+    private void OnLobbyChatMessage(ulong lobbyId, ulong steamId, string message)
+    {
+    }
+
+    private void OnLobbyDataChanged(ulong lobbyId)
+    {
+    }
+
+    private void OnLobbyMemberDataChanged(ulong lobbyId, ulong steamId)
+    {
+    }
+
+    private void OnLobbyMemberDisconnected(ulong lobbyId, ulong steamId)
+    {
+    }
+
+    private void OnLobbyMemberLeave(ulong lobbyId, ulong steamId)
+    {
+    }
+
+    private void OnLobbyMemberJoined(ulong lobbyId, ulong steamId)
+    {
+    }
+
+    private void OnLobbyInvite(ulong lobbyId, ulong steamId)
+    {
+    }
+
+    private void OnLobbyEntered(ulong lobbyId)
+    {
+    }
+
+    private void OnLobbyLeaved(ulong lobbyId)
+    {
+        if (MultiplayerPeer is null)
+        {
+        }
+    }
+
+    private void OnLobbyCreated(int result, ulong lobbyId)
+    {
+    }
+
+    private bool IsMultiplayerPeerValid(MultiplayerPeer multiplayerPeer)
+    {
+        return multiplayerPeer is not null && multiplayerPeer is not OfflineMultiplayerPeer;
+    }
+
     /// <summary>
     /// 创建一个大厅，如果失败则不允许用多人游戏
     /// </summary>
     /// <param name="maxUser"></param>
     /// <exception cref="Exception"></exception>
-    public async void CreateLobbyAsync(int maxUser)
+    public async Task CreateLobbyAsync(int maxUser)
     {
         var lobby = await SMatchmaking.CreateLobbyAsync(maxUser);
         if (!lobby.HasValue)
@@ -46,9 +101,26 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
             throw new Exception($"{nameof(SteamMultiPlayer)} 创建大厅异常");
         }
     }
-    public async void JoinLobbyAsync(Lobby lobby)
+
+    public async Task JoinLobbyAsync(Friend friend)
     {
-         await SMatchmaking.JoinLobbyAsync(lobby);
+        var lobby = friend.GameInfo?.Lobby;
+        if (!lobby.HasValue)
+        {
+            throw new Exception($"{nameof(SteamMultiPlayer)} 未找到大厅");
+        }
+
+        await JoinLobbyAsync(lobby.Value);
+    }
+
+    public async Task JoinLobbyAsync(Lobby lobby)
+    {
+        var result = await SMatchmaking.JoinLobbyAsync(lobby);
+        if (!result)
+        {
+            SceneMultiplayer.SetMultiplayerPeer(new OfflineMultiplayerPeer());
+            throw new Exception($"{nameof(SteamMultiPlayer)} 加入大厅异常");
+        }
     }
 
     public override void _SetMultiplayerPeer(MultiplayerPeer multiplayerPeer)

@@ -12,8 +12,7 @@ namespace Godot;
 [Singleton]
 public partial class SFriends : SteamComponent
 {
-    private static readonly Dictionary<SteamId, Friend> _friends = new();
-    public static Dictionary<SteamId, Friend> Friends => UpdateFriends();
+    public static readonly Dictionary<SteamId, Friend> Friends = new();
     private static readonly Dictionary<(SteamId, AvatarSize), Image> Avatars = new();
     public static Friend Me { private set; get; }
 
@@ -29,20 +28,16 @@ public partial class SFriends : SteamComponent
         SteamFriends.OnGameServerChangeRequested += (s1, s2) => { Log.Info($"steam 游戏服务器改变请求 {s1} {s2}"); };
         SteamFriends.OnOverlayBrowserProtocol += (s) => { Log.Info($"steam 覆盖界面浏览器协议 {s}"); };
         SteamFriends.OnPersonaStateChange += (friend) => { };
-    }
-
-    public static Dictionary<SteamId, Friend> UpdateFriends()
-    {
-        Me = new(SteamClient.SteamId);
-        _friends[SteamClient.SteamId] = Me;
-        foreach (var friend in SteamFriends.GetFriends())
+        SClient.Instance.SteamClientConnected += () =>
         {
-            _friends[friend.Id] = friend;
-        }
-
-        return _friends;
+            Me = new(SteamClient.SteamId);
+            Friends[SteamClient.SteamId] = Me;
+            foreach (var friend in SteamFriends.GetFriends())
+            {
+                Friends[friend.Id] = friend;
+            }
+        };
     }
-
 
     /// <summary>
     /// 获取steam头像
