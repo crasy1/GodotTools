@@ -40,12 +40,11 @@ public partial class SteamSocketPeer : SteamPeer
     /// <param name="port"></param>
     /// <param name="maxUser"></param>
     /// <returns></returns>
-    public static async Task<SteamSocketPeer> CreateRelayServer(int port, int maxUser = 4)
+    public static async Task<SteamSocketPeer> CreateRelayServer(int port)
     {
         var peer = new SteamSocketPeer(ServerPeerId, SteamSocketType.Relay);
         try
         {
-            await CreateLobby(maxUser);
             var peerSocketManager = new PeerSocketManager(peer);
             var socketManager = SteamNetworkingSockets.CreateRelaySocket(port, peerSocketManager);
             peer.PeerSocketManager = peerSocketManager;
@@ -55,17 +54,15 @@ public partial class SteamSocketPeer : SteamPeer
         catch (Exception e)
         {
             Log.Error($"创建 relay peer 服务端异常, {e.Message}");
-            peer.Lobby?.Leave();
             throw;
         }
     }
 
-    public static async Task<SteamSocketPeer> CreateNormalServer(ushort port, int maxUser = 4)
+    public static SteamSocketPeer CreateNormalServer(ushort port)
     {
         var peer = new SteamSocketPeer(ServerPeerId, SteamSocketType.Normal);
         try
         {
-            await CreateLobby(maxUser);
             var peerSocketManager = new PeerSocketManager(peer);
             var socketManager = SteamNetworkingSockets.CreateNormalSocket(NetAddress.AnyIp(port), peerSocketManager);
             peer.PeerSocketManager = peerSocketManager;
@@ -75,21 +72,18 @@ public partial class SteamSocketPeer : SteamPeer
         catch (Exception e)
         {
             Log.Error($"创建 normal peer 服务端异常, {e.Message}");
-            peer.Lobby?.Leave();
             throw;
         }
     }
 
-    public static async Task<SteamSocketPeer> CreateRelayClient(Lobby lobby, int port)
+    public static SteamSocketPeer CreateRelayClient(SteamId steamId, int port)
     {
         var peer = new SteamSocketPeer((int)SteamClient.SteamId.AccountId, SteamSocketType.Relay);
         try
         {
-            await JoinLobby(lobby);
-            var lobbyOwner = lobby.Owner;
             var peerConnectionManager = new PeerConnectionManager(peer);
             var connectionManager =
-                SteamNetworkingSockets.ConnectRelay(lobbyOwner.Id, port, peerConnectionManager);
+                SteamNetworkingSockets.ConnectRelay(steamId, port, peerConnectionManager);
             peer.PeerConnectionManager = peerConnectionManager;
             peer.ConnectionManager = connectionManager;
             return peer;
@@ -98,17 +92,15 @@ public partial class SteamSocketPeer : SteamPeer
         {
             peer.ConnectionStatus = ConnectionStatus.Disconnected;
             Log.Error($"创建 relay peer 客户端异常, {e.Message}");
-            peer.Lobby?.Leave();
             throw;
         }
     }
 
-    public static async Task<SteamSocketPeer> CreateNormalClient(string host, ushort port, Lobby lobby)
+    public static SteamSocketPeer CreateNormalClient(string host, ushort port)
     {
         var peer = new SteamSocketPeer((int)SteamClient.SteamId.AccountId, SteamSocketType.Normal);
         try
         {
-            await JoinLobby(lobby);
             var peerConnectionManager = new PeerConnectionManager(peer);
             var connectionManager =
                 SteamNetworkingSockets.ConnectNormal(NetAddress.From(host, port), peerConnectionManager);
@@ -120,8 +112,6 @@ public partial class SteamSocketPeer : SteamPeer
         {
             peer.ConnectionStatus = ConnectionStatus.Disconnected;
             Log.Error($"创建 normal peer 客户端异常, {e.Message}");
-            peer.Lobby?.Leave();
-
             throw;
         }
     }
@@ -149,7 +139,7 @@ public partial class SteamSocketPeer : SteamPeer
 
     public override void ReceiveData(ulong steamId, int channel, byte[] data)
     {
-        var peerId = Lobby!.Value.IsOwnedBy(steamId) ? ServerPeerId : (int)((SteamId)steamId).AccountId;
+        var peerId = SteamIdToPeerId(steamId);
         ProcessData(peerId, steamId, channel, data);
     }
 
@@ -178,7 +168,7 @@ public partial class SteamSocketPeer : SteamPeer
         }
     }
 
-    protected override void OnPeerDisconnect(SteamId steamId)
+    protected override async Task OnPeerDisconnect(SteamId steamId)
     {
         if (_IsServer())
         {
@@ -191,6 +181,8 @@ public partial class SteamSocketPeer : SteamPeer
         {
             ConnectionManager.Close();
         }
+
+        await Task.CompletedTask;
     }
 
     protected override bool ServerRelaySupported()
@@ -200,13 +192,20 @@ public partial class SteamSocketPeer : SteamPeer
 
     protected override void Receive()
     {
-        if (_IsServer())
+        try
         {
-            SocketManager.Receive();
+            if (_IsServer())
+            {
+                SocketManager.Receive();
+            }
+            else
+            {
+                ConnectionManager.Receive();
+            }
         }
-        else
+        catch (Exception e)
         {
-            ConnectionManager.Receive();
+            // ignored
         }
     }
 }

@@ -46,7 +46,7 @@ public partial class SMatchmaking : SteamComponent
     [Signal]
     public delegate void LobbyMemberKickEventHandler(ulong lobbyId, ulong steamId);
 
-    public static Lobby? Lobby { get; private set; }
+    public static Lobby Lobby { get; private set; }
 
     private const string KickMemberMsg = "[KICK_MEMBER]";
 
@@ -61,8 +61,9 @@ public partial class SMatchmaking : SteamComponent
             {
                 LeaveLobby();
                 Lobby = lobby;
+                lobby.SetPublic();
                 // 确保只能搜到客户端版本一致的大厅
-                var update = Lobby?.SetData(nameof(Project.Version), Project.Version);
+                var update = Lobby.SetData(nameof(Project.Version), Project.Version);
                 Log.Debug($"[matchmaking]更新lobby {nameof(Project.Version)} {Project.Version} {update}");
             }
 
@@ -157,9 +158,9 @@ public partial class SMatchmaking : SteamComponent
     /// </summary>
     /// <param name="lobby"></param>
     /// <returns></returns>
-    public static async Task<bool> JoinLobbyAsync(Lobby lobby)
+    public static async Task<RoomEnter> JoinLobbyAsync(Lobby lobby)
     {
-        return await lobby.Join() == RoomEnter.Success;
+        return await lobby.Join();
     }
 
     /// <summary>
@@ -167,12 +168,12 @@ public partial class SMatchmaking : SteamComponent
     /// </summary>
     public static void LeaveLobby()
     {
-        if (Lobby.HasValue)
+        if (Lobby.IsValid())
         {
             Log.Debug("退出大厅");
-            var lobbyId = Lobby.Value.Id;
-            Lobby?.Leave();
-            Lobby = null;
+            var lobbyId = Lobby.Id;
+            Lobby.Leave();
+            Lobby = new Lobby();
             Instance.EmitSignalLobbyLeaved(lobbyId);
         }
     }
@@ -194,7 +195,10 @@ public partial class SMatchmaking : SteamComponent
     /// <param name="steamId"></param>
     public static void Invite(SteamId steamId)
     {
-        Lobby?.InviteFriend(steamId);
+        if (Lobby.IsValid())
+        {
+            Lobby.InviteFriend(steamId);
+        }
     }
 
     /// <summary>
@@ -203,19 +207,18 @@ public partial class SMatchmaking : SteamComponent
     /// <param name="steamId"></param>
     public static void Kick(SteamId steamId)
     {
-        if (!Lobby.HasValue)
+        if (!Lobby.IsValid())
         {
             return;
         }
 
-        var lobby = Lobby.Value;
-        if (lobby.IsOwnedBy(SteamClient.SteamId))
+        if (Lobby.IsOwnedBy(SteamClient.SteamId))
         {
-            foreach (var member in lobby.Members)
+            foreach (var member in Lobby.Members)
             {
                 if (member.Id == steamId)
                 {
-                    lobby.SendChatString($"{KickMemberMsg}{steamId}");
+                    Lobby.SendChatString($"{KickMemberMsg}{steamId}");
                 }
             }
         }

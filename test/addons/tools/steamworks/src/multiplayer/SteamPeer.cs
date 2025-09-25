@@ -14,21 +14,20 @@ namespace Godot;
 public abstract partial class SteamPeer : MultiplayerPeerExtension
 {
     public const int ServerPeerId = 1;
-    private int TargetPeer { set; get; }
-    private int PeerId { get; }
-    private SteamSocketType SteamSocketType { get; }
+    public const int MaxPacketSize = 512 * 1024;
+    protected int TargetPeer { set; get; }
+    protected int PeerId { get; }
+    protected SteamSocketType SteamSocketType { get; }
     public ConnectionStatus ConnectionStatus { set; get; } = ConnectionStatus.Connecting;
-    protected Lobby? Lobby { private set; get; }
-    private Friend? LobbyOwner { set; get; }
 
-    private readonly Queue<SteamPacket> PacketQueue = new();
+    protected readonly Queue<SteamPacket> PacketQueue = new();
 
     /// <summary>
     /// 大厅中的peer
     /// </summary>
-    private readonly Dictionary<int, SteamId> ConnectedPeers = new();
+    protected readonly Dictionary<int, SteamId> ConnectedPeers = new();
 
-    private string Type { set; get; }
+    protected string Type { set; get; }
 
     protected SteamPeer(int peerId, SteamSocketType socketType)
     {
@@ -36,9 +35,6 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         SteamSocketType = socketType;
         Type = GetType().Name;
         Log.Info($"创建 {Type}");
-        SteamMatchmaking.OnLobbyEntered += OnLobbyEntered;
-        SteamMatchmaking.OnLobbyMemberJoined += OnLobbyMemberJoined;
-        SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeave;
         OnCreate();
     }
 
@@ -52,63 +48,30 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
     /// </summary>
     protected abstract void OnClose();
 
-    public void OnSocketConnected(SteamId steamId)
+    public int SteamIdToPeerId(ulong steamId)
     {
-        var peerId = LobbyOwner?.Id == steamId ? ServerPeerId : (int)steamId.AccountId;
+        return SteamIdToPeerId((SteamId)steamId);
+    }
+
+    public int SteamIdToPeerId(SteamId steamId)
+    {
+        return _IsServer() ? (int)steamId.AccountId : ServerPeerId;
+    }
+
+    public void OnSocketConnected(ulong steamId)
+    {
+        var peerId = SteamIdToPeerId(steamId);
         if (ConnectedPeers.TryAdd(peerId, steamId))
         {
-            if (!_IsServer() && peerId == ServerPeerId)
-            {
-                ConnectionStatus = ConnectionStatus.Connected;
-            }
-
+            ConnectionStatus = ConnectionStatus.Connected;
             EmitSignalPeerConnected(peerId);
         }
     }
 
-    public void OnSocketDisconnected(SteamId steamId)
+    public void OnSocketDisconnected(ulong steamId)
     {
-        var peerId = LobbyOwner?.Id == steamId ? ServerPeerId : (int)steamId.AccountId;
-        if (!_IsServer() && peerId == ServerPeerId)
-        {
-            ConnectionStatus = ConnectionStatus.Disconnected;
-        }
-
+        var peerId = SteamIdToPeerId(steamId);
         DisconnectPeer(peerId);
-    }
-
-    protected virtual void OnLobbyEntered(Lobby lobby)
-    {
-        Lobby = lobby;
-        LobbyOwner = lobby.Owner;
-        if (_IsServer())
-        {
-            ConnectionStatus = ConnectionStatus.Connected;
-        }
-    }
-
-    protected virtual void OnLobbyMemberJoined(Lobby lobby, Friend friend)
-    {
-    }
-
-    protected void OnLobbyMemberLeave(Lobby lobby, Friend friend)
-    {
-        // 房主离开后会自动换新的房主
-        var isLobbyOwnerLeave = friend.Id == LobbyOwner?.Id;
-        var peerId = isLobbyOwnerLeave ? ServerPeerId : (int)friend.Id.AccountId;
-        if (_IsServer())
-        {
-            // 服务器移除离开的成员
-            DisconnectPeer(peerId);
-        }
-        else
-        {
-            if (isLobbyOwnerLeave)
-            {
-                // 客户端移除服务器
-                DisconnectPeer(peerId);
-            }
-        }
     }
 
     /// <summary>
@@ -138,26 +101,6 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
         PacketQueue.Enqueue(steamMessage);
     }
 
-    protected static async Task<Lobby> CreateLobby(int maxUser)
-    {
-        var lobby = await SMatchmaking.CreateLobbyAsync(maxUser);
-        if (!lobby.HasValue)
-        {
-            throw new Exception("创建大厅失败");
-        }
-
-        return lobby.Value;
-    }
-
-    protected static async Task JoinLobby(Lobby lobby)
-    {
-        var result = await SMatchmaking.JoinLobbyAsync(lobby);
-        if (!result)
-        {
-            throw new Exception("加入大厅失败");
-        }
-    }
-
     protected bool SendMsg(SteamId steamId, string data, Channel channel = Channel.Msg,
         SendType sendType = SendType.Reliable)
     {
@@ -170,33 +113,39 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
 
     public override void _Close()
     {
-        Lobby?.Leave();
         foreach (var peerId in ConnectedPeers.Keys)
         {
             DisconnectPeer(peerId);
         }
 
-        Lobby = null;
-        LobbyOwner = null;
+        OnClose();
         ConnectionStatus = ConnectionStatus.Disconnected;
         PacketQueue.Clear();
         ConnectedPeers.Clear();
-        SteamMatchmaking.OnLobbyEntered -= OnLobbyEntered;
-        SteamMatchmaking.OnLobbyMemberJoined -= OnLobbyMemberJoined;
-        SteamMatchmaking.OnLobbyMemberLeave -= OnLobbyMemberLeave;
-        OnClose();
     }
 
-    public override void _DisconnectPeer(int pPeer, bool pForce)
+    public override async void _DisconnectPeer(int pPeer, bool pForce)
     {
-        if (ConnectedPeers.Remove(pPeer, out var steamId))
+        try
         {
-            EmitSignalPeerDisconnected(pPeer);
-            OnPeerDisconnect(steamId);
+            if (!_IsServer())
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+            }
+
+            if (ConnectedPeers.Remove(pPeer, out var steamId))
+            {
+                await OnPeerDisconnect(steamId);
+                EmitSignalPeerDisconnected(pPeer);
+            }
+        }
+        catch (Exception e)
+        {
+            // ignored
         }
     }
 
-    protected abstract void OnPeerDisconnect(SteamId steamId);
+    protected abstract Task OnPeerDisconnect(SteamId steamId);
 
     public override int _GetAvailablePacketCount()
     {
@@ -210,7 +159,7 @@ public abstract partial class SteamPeer : MultiplayerPeerExtension
 
     public override int _GetMaxPacketSize()
     {
-        return SNetworking.MaxPacketSize;
+        return MaxPacketSize;
     }
 
     public override int _GetPacketChannel()

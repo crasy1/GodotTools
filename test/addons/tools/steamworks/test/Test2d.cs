@@ -2,19 +2,21 @@ using System;
 using System.Text;
 using Godot;
 using Steamworks;
+using Steamworks.Data;
 
 [SceneTree]
 public partial class Test2d : Node2D
 {
     private bool IsServer { set; get; }
 
-    private Friend? ChooseFriend { set; get; }
+    private Friend ChooseFriend { set; get; }
     private int Port { set; get; } = 60937;
     private int PeerType => SocketType.Selected;
+    private SteamMultiPlayer SteamMultiPlayer = new();
 
     public override void _Ready()
     {
-        GetTree().SetMultiplayer(new SteamMultiPlayer());
+        GetTree().SetMultiplayer(SteamMultiPlayer);
         var multiplayerApi = GetTree().GetMultiplayer();
         multiplayerApi.PeerConnected += OnPeerConnected;
         multiplayerApi.PeerDisconnected += OnPeerDisconnected;
@@ -31,12 +33,13 @@ public partial class Test2d : Node2D
             }
 
             IsServer = true;
+            await SteamMultiPlayer.CreateLobbyAsync(2);
             switch (PeerType)
             {
                 case 0:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = await SteamP2PPeer.CreateServer();
+                        multiplayerApi.MultiplayerPeer = SteamP2PPeer.CreateServer();
                     }
                     catch (Exception e)
                     {
@@ -47,7 +50,7 @@ public partial class Test2d : Node2D
                 case 1:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = await SteamMessageP2PPeer.CreateServer();
+                        multiplayerApi.MultiplayerPeer = SteamP2PPeer.CreateServer(SteamSocketType.P2P);
                     }
                     catch (Exception e)
                     {
@@ -69,7 +72,7 @@ public partial class Test2d : Node2D
                 case 3:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = await SteamSocketPeer.CreateNormalServer((ushort)Port);
+                        multiplayerApi.MultiplayerPeer = SteamSocketPeer.CreateNormalServer((ushort)Port);
                     }
                     catch (Exception e)
                     {
@@ -129,18 +132,14 @@ public partial class Test2d : Node2D
                 return;
             }
 
-            var lobby = ChooseFriend?.GameInfo?.Lobby;
-            if (lobby is null)
-            {
-                return;
-            }
-
+            var lobby = ChooseFriend.GameInfo?.Lobby ?? new Lobby();
+            await SteamMultiPlayer.JoinLobbyAsync(lobby);
             switch (PeerType)
             {
                 case 0:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = await SteamP2PPeer.CreateClient(lobby.Value);
+                        multiplayerApi.MultiplayerPeer = SteamP2PPeer.CreateClient(ChooseFriend.Id);
                     }
                     catch (Exception e)
                     {
@@ -152,7 +151,7 @@ public partial class Test2d : Node2D
                     try
                     {
                         multiplayerApi.MultiplayerPeer =
-                            await SteamMessageP2PPeer.CreateClient(lobby.Value);
+                            SteamP2PPeer.CreateClient(ChooseFriend.Id, SteamSocketType.P2P);
                     }
                     catch (Exception e)
                     {
@@ -164,7 +163,7 @@ public partial class Test2d : Node2D
                     try
                     {
                         multiplayerApi.MultiplayerPeer =
-                            await SteamSocketPeer.CreateRelayClient(lobby.Value, Port);
+                            SteamSocketPeer.CreateRelayClient(ChooseFriend.Id, Port);
                     }
                     catch (Exception e)
                     {
@@ -176,7 +175,7 @@ public partial class Test2d : Node2D
                     try
                     {
                         multiplayerApi.MultiplayerPeer =
-                            await SteamSocketPeer.CreateNormalClient(Host.Text, (ushort)Port, lobby.Value);
+                            SteamSocketPeer.CreateNormalClient(Host.Text, (ushort)Port);
                     }
                     catch (Exception e)
                     {
@@ -205,7 +204,7 @@ public partial class Test2d : Node2D
                     var p2PPeer = (SteamP2PPeer)multiplayerApi.MultiplayerPeer;
                     break;
                 case 1:
-                    var msgP2PPeer = (SteamMessageP2PPeer)multiplayerApi.MultiplayerPeer;
+                    var msgP2PPeer = (SteamP2PPeer)multiplayerApi.MultiplayerPeer;
                     break;
                 case 2:
                     var relayPeer = (SteamSocketPeer)multiplayerApi.MultiplayerPeer;

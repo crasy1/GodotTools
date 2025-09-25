@@ -6,22 +6,16 @@ using Steamworks.Data;
 namespace Godot;
 
 /// <summary>
-/// 扩展steam多人游戏 TODO 和steam lobby结合，将lobby的逻辑从peer移到这里
+/// 扩展steam多人游戏
 /// </summary>
 public partial class SteamMultiPlayer : MultiplayerApiExtension
 {
     private SceneMultiplayer SceneMultiplayer = new();
-    private Lobby? Lobby { set; get; }
+    private OfflineMultiplayerPeer OfflinePeer = new();
+    private Lobby Lobby { set; get; }
 
     public SteamMultiPlayer()
     {
-        Dispose();
-        SceneMultiplayer.PeerConnected += EmitSignalPeerConnected;
-        SceneMultiplayer.PeerDisconnected += EmitSignalPeerDisconnected;
-        SceneMultiplayer.ServerDisconnected += EmitSignalServerDisconnected;
-        SceneMultiplayer.ConnectedToServer += EmitSignalConnectedToServer;
-        SceneMultiplayer.ConnectionFailed += EmitSignalConnectionFailed;
-
         SMatchmaking.Instance.LobbyCreated += OnLobbyCreated;
         SMatchmaking.Instance.LobbyEntered += OnLobbyEntered;
         SMatchmaking.Instance.LobbyLeaved += OnLobbyLeaved;
@@ -33,6 +27,39 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         SMatchmaking.Instance.LobbyDataChanged += OnLobbyDataChanged;
         SMatchmaking.Instance.LobbyChatMessage += OnLobbyChatMessage;
         SMatchmaking.Instance.LobbyMemberKick += OnLobbyMemberKick;
+
+        SceneMultiplayer.PeerConnected += OnPeerConnected;
+        SceneMultiplayer.PeerDisconnected += OnPeerDisconnected;
+        SceneMultiplayer.ServerDisconnected += OnServerDisconnected;
+        SceneMultiplayer.ConnectedToServer += OnConnectedToServer;
+        SceneMultiplayer.ConnectionFailed += OnConnectionFailed;
+    }
+
+    private void OnConnectionFailed()
+    {
+        Exit();
+        EmitSignalConnectionFailed();
+    }
+
+    private void OnConnectedToServer()
+    {
+        EmitSignalConnectedToServer();
+    }
+
+    private void OnServerDisconnected()
+    {
+        Exit();
+        EmitSignalServerDisconnected();
+    }
+
+    private void OnPeerDisconnected(long id)
+    {
+        EmitSignalPeerDisconnected(id);
+    }
+
+    private void OnPeerConnected(long id)
+    {
+        EmitSignalPeerConnected(id);
     }
 
     private void OnLobbyMemberKick(ulong lobbyId, ulong steamId)
@@ -69,22 +96,39 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
 
     private void OnLobbyEntered(ulong lobbyId)
     {
+        Lobby = new Lobby(lobbyId);
     }
 
     private void OnLobbyLeaved(ulong lobbyId)
     {
-        if (MultiplayerPeer is null)
-        {
-        }
+        Exit();
     }
 
     private void OnLobbyCreated(int result, ulong lobbyId)
     {
+        if (result == (int)Result.OK)
+        {
+            Lobby = new Lobby(lobbyId);
+        }
     }
 
-    private bool IsMultiplayerPeerValid(MultiplayerPeer multiplayerPeer)
+    /// <summary>
+    /// 退出多人
+    /// </summary>
+    public void Exit()
     {
-        return multiplayerPeer is not null && multiplayerPeer is not OfflineMultiplayerPeer;
+        Lobby.Leave();
+        Lobby = new Lobby();
+        if (IsMultiplayerPeerValid())
+        {
+            MultiplayerPeer.Close();
+            MultiplayerPeer = OfflinePeer;
+        }
+    }
+
+    private bool IsMultiplayerPeerValid()
+    {
+        return MultiplayerPeer is not null && MultiplayerPeer is not OfflineMultiplayerPeer;
     }
 
     /// <summary>
@@ -97,11 +141,18 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         var lobby = await SMatchmaking.CreateLobbyAsync(maxUser);
         if (!lobby.HasValue)
         {
-            SceneMultiplayer.SetMultiplayerPeer(new OfflineMultiplayerPeer());
+            SetMultiplayerPeer(OfflinePeer);
             throw new Exception($"{nameof(SteamMultiPlayer)} 创建大厅异常");
         }
+
+        Lobby = lobby.Value;
     }
 
+    /// <summary>
+    /// 加入好友大厅
+    /// </summary>
+    /// <param name="friend"></param>
+    /// <exception cref="Exception"></exception>
     public async Task JoinLobbyAsync(Friend friend)
     {
         var lobby = friend.GameInfo?.Lobby;
@@ -113,24 +164,68 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         await JoinLobbyAsync(lobby.Value);
     }
 
+    /// <summary>
+    /// 加入指定大厅
+    /// </summary>
+    /// <param name="lobby"></param>
+    /// <exception cref="Exception"></exception>
     public async Task JoinLobbyAsync(Lobby lobby)
     {
         var result = await SMatchmaking.JoinLobbyAsync(lobby);
-        if (!result)
+        if (!RoomEnter.Success.Equals(result))
         {
-            SceneMultiplayer.SetMultiplayerPeer(new OfflineMultiplayerPeer());
-            throw new Exception($"{nameof(SteamMultiPlayer)} 加入大厅异常");
+            SceneMultiplayer.SetMultiplayerPeer(OfflinePeer);
+            throw new Exception($"{nameof(SteamMultiPlayer)} 加入大厅异常 {result}");
         }
+
+        Lobby = lobby;
     }
 
     public override void _SetMultiplayerPeer(MultiplayerPeer multiplayerPeer)
     {
-        SceneMultiplayer.SetMultiplayerPeer(multiplayerPeer);
+        if (multiplayerPeer is OfflineMultiplayerPeer)
+        {
+            SceneMultiplayer.MultiplayerPeer = multiplayerPeer;
+            return;
+        }
+
+        var isServer = multiplayerPeer.GetUniqueId() == SteamPeer.ServerPeerId;
+        try
+        {
+            if (!Lobby.IsValid())
+            {
+                if (isServer)
+                {
+                    throw new Exception("请先创建一个大厅");
+                }
+
+                throw new Exception("请先加入一个大厅");
+            }
+            else
+            {
+                if (isServer && !Lobby.IsOwnedBy(SteamClient.SteamId))
+                {
+                    throw new Exception("大厅成员不能作为服务端");
+                }
+
+                if (!isServer && Lobby.IsOwnedBy(SteamClient.SteamId))
+                {
+                    throw new Exception("大厅拥有者不能作为客户端");
+                }
+
+                SceneMultiplayer.MultiplayerPeer = multiplayerPeer;
+            }
+        }
+        catch (Exception e)
+        {
+            Exit();
+            throw;
+        }
     }
 
     public override MultiplayerPeer _GetMultiplayerPeer()
     {
-        return SceneMultiplayer.GetMultiplayerPeer();
+        return SceneMultiplayer.MultiplayerPeer;
     }
 
     public override int[] _GetPeerIds()

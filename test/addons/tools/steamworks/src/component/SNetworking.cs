@@ -27,7 +27,6 @@ public partial class SNetworking : SteamComponent
     /// </summary>
     public readonly List<SteamId> ConnectedIds = new();
 
-    public const int MaxPacketSize = 512 * 1024;
 
     public static readonly List<int> Channels = Enum.GetValues(typeof(Channel))
         .Cast<Channel>()

@@ -51,7 +51,7 @@ popup/item_4/id = 4
 [node name="Host" type="LineEdit" parent="CanvasLayer/Menu"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "127.0.0.1"
+text = "122.246.0.254"
 alignment = 1
 
 [node name="Join" type="Button" parent="CanvasLayer/Menu"]

@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using Steamworks;
 using Steamworks.Data;
@@ -7,6 +8,7 @@ namespace Godot;
 
 /// <summary>
 /// 相当于 <see href="https://partner.steamgames.com/doc/api/ISteamNetworking">steamworks networking</see> p2p的包装
+/// 相当于 <see href="https://partner.steamgames.com/doc/api/ISteamNetworkingMessages">steamworks networking message</see> p2p的包装
 /// </summary>
 public partial class SteamP2PPeer : SteamPeer
 {
@@ -14,72 +16,92 @@ public partial class SteamP2PPeer : SteamPeer
     {
     }
 
-    public static async Task<SteamP2PPeer> CreateServer(int maxUser = 4)
+    public static SteamP2PPeer CreateServer(SteamSocketType socketType = SteamSocketType.P2PMessage)
     {
-        var peer = new SteamP2PPeer(ServerPeerId, SteamSocketType.P2P);
-        await CreateLobby(maxUser);
+        return new SteamP2PPeer(ServerPeerId, socketType);
+    }
+
+    public static SteamP2PPeer CreateClient(SteamId steamId, SteamSocketType socketType = SteamSocketType.P2PMessage)
+    {
+        var peer = new SteamP2PPeer((int)SteamClient.SteamId.AccountId, socketType);
+        peer.SendMsg(steamId, Consts.SocketHandShake, Channel.Handshake);
         return peer;
     }
 
-    public static async Task<SteamP2PPeer> CreateClient(Lobby lobby)
-    {
-        var peer = new SteamP2PPeer((int)SteamClient.SteamId.AccountId, SteamSocketType.P2P);
-        await JoinLobby(lobby);
-        return peer;
-    }
-
-    protected override void OnLobbyEntered(Lobby lobby)
-    {
-        base.OnLobbyEntered(lobby);
-        if (!_IsServer())
-        {
-            // 给服务器发送握手包
-            HandShake(lobby.Owner.Id);
-        }
-    }
-
-    protected override void OnLobbyMemberJoined(Lobby lobby, Friend friend)
-    {
-        base.OnLobbyEntered(lobby);
-        // 服务器给新加入的peer发送握手包
-        if (_IsServer())
-        {
-            HandShake(friend.Id);
-        }
-    }
-
-    private void OnHandShakeFailed(ulong steamId)
-    {
-        if (!_IsServer())
-        {
-            ConnectionStatus = ConnectionStatus.Disconnected;
-        }
-    }
-
-    private void HandShake(SteamId steamId)
-    {
-        SendMsg(steamId, Consts.SocketHandShake, Channel.Handshake);
-    }
 
     protected override void OnCreate()
     {
-        SNetworking.Instance.ReceiveData += ReceiveData;
-        SNetworking.Instance.UserConnectFailed += OnHandShakeFailed;
+        if (SteamSocketType == SteamSocketType.P2PMessage)
+        {
+            SNetworkingSocketMessages.Instance.ReceiveData += ReceiveData;
+            // SNetworkingSocketMessages.Instance.UserConnected += OnSocketConnected;
+            SNetworkingSocketMessages.Instance.UserConnectFailed += OnSocketDisconnected;
+        }
+        else if (SteamSocketType == SteamSocketType.P2P)
+        {
+            SNetworking.Instance.ReceiveData += ReceiveData;
+            // SNetworking.Instance.UserConnected += OnSocketConnected;
+            SNetworking.Instance.UserConnectFailed += OnSocketDisconnected;
+        }
     }
 
     protected override void OnClose()
     {
-        SNetworking.Instance.ReceiveData -= ReceiveData;
-        SNetworking.Instance.UserConnectFailed += OnHandShakeFailed;
+        if (SteamSocketType == SteamSocketType.P2PMessage)
+        {
+            SNetworkingSocketMessages.Instance.ReceiveData -= ReceiveData;
+            // SNetworkingSocketMessages.Instance.UserConnected -= OnSocketConnected;
+            SNetworkingSocketMessages.Instance.UserConnectFailed -= OnSocketDisconnected;
+        }
+        else if (SteamSocketType == SteamSocketType.P2P)
+        {
+            SNetworking.Instance.ReceiveData -= ReceiveData;
+            // SNetworking.Instance.UserConnected -= OnSocketConnected;
+            SNetworking.Instance.UserConnectFailed -= OnSocketDisconnected;
+        }
     }
 
     public override void ReceiveData(ulong steamId, int channel, byte[] data)
     {
-        var peerId = Lobby!.Value.IsOwnedBy(steamId) ? ServerPeerId : (int)((SteamId)steamId).AccountId;
+        var peerId = SteamIdToPeerId(steamId);
         // 过滤掉握手包
         if (channel == (int)Channel.Handshake)
         {
-            OnSocketConnected(steamId);
+            var msg = Encoding.UTF8.GetString(data);
+            switch (msg)
+            {
+                case Consts.SocketHandShake:
+                    if (_IsServer())
+                    {
+                        SendMsg(steamId, Consts.SocketHandShakeReply, Channel.Handshake);
+                    }
+
+                    else
+                    {
+                        SendMsg(steamId, Consts.SocketHandShake, Channel.Handshake);
+                    }
+
+                    break;
+                case Consts.SocketHandShakeReply:
+                    if (_IsServer())
+                    {
+                        OnSocketConnected(steamId);
+                    }
+                    else
+                    {
+                        SendMsg(steamId, Consts.SocketHandShakeReply, Channel.Handshake);
+                        OnSocketConnected(steamId);
+                    }
+
+                    break;
+                case Consts.SocketDisconnect:
+                    if (ConnectedPeers.ContainsValue(steamId))
+                    {
+                        OnSocketDisconnected(steamId);
+                    }
+                    break;
+            }
+
             return;
         }
 
@@ -91,7 +113,16 @@ public partial class SteamP2PPeer : SteamPeer
     {
         try
         {
-            return SNetworking.SendP2P(steamId, data, channel, sendType);
+            if (SteamSocketType == SteamSocketType.P2PMessage)
+            {
+                return SNetworkingSocketMessages.SendP2P(steamId, data, channel, sendType);
+            }
+            else if (SteamSocketType == SteamSocketType.P2P)
+            {
+                return SNetworking.SendP2P(steamId, data, channel, sendType);
+            }
+
+            return false;
         }
         catch (Exception e)
         {
@@ -99,9 +130,18 @@ public partial class SteamP2PPeer : SteamPeer
         }
     }
 
-    protected override void OnPeerDisconnect(SteamId steamId)
+    protected override async Task OnPeerDisconnect(SteamId steamId)
     {
-        SNetworking.Instance.Disconnect(steamId);
+        SendMsg(steamId, Consts.SocketDisconnect, Channel.Handshake);
+        await Task.Delay(1000);
+        if (SteamSocketType == SteamSocketType.P2PMessage)
+        {
+            SNetworkingSocketMessages.Instance.Disconnect(steamId);
+        }
+        else if (SteamSocketType == SteamSocketType.P2P)
+        {
+            SNetworking.Instance.Disconnect(steamId);
+        }
     }
 
     protected override bool ServerRelaySupported()

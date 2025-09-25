@@ -1,4 +1,5 @@
 using Steamworks;
+using Steamworks.Data;
 
 namespace Godot;
 
@@ -32,4 +33,6 @@ public static class SteamworksExtensions
     }
 
     public static string State(this FriendState friendState) => FriendStates[friendState];
+    public static bool IsValid(this Friend friend) => friend.Id.IsValid;
+    public static bool IsValid(this Lobby lobby) => lobby.Id.IsValid;
 }
