@@ -71,9 +71,12 @@ public partial class SMatchmaking : SteamComponent
         };
         SteamMatchmaking.OnLobbyEntered += (lobby) =>
         {
-            Lobby = lobby;
-            Log.Debug($"[matchmaking]进入大厅 {lobby.Id}");
-            EmitSignalLobbyEntered(lobby.Id);
+            if (lobby.IsValid())
+            {
+                Lobby = lobby;
+                Log.Debug($"[matchmaking]进入大厅 {lobby.Id}");
+                EmitSignalLobbyEntered(lobby.Id);
+            }
         };
         SteamMatchmaking.OnLobbyInvite += (friend, lobby) =>
         {
@@ -170,8 +173,8 @@ public partial class SMatchmaking : SteamComponent
     {
         if (Lobby.IsValid())
         {
-            Log.Debug("退出大厅");
             var lobbyId = Lobby.Id;
+            Log.Debug($"[matchmaking]退出大厅 {lobbyId}");
             Lobby.Leave();
             Lobby = new Lobby();
             Instance.EmitSignalLobbyLeaved(lobbyId);

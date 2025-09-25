@@ -16,8 +16,15 @@ public partial class Test2dPlayer : CharacterBody2D
 
     public override void _EnterTree()
     {
-        Log.Info($"peerId:{Multiplayer.GetUniqueId()} ,playername :",Name);
-        SetMultiplayerAuthority(int.Parse(Name));
+        Log.Info($"peerId:{Multiplayer.GetUniqueId()} ,playername :", Name);
+        if (int.TryParse(Name, out var peerId))
+        {
+            SetMultiplayerAuthority(peerId);
+        }
+        else
+        {
+            QueueFree();
+        }
     }
 
     public override void _Ready()

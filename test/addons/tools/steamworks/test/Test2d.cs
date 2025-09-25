@@ -17,29 +17,28 @@ public partial class Test2d : Node2D
     public override void _Ready()
     {
         GetTree().SetMultiplayer(SteamMultiPlayer);
-        var multiplayerApi = GetTree().GetMultiplayer();
-        multiplayerApi.PeerConnected += OnPeerConnected;
-        multiplayerApi.PeerDisconnected += OnPeerDisconnected;
-        multiplayerApi.ConnectedToServer += OnConnectedToServer;
-        multiplayerApi.ConnectionFailed += OnConnectionFailed;
-        multiplayerApi.ServerDisconnected += OnServerDisconnected;
+        Multiplayer.PeerConnected += OnPeerConnected;
+        Multiplayer.PeerDisconnected += OnPeerDisconnected;
+        Multiplayer.ConnectedToServer += OnConnectedToServer;
+        Multiplayer.ConnectionFailed += OnConnectionFailed;
+        Multiplayer.ServerDisconnected += OnServerDisconnected;
         // 只有把场景加到列表中才会被同步，不在列表中的场景不会被同步
         Spawner.AddSpawnableScene(Test2dPlayer.TscnFilePath);
         Create.Pressed += async () =>
         {
-            if (multiplayerApi.MultiplayerPeer is not OfflineMultiplayerPeer)
+            if (Multiplayer.MultiplayerPeer is not OfflineMultiplayerPeer)
             {
                 return;
             }
 
             IsServer = true;
-            await SteamMultiPlayer.CreateLobbyAsync(2);
+              await SteamMultiPlayer.CreateLobbyAsync(2);
             switch (PeerType)
             {
                 case 0:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = SteamP2PPeer.CreateServer();
+                        Multiplayer.MultiplayerPeer = SteamP2PPeer.CreateServer();
                     }
                     catch (Exception e)
                     {
@@ -50,7 +49,7 @@ public partial class Test2d : Node2D
                 case 1:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = SteamP2PPeer.CreateServer(SteamSocketType.P2P);
+                        Multiplayer.MultiplayerPeer = SteamP2PPeer.CreateServer(SteamSocketType.P2P);
                     }
                     catch (Exception e)
                     {
@@ -61,7 +60,7 @@ public partial class Test2d : Node2D
                 case 2:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = await SteamSocketPeer.CreateRelayServer(Port);
+                        Multiplayer.MultiplayerPeer = await SteamSocketPeer.CreateRelayServer(Port);
                     }
                     catch (Exception e)
                     {
@@ -72,7 +71,7 @@ public partial class Test2d : Node2D
                 case 3:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = SteamSocketPeer.CreateNormalServer((ushort)Port);
+                        Multiplayer.MultiplayerPeer = SteamSocketPeer.CreateNormalServer((ushort)Port);
                     }
                     catch (Exception e)
                     {
@@ -83,15 +82,17 @@ public partial class Test2d : Node2D
                 default:
                     var peer = new ENetMultiplayerPeer();
                     peer.CreateServer(Port, 1);
-                    multiplayerApi.MultiplayerPeer = peer;
+                    Multiplayer.MultiplayerPeer = peer;
                     break;
             }
 
             var test2dPlayer = AddPlayer(Multiplayer.GetUniqueId());
             test2dPlayer.Position = new Vector2(500, 500);
         };
-        Search.Pressed += () =>
+        Search.Pressed += async () =>
         {
+            var lobbies = await SteamLobby.Search();
+            Log.Info(lobbies.Count);
             Friends.ClearAndFreeChildren();
             foreach (var (steamId, friend) in SFriends.Friends)
             {
@@ -112,7 +113,7 @@ public partial class Test2d : Node2D
         };
         Exit.Pressed += () =>
         {
-            if (multiplayerApi.MultiplayerPeer is OfflineMultiplayerPeer)
+            if (Multiplayer.MultiplayerPeer is OfflineMultiplayerPeer)
             {
                 return;
             }
@@ -121,13 +122,11 @@ public partial class Test2d : Node2D
             {
                 Players.ClearAndFreeChildren();
             }
-
-            multiplayerApi.MultiplayerPeer.Close();
-            multiplayerApi.MultiplayerPeer = new OfflineMultiplayerPeer();
+            SteamMultiPlayer.LeaveLobby();
         };
         Join.Pressed += async () =>
         {
-            if (multiplayerApi.MultiplayerPeer is not OfflineMultiplayerPeer)
+            if (Multiplayer.MultiplayerPeer is not OfflineMultiplayerPeer)
             {
                 return;
             }
@@ -139,7 +138,7 @@ public partial class Test2d : Node2D
                 case 0:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer = SteamP2PPeer.CreateClient(ChooseFriend.Id);
+                        Multiplayer.MultiplayerPeer = SteamP2PPeer.CreateClient(ChooseFriend.Id);
                     }
                     catch (Exception e)
                     {
@@ -150,7 +149,7 @@ public partial class Test2d : Node2D
                 case 1:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer =
+                        Multiplayer.MultiplayerPeer =
                             SteamP2PPeer.CreateClient(ChooseFriend.Id, SteamSocketType.P2P);
                     }
                     catch (Exception e)
@@ -162,7 +161,7 @@ public partial class Test2d : Node2D
                 case 2:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer =
+                        Multiplayer.MultiplayerPeer =
                             SteamSocketPeer.CreateRelayClient(ChooseFriend.Id, Port);
                     }
                     catch (Exception e)
@@ -174,7 +173,7 @@ public partial class Test2d : Node2D
                 case 3:
                     try
                     {
-                        multiplayerApi.MultiplayerPeer =
+                        Multiplayer.MultiplayerPeer =
                             SteamSocketPeer.CreateNormalClient(Host.Text, (ushort)Port);
                     }
                     catch (Exception e)
@@ -186,13 +185,13 @@ public partial class Test2d : Node2D
                 default:
                     var peer = new ENetMultiplayerPeer();
                     peer.CreateClient(Host.Text, Port);
-                    multiplayerApi.MultiplayerPeer = peer;
+                    Multiplayer.MultiplayerPeer = peer;
                     break;
             }
         };
         Send.Pressed += () =>
         {
-            if (multiplayerApi.MultiplayerPeer is OfflineMultiplayerPeer)
+            if (Multiplayer.MultiplayerPeer is OfflineMultiplayerPeer)
             {
                 return;
             }
@@ -201,19 +200,19 @@ public partial class Test2d : Node2D
             switch (PeerType)
             {
                 case 0:
-                    var p2PPeer = (SteamP2PPeer)multiplayerApi.MultiplayerPeer;
+                    var p2PPeer = (SteamP2PPeer)Multiplayer.MultiplayerPeer;
                     break;
                 case 1:
-                    var msgP2PPeer = (SteamP2PPeer)multiplayerApi.MultiplayerPeer;
+                    var msgP2PPeer = (SteamP2PPeer)Multiplayer.MultiplayerPeer;
                     break;
                 case 2:
-                    var relayPeer = (SteamSocketPeer)multiplayerApi.MultiplayerPeer;
+                    var relayPeer = (SteamSocketPeer)Multiplayer.MultiplayerPeer;
                     break;
                 case 3:
-                    var normalPeer = (SteamSocketPeer)multiplayerApi.MultiplayerPeer;
+                    var normalPeer = (SteamSocketPeer)Multiplayer.MultiplayerPeer;
                     break;
                 default:
-                    var enetPeer = (ENetMultiplayerPeer)multiplayerApi.MultiplayerPeer;
+                    var enetPeer = (ENetMultiplayerPeer)Multiplayer.MultiplayerPeer;
                     // 貌似不行，只能用在场景同步
                     // enetPeer.Host.Broadcast(0, content, (int)MultiplayerPeer.TransferModeEnum.Reliable);
                     break;

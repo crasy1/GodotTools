@@ -10,6 +10,10 @@ namespace Godot;
 
 /// <summary>
 /// steamworks 的godot MultiplayerPeer 基类
+///
+/// 目前测试 MultiplayerPeer
+/// 速度      enet>p2p>normal>relay
+/// 稳定性     enet>normal>p2p>relay
 /// </summary>
 public abstract partial class SteamPeer : MultiplayerPeerExtension
 {

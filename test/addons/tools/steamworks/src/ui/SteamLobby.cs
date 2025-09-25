@@ -190,11 +190,6 @@ public partial class SteamLobby : Control
                 var isOwner = Lobby.Value.IsOwnedBy(lobbyMember.Id);
                 Joinable.Disabled = !isOwner;
                 LobbyTypeOption.Disabled = !isOwner;
-                if (isOwner)
-                {
-                    Log.Info($"房主是: {lobbyMember.Name}");
-                }
-
                 Friends.AddChild(SteamUserInfo.Instantiate(lobbyMember));
             }
     }

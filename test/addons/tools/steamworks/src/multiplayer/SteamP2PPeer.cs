@@ -34,13 +34,11 @@ public partial class SteamP2PPeer : SteamPeer
         if (SteamSocketType == SteamSocketType.P2PMessage)
         {
             SNetworkingSocketMessages.Instance.ReceiveData += ReceiveData;
-            // SNetworkingSocketMessages.Instance.UserConnected += OnSocketConnected;
             SNetworkingSocketMessages.Instance.UserConnectFailed += OnSocketDisconnected;
         }
         else if (SteamSocketType == SteamSocketType.P2P)
         {
             SNetworking.Instance.ReceiveData += ReceiveData;
-            // SNetworking.Instance.UserConnected += OnSocketConnected;
             SNetworking.Instance.UserConnectFailed += OnSocketDisconnected;
         }
     }
@@ -50,13 +48,11 @@ public partial class SteamP2PPeer : SteamPeer
         if (SteamSocketType == SteamSocketType.P2PMessage)
         {
             SNetworkingSocketMessages.Instance.ReceiveData -= ReceiveData;
-            // SNetworkingSocketMessages.Instance.UserConnected -= OnSocketConnected;
             SNetworkingSocketMessages.Instance.UserConnectFailed -= OnSocketDisconnected;
         }
         else if (SteamSocketType == SteamSocketType.P2P)
         {
             SNetworking.Instance.ReceiveData -= ReceiveData;
-            // SNetworking.Instance.UserConnected -= OnSocketConnected;
             SNetworking.Instance.UserConnectFailed -= OnSocketDisconnected;
         }
     }
@@ -99,6 +95,7 @@ public partial class SteamP2PPeer : SteamPeer
                     {
                         OnSocketDisconnected(steamId);
                     }
+
                     break;
             }
 
@@ -133,7 +130,7 @@ public partial class SteamP2PPeer : SteamPeer
     protected override async Task OnPeerDisconnect(SteamId steamId)
     {
         SendMsg(steamId, Consts.SocketDisconnect, Channel.Handshake);
-        await Task.Delay(1000);
+        await Task.Delay(100);
         if (SteamSocketType == SteamSocketType.P2PMessage)
         {
             SNetworkingSocketMessages.Instance.Disconnect(steamId);

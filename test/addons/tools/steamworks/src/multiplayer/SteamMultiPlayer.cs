@@ -7,6 +7,10 @@ namespace Godot;
 
 /// <summary>
 /// 扩展steam多人游戏
+/// 服务端用法，创建一个SteamMultiPlayer对象，调用CreateLobbyAsync方法创建一个大厅，
+/// 创建 MultiplayerPeer server 赋值给 SteamMultiPlayer，正常连接就能使用了，要退出的话调用 LeaveLobby 离开大厅并关闭 MultiplayerPeer
+/// 客户端用法，创建一个SteamMultiPlayer对象，然后调用JoinLobbyAsync方法加入一个大厅，
+/// 创建 MultiplayerPeer client 赋值给 SteamMultiPlayer，正常连接就能使用了，要退出的话调用 LeaveLobby 离开大厅并关闭 MultiplayerPeer
 /// </summary>
 public partial class SteamMultiPlayer : MultiplayerApiExtension
 {
@@ -37,7 +41,7 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
 
     private void OnConnectionFailed()
     {
-        Exit();
+        LeaveLobby();
         EmitSignalConnectionFailed();
     }
 
@@ -48,7 +52,7 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
 
     private void OnServerDisconnected()
     {
-        Exit();
+        LeaveLobby();
         EmitSignalServerDisconnected();
     }
 
@@ -101,7 +105,7 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
 
     private void OnLobbyLeaved(ulong lobbyId)
     {
-        Exit();
+        Lobby = new Lobby();
     }
 
     private void OnLobbyCreated(int result, ulong lobbyId)
@@ -113,12 +117,11 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
     }
 
     /// <summary>
-    /// 退出多人
+    /// 退出大厅，并关闭MultiplayerPeer
     /// </summary>
-    public void Exit()
+    public void LeaveLobby()
     {
-        Lobby.Leave();
-        Lobby = new Lobby();
+        SMatchmaking.LeaveLobby();
         if (IsMultiplayerPeerValid())
         {
             MultiplayerPeer.Close();
@@ -141,7 +144,7 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         var lobby = await SMatchmaking.CreateLobbyAsync(maxUser);
         if (!lobby.HasValue)
         {
-            SetMultiplayerPeer(OfflinePeer);
+            LeaveLobby();
             throw new Exception($"{nameof(SteamMultiPlayer)} 创建大厅异常");
         }
 
@@ -174,7 +177,8 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         var result = await SMatchmaking.JoinLobbyAsync(lobby);
         if (!RoomEnter.Success.Equals(result))
         {
-            SceneMultiplayer.SetMultiplayerPeer(OfflinePeer);
+            SceneMultiplayer.MultiplayerPeer = OfflinePeer;
+            Log.Debug($"{nameof(MultiplayerPeer)} OfflinePeer");
             throw new Exception($"{nameof(SteamMultiPlayer)} 加入大厅异常 {result}");
         }
 
@@ -218,7 +222,7 @@ public partial class SteamMultiPlayer : MultiplayerApiExtension
         }
         catch (Exception e)
         {
-            Exit();
+            LeaveLobby();
             throw;
         }
     }
